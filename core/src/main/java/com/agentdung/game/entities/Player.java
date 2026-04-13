@@ -1,4 +1,4 @@
-package com.agentdung.game;
+package com.agentdung.game.entities;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;

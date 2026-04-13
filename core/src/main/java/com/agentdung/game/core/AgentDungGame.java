@@ -1,5 +1,6 @@
-package com.agentdung.game;
+package com.agentdung.game.core;
 
+import com.agentdung.game.screens.MenuScreen;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 

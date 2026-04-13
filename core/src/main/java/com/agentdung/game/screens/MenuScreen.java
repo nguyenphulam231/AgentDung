@@ -1,5 +1,6 @@
-package com.agentdung.game;
+package com.agentdung.game.screens;
 
+import com.agentdung.game.core.AgentDungGame;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;

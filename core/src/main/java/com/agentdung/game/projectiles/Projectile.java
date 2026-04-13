@@ -1,4 +1,4 @@
-package com.agentdung.game;
+package com.agentdung.game.projectiles;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -28,4 +28,12 @@ public abstract class Projectile {
     public abstract void render(ShapeRenderer shape);
 
     public boolean isActive() { return active; }
+
+    public Vector2 getPosition() {
+        return position;
+    }
+
+    public Color getColor() {
+        return color;
+    }
 }

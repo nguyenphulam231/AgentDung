@@ -1,4 +1,4 @@
-package com.agentdung.game;
+package com.agentdung.game.projectiles;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
