@@ -1,7 +1,6 @@
 package com.agentdung.game.screens;
 
 import com.agentdung.game.core.AgentDungGame;
-import com.agentdung.game.core.LevelProvider;
 import com.agentdung.game.entities.Enemy;
 import com.agentdung.game.entities.Player;
 import com.agentdung.game.entities.Server;
@@ -16,52 +15,161 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.MapObjects;
+import com.badlogic.gdx.maps.objects.RectangleMapObject;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PlayScreen extends ScreenAdapter {
     AgentDungGame game;
     OrthographicCamera camera;
 
+    TiledMap map;
+    OrthogonalTiledMapRenderer mapRenderer;
+    TmxMapLoader mapLoader;
+
     Player dung;
-    Enemy guard;
+    Array<Enemy> enemies;
     Array<Skill> skills;
     Array<Projectile> projectiles;
     Array<Rectangle> poopTraps;
     Array<Wall> walls;
     Server targetServer;
+
     int currentLevel;
-    int currentWorld = 1; // Mặc định là world 1
+    int currentWorld = 1;
+    float mapWidth, mapHeight;
 
     public PlayScreen(AgentDungGame game, int level) {
         this.game = game;
         this.currentLevel = level;
         this.camera = new OrthographicCamera();
-        camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        camera.setToOrtho(false, 400, 400 * (float)Gdx.graphics.getHeight()/Gdx.graphics.getWidth());
+
+        this.enemies = new Array<>();
+        this.projectiles = new Array<>();
+        this.poopTraps = new Array<>();
+        this.walls = new Array<>();
 
         initLevel(currentLevel);
     }
 
     private void initLevel(int level) {
-        // Gọi LevelProvider với cả World và Level
-        LevelProvider data = LevelProvider.getLevel(currentWorld, level);
+        String mapPath = "maps/map" + currentWorld + "_" + level + ".tmx";
 
-        // Cập nhật dữ liệu từ Provider
-        this.walls = data.walls;
-        this.dung = new Player(data.dungSpawn.x, data.dungSpawn.y);
-        this.dung.setSize(32);
+        try {
+            if (map != null) map.dispose();
+            mapLoader = new TmxMapLoader();
+            map = mapLoader.load(mapPath);
+            mapRenderer = new OrthogonalTiledMapRenderer(map);
 
-        this.guard = new Enemy(data.guardSpawn.x, data.guardSpawn.y);
-        this.guard.setPatrolRoute(data.guardSpawn.x, data.guardSpawn.y, data.guardPatrolEnd.x, data.guardPatrolEnd.y);
+            // Lấy kích thước map để chặn Camera
+            int tileWidth = map.getProperties().get("tilewidth", Integer.class);
+            int tileHeight = map.getProperties().get("tileheight", Integer.class);
+            mapWidth = map.getProperties().get("width", Integer.class) * tileWidth;
+            mapHeight = map.getProperties().get("height", Integer.class) * tileHeight;
 
-        this.targetServer = new Server(data.serverPos.x, data.serverPos.y);
+        } catch (Exception e) {
+            Gdx.app.error("MapError", "Không tìm thấy: " + mapPath + ". Quay lại Menu.");
+            game.setScreen(new MenuScreen(game));
+            return;
+        }
 
-        // Reset các mảng thực thể để tránh rác từ level cũ
-        this.projectiles = new Array<>();
-        this.poopTraps = new Array<>();
+        enemies.clear();
+        walls.clear();
+        projectiles.clear();
+        poopTraps.clear();
 
-        // Nạp lại skills
+        // 1. Quét Tường
+        MapObjects wallObjects = map.getLayers().get("collisions").getObjects();
+        for (MapObject obj : wallObjects) {
+            Rectangle rect = ((RectangleMapObject) obj).getRectangle();
+            walls.add(new Wall(rect.x, rect.y, rect.width, rect.height));
+        }
+
+        // 2. Quét Thực thể
+        MapObjects entityObjects = map.getLayers().get("entities").getObjects();
+        for (MapObject obj : entityObjects) {
+            Rectangle rect = ((RectangleMapObject) obj).getRectangle();
+            if ("player_spawn".equals(obj.getName())) {
+                dung = new Player(rect.x, rect.y);
+                dung.setSize(16);
+            } else if ("server".equals(obj.getName())) {
+                targetServer = new Server(rect.x, rect.y);
+            }
+        }
+
+        // 3. Quét Kẻ địch (Layer: enemies)
+        MapObjects enemyObjects = map.getLayers().get("enemies").getObjects();
+        Map<Integer, Vector2> starts = new HashMap<>();
+        Map<Integer, Vector2> ends = new HashMap<>();
+        Map<Integer, Float> distances = new HashMap<>();
+        Map<Integer, Float> angles = new HashMap<>();
+
+        for (MapObject obj : enemyObjects) {
+            if (obj instanceof RectangleMapObject) {
+                Rectangle r = ((RectangleMapObject) obj).getRectangle();
+                // Dùng Number.class để né lỗi ClassCastException hôm nọ
+                int id = obj.getProperties().get("id", -1, Number.class).intValue();
+                String name = obj.getName();
+
+                if ("guard_start".equals(name)) {
+                    starts.put(id, new Vector2(r.x, r.y));
+                    distances.put(id, obj.getProperties().get("viewDistance", 100f, Number.class).floatValue());
+                    angles.put(id, obj.getProperties().get("viewAngle", 60f, Number.class).floatValue());
+                } else if ("guard_end".equals(name)) {
+                    ends.put(id, new Vector2(r.x, r.y));
+                }
+            }
+        }
+
+        // ĐOẠN KIỂM TRA (DEBUG) KHÔNG BỊ ĐỎ
+        System.out.println("--- DỮ LIỆU TỪ TILED ---");
+        System.out.println("Số điểm Start: " + starts.size());
+        System.out.println("Số điểm End: " + ends.size());
+
+        for (Integer guardId : starts.keySet()) { // Đổi tên biến thành guardId để tránh trùng
+            if (ends.containsKey(guardId)) {
+                Vector2 startPos = starts.get(guardId);
+                Vector2 endPos = ends.get(guardId);
+
+                Enemy guard = new Enemy(startPos.x, startPos.y);
+                guard.setPatrolRoute(startPos.x, startPos.y, endPos.x, endPos.y);
+                guard.setViewDistance(distances.getOrDefault(guardId, 100f));
+                guard.setViewAngle(angles.getOrDefault(guardId, 60f));
+
+                enemies.add(guard);
+                System.out.println("-> OK: Đã tạo lính ID " + guardId);
+            } else {
+                System.out.println("-> THIẾU: Lính ID " + guardId + " không có điểm End tương ứng!");
+            }
+        }
+        System.out.println("Tổng cộng lính trong Game: " + enemies.size);
+
+
+        for (Integer id : starts.keySet()) {
+            if (ends.containsKey(id)) {
+                Vector2 s = starts.get(id);
+                Vector2 e = ends.get(id);
+                Enemy guard = new Enemy(s.x, s.y);
+                guard.setPatrolRoute(s.x, s.y, e.x, e.y);
+                guard.setViewDistance(distances.get(id));
+                guard.setViewAngle(angles.get(id));
+                enemies.add(guard);
+            }
+        }
+
+
+
+
+
         this.skills = new Array<>();
         skills.add(new SpitSkill());
         skills.add(new PoopSkill());
@@ -72,25 +180,27 @@ public class PlayScreen extends ScreenAdapter {
     @Override
     public void render(float delta) {
         update(delta);
-
         ScreenUtils.clear(0, 0, 0, 1);
+
+        mapRenderer.setView(camera);
+        mapRenderer.render();
+
         game.shapeRenderer.setProjectionMatrix(camera.combined);
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        for (Wall w : walls) w.render(game.shapeRenderer);
         targetServer.render(game.shapeRenderer);
-
         for (Rectangle trap : poopTraps) {
             game.shapeRenderer.setColor(new Color(0.5f, 0.25f, 0, 1));
             game.shapeRenderer.rect(trap.x, trap.y, trap.width, trap.height);
         }
 
         dung.render(game.shapeRenderer);
-        guard.render(game.shapeRenderer);
+        for (Enemy e : enemies) e.render(game.shapeRenderer);
         for (Projectile p : projectiles) p.render(game.shapeRenderer);
+
         game.shapeRenderer.end();
 
-        // HUD cố định trên màn hình
+        // HUD
         Matrix4 hudMatrix = new Matrix4().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         game.shapeRenderer.setProjectionMatrix(hudMatrix);
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
@@ -105,31 +215,28 @@ public class PlayScreen extends ScreenAdapter {
         handleSkillInput();
         updateProjectiles(delta);
 
-        // Camera mượt mà bám theo Dũng
-        camera.position.x = dung.getPosition().x + dung.getSize() / 2;
-        camera.position.y = dung.getPosition().y + dung.getSize() / 2;
+        // Camera bám theo và chặn ở mép bản đồ
+        camera.position.x = MathUtils.clamp(dung.getPosition().x + dung.getSize()/2, camera.viewportWidth/2, mapWidth - camera.viewportWidth/2);
+        camera.position.y = MathUtils.clamp(dung.getPosition().y + dung.getSize()/2, camera.viewportHeight/2, mapHeight - camera.viewportHeight/2);
         camera.update();
 
-        guard.update(delta, dung);
-
-        // Kiểm tra dẫm phân
-        Rectangle guardRect = new Rectangle(guard.getPosition().x, guard.getPosition().y, guard.getSize(), guard.getSize());
-        for (int i = poopTraps.size - 1; i >= 0; i--) {
-            if (guardRect.overlaps(poopTraps.get(i))) {
-                guard.applyPoopEffect();
-                poopTraps.removeIndex(i);
+        for (Enemy e : enemies) {
+            e.update(delta, dung);
+            if (e.detects(dung)) {
+                initLevel(currentLevel);
+                return;
+            }
+            Rectangle guardRect = new Rectangle(e.getPosition().x, e.getPosition().y, e.getSize(), e.getSize());
+            for (int i = poopTraps.size - 1; i >= 0; i--) {
+                if (guardRect.overlaps(poopTraps.get(i))) {
+                    e.applyPoopEffect();
+                    poopTraps.removeIndex(i);
+                }
             }
         }
 
-        // Nếu bị bắt -> Reset level hiện tại
-        if (guard.detects(dung)) {
-            initLevel(currentLevel);
-        }
-
-        // KIỂM TRA PHÁ HỦY SERVER -> QUA MÀN
         if (targetServer.hp <= 0) {
             currentLevel++;
-            // Bạn có thể thêm logic check nếu hết level thì về Menu, ở đây mình tạm gọi level tiếp theo
             initLevel(currentLevel);
         }
 
@@ -143,7 +250,7 @@ public class PlayScreen extends ScreenAdapter {
         float dy = mousePos.y - (dung.getPosition().y + dung.getSize() / 2);
         dung.setAngle(MathUtils.atan2(dy, dx) * MathUtils.radiansToDegrees);
 
-        float moveSpeed = 220f;
+        float moveSpeed = 140f;
         Vector2 vel = new Vector2(0, 0);
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             vel.x = MathUtils.cosDeg(dung.getAngle()) * moveSpeed;
@@ -154,7 +261,7 @@ public class PlayScreen extends ScreenAdapter {
             vel.y = -MathUtils.sinDeg(dung.getAngle()) * moveSpeed;
         }
 
-        // Xử lý va chạm X
+        // Xử lý va chạm tường trục X
         float oldX = dung.getPosition().x;
         dung.getPosition().x += vel.x * delta;
         Rectangle dungRectX = new Rectangle(dung.getPosition().x, dung.getPosition().y, dung.getSize(), dung.getSize());
@@ -165,7 +272,7 @@ public class PlayScreen extends ScreenAdapter {
             }
         }
 
-        // Xử lý va chạm Y
+        // Xử lý va chạm tường trục Y
         float oldY = dung.getPosition().y;
         dung.getPosition().y += vel.y * delta;
         Rectangle dungRectY = new Rectangle(dung.getPosition().x, dung.getPosition().y, dung.getSize(), dung.getSize());
@@ -178,55 +285,73 @@ public class PlayScreen extends ScreenAdapter {
     }
 
     private void handleSkillInput() {
-        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) || Gdx.input.isKeyJustPressed(Input.Keys.NUM_1))
-            skills.get(0).activate(dung, guard, projectiles);
-
-        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
-            if (skills.get(1).activate(dung, guard, projectiles)) {
-                poopTraps.add(new Rectangle(dung.getPosition().x, dung.getPosition().y, 20, 20));
+        // AUTO-TARGET: Tìm kẻ địch gần nhất trong tầm 180px
+        Enemy target = null;
+        float minDistance = 180f;
+        for (Enemy e : enemies) {
+            float d = Vector2.dst(dung.getPosition().x, dung.getPosition().y, e.getPosition().x, e.getPosition().y);
+            if (d < minDistance) {
+                minDistance = d;
+                target = e;
             }
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.NUM_3)) skills.get(2).activate(dung, guard, projectiles);
-        if (Gdx.input.isKeyPressed(Input.Keys.NUM_4)) skills.get(3).activate(dung, guard, projectiles);
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) || Gdx.input.isKeyJustPressed(Input.Keys.NUM_1))
+             skills.get(0).activate(dung, target, projectiles);
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
+            if (skills.get(1).activate(dung, target, projectiles)) {
+                poopTraps.add(new Rectangle(dung.getPosition().x, dung.getPosition().y, 16, 16));
+            }
+        }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.NUM_3))  skills.get(2).activate(dung, target, projectiles);
+        if (Gdx.input.isKeyPressed(Input.Keys.NUM_4))  skills.get(3).activate(dung, target, projectiles);
     }
 
     private void updateProjectiles(float delta) {
-        Rectangle guardRect = new Rectangle(guard.getPosition().x, guard.getPosition().y, guard.getSize(), guard.getSize());
         Rectangle serverRect = new Rectangle(targetServer.x, targetServer.y, targetServer.width, targetServer.height);
 
         for (int i = projectiles.size - 1; i >= 0; i--) {
             Projectile p = projectiles.get(i);
             p.update(delta);
             Rectangle pRect = new Rectangle(p.getPosition().x, p.getPosition().y, 5, 5);
+            boolean hit = false;
 
-            // Bắn trúng lính
-            if (pRect.overlaps(guardRect)) {
-                if (p instanceof BlobProjectile) guard.applySpitEffect();
-                else if (p instanceof StreamProjectile) {
-                    if (p.getColor().equals(Color.YELLOW)) guard.applyPeeEffect();
-                    else if (p.getColor().equals(Color.WHITE)) guard.applyVomitEffect();
-                }
-                projectiles.removeIndex(i);
-                continue;
-            }
-
-            // Bắn trúng Server (Chỉ tia nước tiểu mới gây dame mạnh cho điện tử)
-            if (p.getColor().equals(Color.YELLOW) && pRect.overlaps(serverRect)) {
-                targetServer.takeDamage(40 * delta); // Tăng dame một chút cho nhanh qua màn
-                projectiles.removeIndex(i);
-                continue;
-            }
-
-            // Xóa đạn nếu chạm tường (tùy chọn)
+            // Kiểm tra va chạm Tường trước (để đạn không bay xuyên tường)
             for(Wall w : walls) {
                 if(pRect.overlaps(w.bounds)) {
                     projectiles.removeIndex(i);
+                    hit = true;
+                    break;
+                }
+            }
+            if(hit) continue;
+
+            // Sau đó mới kiểm tra va chạm Lính
+            for (Enemy e : enemies) {
+                Rectangle guardRect = new Rectangle(e.getPosition().x, e.getPosition().y, e.getSize(), e.getSize());
+                if (pRect.overlaps(guardRect)) {
+                    if (p instanceof BlobProjectile) e.applySpitEffect();
+                    else if (p instanceof StreamProjectile) {
+                        if (p.getColor().equals(Color.YELLOW)) e.applyPeeEffect();
+                        else if (p.getColor().equals(Color.WHITE)) e.applyVomitEffect();
+                    }
+                    hit = true;
                     break;
                 }
             }
 
-            if (i < projectiles.size && !p.isActive()) projectiles.removeIndex(i);
+            if (hit) { projectiles.removeIndex(i); continue; }
+
+            // Va chạm Server
+            if (p.getColor().equals(Color.YELLOW) && pRect.overlaps(serverRect)) {
+                targetServer.takeDamage(40 * delta);
+                projectiles.removeIndex(i);
+                continue;
+            }
+
+            if (!hit && i < projectiles.size && !p.isActive()) projectiles.removeIndex(i);
         }
     }
 
@@ -239,9 +364,13 @@ public class PlayScreen extends ScreenAdapter {
             game.shapeRenderer.setColor(s.getManaColor());
             game.shapeRenderer.rect(xPos, yPos, 150 * s.getManaPercent(), 15);
         }
-
-        // Hiển thị máu Server ở trên đầu màn hình cho dễ nhìn
         game.shapeRenderer.setColor(Color.RED);
         game.shapeRenderer.rect(Gdx.graphics.getWidth()/2 - 100, Gdx.graphics.getHeight() - 30, 200 * (targetServer.hp / 100f), 20);
+    }
+
+    @Override
+    public void dispose() {
+        if (map != null) map.dispose();
+        if (mapRenderer != null) mapRenderer.dispose();
     }
 }
