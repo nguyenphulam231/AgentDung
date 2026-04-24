@@ -2,6 +2,8 @@ package com.agentdung.game.entities;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Array;
 
 public abstract class Entity {
     protected Vector2 position; // Tọa độ x, y
@@ -26,7 +28,7 @@ public abstract class Entity {
 
     public abstract void render(ShapeRenderer shape);
 
-    public abstract void update(float delta, Player player);
+    public abstract void update(float delta, Player player, Array<Rectangle> walls);
 
     public Vector2 getPosition() { return position; }
 }

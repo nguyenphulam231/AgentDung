@@ -5,6 +5,8 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.math.Rectangle;
 
 public class Player extends Entity {
     private float maxMana = 100f;
@@ -17,7 +19,7 @@ public class Player extends Entity {
     }
 
     @Override
-    public void update(float delta, Player self) {
+    public void update(float delta, Player player, Array<Rectangle> walls) {
         // --- PHẦN GÓC XOAY ---
         // Lưu ý: Logic di chuyển tiến/lùi (W/S) đã được PlayScreen xử lý
         // cùng với va chạm tường, nên ở đây ta chỉ giữ lại logic tính góc xoay theo chuột.

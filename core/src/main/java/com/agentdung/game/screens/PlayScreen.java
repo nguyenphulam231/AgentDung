@@ -41,6 +41,7 @@ public class PlayScreen extends ScreenAdapter {
     Array<Projectile> projectiles;
     Array<Rectangle> poopTraps;
     Array<Wall> walls;
+    Array<Rectangle> wallRects; // Dùng để truyền vào cho lính check tầm nhìn
     Server targetServer;
 
     int currentLevel;
@@ -51,12 +52,13 @@ public class PlayScreen extends ScreenAdapter {
         this.game = game;
         this.currentLevel = level;
         this.camera = new OrthographicCamera();
-        camera.setToOrtho(false, 400, 400 * (float)Gdx.graphics.getHeight()/Gdx.graphics.getWidth());
+        camera.setToOrtho(false, 400, 400 * (float) Gdx.graphics.getHeight() / Gdx.graphics.getWidth());
 
         this.enemies = new Array<>();
         this.projectiles = new Array<>();
         this.poopTraps = new Array<>();
         this.walls = new Array<>();
+        this.wallRects = new Array<>();
 
         initLevel(currentLevel);
     }
@@ -70,7 +72,6 @@ public class PlayScreen extends ScreenAdapter {
             map = mapLoader.load(mapPath);
             mapRenderer = new OrthogonalTiledMapRenderer(map);
 
-            // Lấy kích thước map để chặn Camera
             int tileWidth = map.getProperties().get("tilewidth", Integer.class);
             int tileHeight = map.getProperties().get("tileheight", Integer.class);
             mapWidth = map.getProperties().get("width", Integer.class) * tileWidth;
@@ -84,6 +85,7 @@ public class PlayScreen extends ScreenAdapter {
 
         enemies.clear();
         walls.clear();
+        wallRects.clear();
         projectiles.clear();
         poopTraps.clear();
 
@@ -92,9 +94,10 @@ public class PlayScreen extends ScreenAdapter {
         for (MapObject obj : wallObjects) {
             Rectangle rect = ((RectangleMapObject) obj).getRectangle();
             walls.add(new Wall(rect.x, rect.y, rect.width, rect.height));
+            wallRects.add(rect);
         }
 
-        // 2. Quét Thực thể
+        // 2. Quét Thực thể (Player & Server)
         MapObjects entityObjects = map.getLayers().get("entities").getObjects();
         for (MapObject obj : entityObjects) {
             Rectangle rect = ((RectangleMapObject) obj).getRectangle();
@@ -116,7 +119,6 @@ public class PlayScreen extends ScreenAdapter {
         for (MapObject obj : enemyObjects) {
             if (obj instanceof RectangleMapObject) {
                 Rectangle r = ((RectangleMapObject) obj).getRectangle();
-                // Dùng Number.class để né lỗi ClassCastException hôm nọ
                 int id = obj.getProperties().get("id", -1, Number.class).intValue();
                 String name = obj.getName();
 
@@ -130,12 +132,7 @@ public class PlayScreen extends ScreenAdapter {
             }
         }
 
-        // ĐOẠN KIỂM TRA (DEBUG) KHÔNG BỊ ĐỎ
-        System.out.println("--- DỮ LIỆU TỪ TILED ---");
-        System.out.println("Số điểm Start: " + starts.size());
-        System.out.println("Số điểm End: " + ends.size());
-
-        for (Integer guardId : starts.keySet()) { // Đổi tên biến thành guardId để tránh trùng
+        for (Integer guardId : starts.keySet()) {
             if (ends.containsKey(guardId)) {
                 Vector2 startPos = starts.get(guardId);
                 Vector2 endPos = ends.get(guardId);
@@ -146,29 +143,8 @@ public class PlayScreen extends ScreenAdapter {
                 guard.setViewAngle(angles.getOrDefault(guardId, 60f));
 
                 enemies.add(guard);
-                System.out.println("-> OK: Đã tạo lính ID " + guardId);
-            } else {
-                System.out.println("-> THIẾU: Lính ID " + guardId + " không có điểm End tương ứng!");
             }
         }
-        System.out.println("Tổng cộng lính trong Game: " + enemies.size);
-
-
-        for (Integer id : starts.keySet()) {
-            if (ends.containsKey(id)) {
-                Vector2 s = starts.get(id);
-                Vector2 e = ends.get(id);
-                Enemy guard = new Enemy(s.x, s.y);
-                guard.setPatrolRoute(s.x, s.y, e.x, e.y);
-                guard.setViewDistance(distances.get(id));
-                guard.setViewAngle(angles.get(id));
-                enemies.add(guard);
-            }
-        }
-
-
-
-
 
         this.skills = new Array<>();
         skills.add(new SpitSkill());
@@ -186,21 +162,31 @@ public class PlayScreen extends ScreenAdapter {
         mapRenderer.render();
 
         game.shapeRenderer.setProjectionMatrix(camera.combined);
+
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        targetServer.render(game.shapeRenderer);
+        if (targetServer != null) targetServer.render(game.shapeRenderer);
+
         for (Rectangle trap : poopTraps) {
             game.shapeRenderer.setColor(new Color(0.5f, 0.25f, 0, 1));
             game.shapeRenderer.rect(trap.x, trap.y, trap.width, trap.height);
         }
 
+        // 1. Vẽ tầm nhìn của lính trước (để nó nằm dưới thân lính)
+        for (Enemy e : enemies) {
+            e.drawVision(game.shapeRenderer, wallRects);
+        }
+
+        // 2. Vẽ nhân vật và thân lính
         dung.render(game.shapeRenderer);
-        for (Enemy e : enemies) e.render(game.shapeRenderer);
+        for (Enemy e : enemies) {
+            e.render(game.shapeRenderer); // Gọi hàm render không tham số để hiện thân lính
+        }
+
         for (Projectile p : projectiles) p.render(game.shapeRenderer);
 
         game.shapeRenderer.end();
 
-        // HUD
         Matrix4 hudMatrix = new Matrix4().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         game.shapeRenderer.setProjectionMatrix(hudMatrix);
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
@@ -215,17 +201,19 @@ public class PlayScreen extends ScreenAdapter {
         handleSkillInput();
         updateProjectiles(delta);
 
-        // Camera bám theo và chặn ở mép bản đồ
-        camera.position.x = MathUtils.clamp(dung.getPosition().x + dung.getSize()/2, camera.viewportWidth/2, mapWidth - camera.viewportWidth/2);
-        camera.position.y = MathUtils.clamp(dung.getPosition().y + dung.getSize()/2, camera.viewportHeight/2, mapHeight - camera.viewportHeight/2);
+        camera.position.x = MathUtils.clamp(dung.getPosition().x + dung.getSize() / 2, camera.viewportWidth / 2, mapWidth - camera.viewportWidth / 2);
+        camera.position.y = MathUtils.clamp(dung.getPosition().y + dung.getSize() / 2, camera.viewportHeight / 2, mapHeight - camera.viewportHeight / 2);
         camera.update();
 
         for (Enemy e : enemies) {
-            e.update(delta, dung);
-            if (e.detects(dung)) {
+            e.update(delta, dung, wallRects);
+
+            // Lính check tầm nhìn với danh sách wallRects
+            if (e.detects(dung, wallRects)) {
                 initLevel(currentLevel);
                 return;
             }
+
             Rectangle guardRect = new Rectangle(e.getPosition().x, e.getPosition().y, e.getSize(), e.getSize());
             for (int i = poopTraps.size - 1; i >= 0; i--) {
                 if (guardRect.overlaps(poopTraps.get(i))) {
@@ -235,7 +223,7 @@ public class PlayScreen extends ScreenAdapter {
             }
         }
 
-        if (targetServer.hp <= 0) {
+        if (targetServer != null && targetServer.hp <= 0) {
             currentLevel++;
             initLevel(currentLevel);
         }
@@ -261,7 +249,6 @@ public class PlayScreen extends ScreenAdapter {
             vel.y = -MathUtils.sinDeg(dung.getAngle()) * moveSpeed;
         }
 
-        // Xử lý va chạm tường trục X
         float oldX = dung.getPosition().x;
         dung.getPosition().x += vel.x * delta;
         Rectangle dungRectX = new Rectangle(dung.getPosition().x, dung.getPosition().y, dung.getSize(), dung.getSize());
@@ -272,7 +259,6 @@ public class PlayScreen extends ScreenAdapter {
             }
         }
 
-        // Xử lý va chạm tường trục Y
         float oldY = dung.getPosition().y;
         dung.getPosition().y += vel.y * delta;
         Rectangle dungRectY = new Rectangle(dung.getPosition().x, dung.getPosition().y, dung.getSize(), dung.getSize());
@@ -285,7 +271,6 @@ public class PlayScreen extends ScreenAdapter {
     }
 
     private void handleSkillInput() {
-        // AUTO-TARGET: Tìm kẻ địch gần nhất trong tầm 180px
         Enemy target = null;
         float minDistance = 180f;
         for (Enemy e : enemies) {
@@ -297,7 +282,7 @@ public class PlayScreen extends ScreenAdapter {
         }
 
         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) || Gdx.input.isKeyJustPressed(Input.Keys.NUM_1))
-             skills.get(0).activate(dung, target, projectiles);
+            skills.get(0).activate(dung, target, projectiles);
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
             if (skills.get(1).activate(dung, target, projectiles)) {
@@ -305,11 +290,12 @@ public class PlayScreen extends ScreenAdapter {
             }
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.NUM_3))  skills.get(2).activate(dung, target, projectiles);
-        if (Gdx.input.isKeyPressed(Input.Keys.NUM_4))  skills.get(3).activate(dung, target, projectiles);
+        if (Gdx.input.isKeyPressed(Input.Keys.NUM_3)) skills.get(2).activate(dung, target, projectiles);
+        if (Gdx.input.isKeyPressed(Input.Keys.NUM_4)) skills.get(3).activate(dung, target, projectiles);
     }
 
     private void updateProjectiles(float delta) {
+        if (targetServer == null) return;
         Rectangle serverRect = new Rectangle(targetServer.x, targetServer.y, targetServer.width, targetServer.height);
 
         for (int i = projectiles.size - 1; i >= 0; i--) {
@@ -318,17 +304,15 @@ public class PlayScreen extends ScreenAdapter {
             Rectangle pRect = new Rectangle(p.getPosition().x, p.getPosition().y, 5, 5);
             boolean hit = false;
 
-            // Kiểm tra va chạm Tường trước (để đạn không bay xuyên tường)
-            for(Wall w : walls) {
-                if(pRect.overlaps(w.bounds)) {
+            for (Wall w : walls) {
+                if (pRect.overlaps(w.bounds)) {
                     projectiles.removeIndex(i);
                     hit = true;
                     break;
                 }
             }
-            if(hit) continue;
+            if (hit) continue;
 
-            // Sau đó mới kiểm tra va chạm Lính
             for (Enemy e : enemies) {
                 Rectangle guardRect = new Rectangle(e.getPosition().x, e.getPosition().y, e.getSize(), e.getSize());
                 if (pRect.overlaps(guardRect)) {
@@ -344,7 +328,6 @@ public class PlayScreen extends ScreenAdapter {
 
             if (hit) { projectiles.removeIndex(i); continue; }
 
-            // Va chạm Server
             if (p.getColor().equals(Color.YELLOW) && pRect.overlaps(serverRect)) {
                 targetServer.takeDamage(40 * delta);
                 projectiles.removeIndex(i);
@@ -364,8 +347,10 @@ public class PlayScreen extends ScreenAdapter {
             game.shapeRenderer.setColor(s.getManaColor());
             game.shapeRenderer.rect(xPos, yPos, 150 * s.getManaPercent(), 15);
         }
-        game.shapeRenderer.setColor(Color.RED);
-        game.shapeRenderer.rect(Gdx.graphics.getWidth()/2 - 100, Gdx.graphics.getHeight() - 30, 200 * (targetServer.hp / 100f), 20);
+        if (targetServer != null) {
+            game.shapeRenderer.setColor(Color.RED);
+            game.shapeRenderer.rect(Gdx.graphics.getWidth() / 2 - 100, Gdx.graphics.getHeight() - 30, 200 * (targetServer.hp / 100f), 20);
+        }
     }
 
     @Override

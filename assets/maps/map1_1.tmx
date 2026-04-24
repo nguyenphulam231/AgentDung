@@ -123,7 +123,7 @@
     <property name="viewRadius" type="int" value="120"/>
    </properties>
   </object>
-  <object id="61" name="gurad_start" x="49.3333" y="64.6667" width="14" height="17.3333">
+  <object id="61" name="guard_start" x="49.3333" y="64.6667" width="14" height="17.3333">
    <properties>
     <property name="id" type="int" value="4"/>
     <property name="viewAngle" type="int" value="60"/>
@@ -168,7 +168,7 @@
   <object id="68" name="guard_start" x="241" y="145.5" width="13.5" height="14.5">
    <properties>
     <property name="id" type="int" value="7"/>
-    <property name="viewAngle" type="int" value="60"/>
+    <property name="viewAngle" type="int" value="50"/>
     <property name="viewRadius" type="int" value="120"/>
    </properties>
   </object>
