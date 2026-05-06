@@ -7,21 +7,33 @@ import com.badlogic.gdx.utils.Array;
 
 public abstract class Entity {
     protected Vector2 position; // Tọa độ x, y
+    protected Vector2 velocity; // --- THÊM DÒNG NÀY ĐỂ XỬ LÝ DI CHUYỂN ---
     protected float speed;
     protected float size;
     protected float angle;
 
     public Entity(float x, float y, float speed, float size) {
         this.position = new Vector2(x, y);
+        this.velocity = new Vector2(0, 0); // Khởi tạo vận tốc bằng 0
         this.speed = speed;
         this.size = size;
         this.angle = 0;
     }
 
+    // --- CÁC HÀM GETTER / SETTER CẦN THIẾT ---
+
+    public Vector2 getPosition() { return position; }
+
+    public Vector2 getVelocity() { return velocity; }
+
     public float getSize() { return size; }
+
     public void setSize(float size) {
         this.size = size;
     }
+
+    public float getAngle() { return angle; }
+
     public void setAngle(float angle) {
         this.angle = angle;
     }
@@ -29,6 +41,4 @@ public abstract class Entity {
     public abstract void render(ShapeRenderer shape);
 
     public abstract void update(float delta, Player player, Array<Rectangle> walls);
-
-    public Vector2 getPosition() { return position; }
 }
