@@ -366,10 +366,10 @@ public class PlayScreen extends ScreenAdapter {
             game.shapeRenderer.setColor(s.getManaColor());
             game.shapeRenderer.rect(20, Gdx.graphics.getHeight() - 40 - (i * 25), 150 * s.getManaPercent(), 15);
         }
-        if (targetServer != null) {
-            game.shapeRenderer.setColor(Color.RED);
-            game.shapeRenderer.rect(Gdx.graphics.getWidth() / 2f - 100, Gdx.graphics.getHeight() - 30, 200 * (targetServer.hp / 100f), 20);
-        }
+        //if (targetServer != null) {
+        //    game.shapeRenderer.setColor(Color.RED);
+        //    game.shapeRenderer.rect(Gdx.graphics.getWidth() / 2f - 100, Gdx.graphics.getHeight() - 30, 200 * (targetServer.hp / 100f), 20);
+        //}
     }
 
     @Override
