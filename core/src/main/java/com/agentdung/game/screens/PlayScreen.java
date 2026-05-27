@@ -5,6 +5,7 @@ import com.agentdung.game.entities.Enemy;
 import com.agentdung.game.entities.Player;
 import com.agentdung.game.entities.Server;
 import com.agentdung.game.entities.Wall;
+import com.agentdung.game.entities.Door; // Nhớ tạo file Door.java trong package entities
 import com.agentdung.game.projectiles.BlobProjectile;
 import com.agentdung.game.projectiles.Projectile;
 import com.agentdung.game.projectiles.StreamProjectile;
@@ -45,6 +46,12 @@ public class PlayScreen extends ScreenAdapter {
     Array<Rectangle> wallRects;
     Server targetServer;
 
+    // --- BIẾN CHO CHÌA KHÓA VÀ CỬA ---
+    private Array<Rectangle> keys;
+    private Array<Door> doors;
+    private boolean hasKey = false;
+    private Texture keyTexture;
+
     // --- BIẾN CHO TẦM NHÌN (FOG OF WAR) ---
     private FrameBuffer fbo;
     private TextureRegion fboRegion;
@@ -65,6 +72,8 @@ public class PlayScreen extends ScreenAdapter {
         this.poopTraps = new Array<>();
         this.walls = new Array<>();
         this.wallRects = new Array<>();
+        this.keys = new Array<>();
+        this.doors = new Array<>();
 
         initLevel(currentLevel);
         initFBO();
@@ -82,7 +91,6 @@ public class PlayScreen extends ScreenAdapter {
         Pixmap pixmap = new Pixmap(size, size, Pixmap.Format.RGBA8888);
         float center = size / 2f;
         float maxDist = size / 2f;
-
         float solidRadius = 0.7f;
 
         for (int y = 0; y < size; y++) {
@@ -126,6 +134,12 @@ public class PlayScreen extends ScreenAdapter {
         wallRects.clear();
         projectiles.clear();
         poopTraps.clear();
+        keys.clear();
+        doors.clear();
+        hasKey = false;
+
+        if (keyTexture != null) keyTexture.dispose();
+        keyTexture = new Texture("images/key.png");
 
         MapObjects wallObjects = map.getLayers().get("collisions").getObjects();
         for (MapObject obj : wallObjects) {
@@ -142,6 +156,10 @@ public class PlayScreen extends ScreenAdapter {
                 dung.setSize(26);
             } else if ("server".equals(obj.getName())) {
                 targetServer = new Server(rect.x, rect.y);
+            } else if ("key".equals(obj.getName())) {
+                keys.add(new Rectangle(rect.x, rect.y, 16, 16));
+            } else if ("server_door".equals(obj.getName())) {
+                doors.add(new Door(rect.x, rect.y, rect.width, rect.height));
             }
         }
 
@@ -182,7 +200,11 @@ public class PlayScreen extends ScreenAdapter {
 
         game.shapeRenderer.setProjectionMatrix(camera.combined);
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
         if (targetServer != null) targetServer.render(game.shapeRenderer);
+
+        for (Door door : doors) door.render(game.shapeRenderer);
+
         for (Rectangle trap : poopTraps) {
             game.shapeRenderer.setColor(new Color(0.5f, 0.25f, 0, 1));
             game.shapeRenderer.rect(trap.x, trap.y, trap.width, trap.height);
@@ -194,16 +216,20 @@ public class PlayScreen extends ScreenAdapter {
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
         dung.draw(game.batch);
+
+        for (Rectangle key : keys) {
+            game.batch.draw(keyTexture, key.x, key.y, key.width, key.height);
+        }
+
         game.batch.end();
 
         // --- 2. VẼ LỚP MẶT NẠ BÓNG TỐI TRONG FBO ---
         fbo.begin();
-        Gdx.gl.glClearColor(0, 0, 0, 0.9f); // Độ mờ của bóng tối
+        Gdx.gl.glClearColor(0, 0, 0, 0.9f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
-        // Chỉ đục lỗ bóng tối cho vị trí của Player
         game.batch.setBlendFunction(GL20.GL_ZERO, GL20.GL_ONE_MINUS_SRC_ALPHA);
         float viewRadius = 350f;
         game.batch.draw(lightMask,
@@ -215,24 +241,18 @@ public class PlayScreen extends ScreenAdapter {
 
         // --- 3. DÁN LỚP BÓNG TỐI LÊN MÀN HÌNH ---
         game.batch.begin();
-        // Reset về chế độ trộn chuẩn để vẽ FBO
         game.batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         game.batch.setProjectionMatrix(new Matrix4().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         game.batch.draw(fboRegion, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         game.batch.end();
 
-        // --- 3.5 VẼ TẦM NHÌN CỦA LÍNH (HIỆU ỨNG ĐÈN PIN) ---
-        // Sử dụng Additive Blending để đèn lính sáng rực lên trên nền bóng tối
+        // --- 3.5 VẼ TẦM NHÌN CỦA LÍNH ---
         Gdx.gl.glEnable(GL20.GL_BLEND);
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE); // Chế độ cộng màu rực rỡ
-
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
         game.shapeRenderer.setProjectionMatrix(camera.combined);
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        // Màu vàng nhạt mờ cho đèn pin lính
         game.shapeRenderer.setColor(1f, 1f, 0.7f, 0.4f);
-        for (Enemy e : enemies) {
-            e.drawVision(game.shapeRenderer, wallRects);
-        }
+        for (Enemy e : enemies) e.drawVision(game.shapeRenderer, wallRects);
         game.shapeRenderer.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
 
@@ -242,11 +262,21 @@ public class PlayScreen extends ScreenAdapter {
         dung.render(game.shapeRenderer);
         game.shapeRenderer.end();
 
+        // --- 5. VẼ HUD (TOẠ ĐỘ MÀN HÌNH) ---
         Matrix4 hudMatrix = new Matrix4().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         game.shapeRenderer.setProjectionMatrix(hudMatrix);
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         renderHUD();
         game.shapeRenderer.end();
+
+        // VẼ ICON CHÌA KHÓA LÊN HUD
+        if (hasKey) {
+            game.batch.setProjectionMatrix(hudMatrix);
+            game.batch.begin();
+            // Vẽ ở góc trên bên phải, cách lề 20px
+            game.batch.draw(keyTexture, Gdx.graphics.getWidth() - 50, Gdx.graphics.getHeight() - 50, 32, 32);
+            game.batch.end();
+        }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) game.setScreen(new MenuScreen(game));
     }
@@ -254,6 +284,20 @@ public class PlayScreen extends ScreenAdapter {
     private void update(float delta) {
         handleTankMovement(delta);
         dung.update(delta, dung, wallRects);
+
+        Rectangle dungRect = new Rectangle(dung.getPosition().x, dung.getPosition().y, dung.getSize(), dung.getSize());
+        for (int i = keys.size - 1; i >= 0; i--) {
+            if (dungRect.overlaps(keys.get(i))) {
+                hasKey = true;
+                keys.removeIndex(i);
+            }
+        }
+
+        for (Door door : doors) {
+            float dist = Vector2.dst(dung.getPosition().x, dung.getPosition().y, door.bounds.x, door.bounds.y);
+            door.update(delta, dist < 60f, hasKey);
+        }
+
         handleSkillInput();
         updateProjectiles(delta);
 
@@ -303,12 +347,16 @@ public class PlayScreen extends ScreenAdapter {
         float oldX = dung.getPosition().x;
         dung.getPosition().x += dung.getVelocity().x * delta;
         Rectangle dungRectX = new Rectangle(dung.getPosition().x, dung.getPosition().y, dung.getSize(), dung.getSize());
+
         for (Wall w : walls) if (Intersector.overlaps(dungRectX, w.bounds)) { dung.getPosition().x = oldX; break; }
+        for (Door d : doors) if (!d.isOpen && Intersector.overlaps(dungRectX, d.bounds)) { dung.getPosition().x = oldX; break; }
 
         float oldY = dung.getPosition().y;
         dung.getPosition().y += dung.getVelocity().y * delta;
         Rectangle dungRectY = new Rectangle(dung.getPosition().x, dung.getPosition().y, dung.getSize(), dung.getSize());
+
         for (Wall w : walls) if (Intersector.overlaps(dungRectY, w.bounds)) { dung.getPosition().y = oldY; break; }
+        for (Door d : doors) if (!d.isOpen && Intersector.overlaps(dungRectY, d.bounds)) { dung.getPosition().y = oldY; break; }
     }
 
     private void handleSkillInput() {
@@ -366,10 +414,6 @@ public class PlayScreen extends ScreenAdapter {
             game.shapeRenderer.setColor(s.getManaColor());
             game.shapeRenderer.rect(20, Gdx.graphics.getHeight() - 40 - (i * 25), 150 * s.getManaPercent(), 15);
         }
-        //if (targetServer != null) {
-        //    game.shapeRenderer.setColor(Color.RED);
-        //    game.shapeRenderer.rect(Gdx.graphics.getWidth() / 2f - 100, Gdx.graphics.getHeight() - 30, 200 * (targetServer.hp / 100f), 20);
-        //}
     }
 
     @Override
@@ -378,5 +422,6 @@ public class PlayScreen extends ScreenAdapter {
         if (mapRenderer != null) mapRenderer.dispose();
         if (fbo != null) fbo.dispose();
         if (lightMask != null) lightMask.dispose();
+        if (keyTexture != null) keyTexture.dispose();
     }
 }
