@@ -1,8 +1,12 @@
 package com.agentdung.game.entities;
 
-import com.badlogic.gdx.Gdx; // Nhớ thêm import này để dùng Blending
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20; // Nhớ thêm import này
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -26,6 +30,22 @@ public class Enemy extends Entity {
     private float currentAngle;
     private float rotationSpeed = 180f;
 
+    // --- SPRITE SYSTEM CHO ENEMY ---
+    private Texture spriteSheet;
+    private Animation<TextureRegion> walkDown, walkUp, walkRight, walkLeft;
+    private TextureRegion idleDown, idleUp, idleRight, idleLeft;
+    private float stateTime = 0;
+
+    private static final int FRAME_COLS = 6;
+    private static final int TILE_W     = 32;
+
+    // Áp dụng chung quy luật boundary từ Player1 sang Patroler
+    private static final int[] ROW_Y = { 0,  29,  59,  92, 125, 155 };
+    private static final int[] ROW_H = { 29,  30,  33,  33,  30, 165 };
+
+    private static final float DRAW_W = 32f;
+    private static final float DRAW_H = 33f;
+
     public Enemy(float x, float y) {
         super(x, y, 100, 16);
         this.currentAngle = 0;
@@ -35,6 +55,49 @@ public class Enemy extends Entity {
         this.speed = originalSpeed;
         this.startPoint = new Vector2(x, y);
         this.endPoint = new Vector2(x, y);
+
+        // ---- KHỞI TẠO VÀ CẮT SPRITE CHO ENEMY ----
+        spriteSheet = new Texture(Gdx.files.internal("images/Patroler.png"));
+        spriteSheet.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+
+        TextureRegion[][] rows = new TextureRegion[5][FRAME_COLS];
+        for (int r = 0; r < 5; r++) {
+            for (int c = 0; c < FRAME_COLS; c++) {
+                rows[r][c] = new TextureRegion(
+                    spriteSheet,
+                    c * TILE_W,
+                    ROW_Y[r],
+                    TILE_W,
+                    ROW_H[r]
+                );
+            }
+        }
+
+        // Idle Frames
+        idleDown  = rows[0][0];
+        idleRight = rows[1][0];
+        idleUp    = rows[2][0];
+        idleLeft  = new TextureRegion(idleRight);
+        idleLeft.flip(true, false);
+
+        // Walk Animations
+        float frameDuration = 0.1f;
+        walkDown  = new Animation<>(frameDuration, rows[3]);
+        walkRight = new Animation<>(frameDuration, rows[4]);
+        walkUp    = new Animation<>(frameDuration, rows[2]); // Tạm thời dùng hàng 2 giống Player
+
+        walkDown.setPlayMode(Animation.PlayMode.LOOP);
+        walkRight.setPlayMode(Animation.PlayMode.LOOP);
+        walkUp.setPlayMode(Animation.PlayMode.LOOP);
+
+        // Lật góc chạy bên trái từ bên phải
+        TextureRegion[] leftFrames = new TextureRegion[FRAME_COLS];
+        for (int i = 0; i < FRAME_COLS; i++) {
+            leftFrames[i] = new TextureRegion(rows[4][i]);
+            leftFrames[i].flip(true, false);
+        }
+        walkLeft = new Animation<>(frameDuration, leftFrames);
+        walkLeft.setPlayMode(Animation.PlayMode.LOOP);
     }
 
     public void setViewDistance(float distance) {
@@ -59,7 +122,7 @@ public class Enemy extends Entity {
 
         if (stunTimer > 0) {
             stunTimer -= delta;
-            return;
+            return; // Khi bị stun thì không di chuyển và không chạy animation
         }
 
         if (effectTimer > 0) {
@@ -98,9 +161,13 @@ public class Enemy extends Entity {
         }
 
         Vector2 velocity = new Vector2(0, 0);
-        // Dừng lại khi lệch góc > 20 độ để xoay mượt
         if (isFleeing || Math.abs(angleDiff) < 20) {
             velocity.set(MathUtils.cosDeg(currentAngle) * speed, MathUtils.sinDeg(currentAngle) * speed);
+        }
+
+        // Tăng thời gian chuyển động nếu có di chuyển
+        if (velocity.len() > 0.1f) {
+            stateTime += delta;
         }
 
         float oldX = position.x;
@@ -122,6 +189,50 @@ public class Enemy extends Entity {
                 break;
             }
         }
+    }
+
+    /**
+     * Thuật toán lấy frame dựa vào góc quay tương tự Player.
+     */
+    private TextureRegion getCurrentFrame() {
+        float a = ((currentAngle % 360) + 360) % 360;
+
+        // Nếu bị choáng (stun), hiển thị dạng đứng yên theo hướng hiện tại
+        if (stunTimer > 0) {
+            if      (a < 45 || a >= 315) return idleRight;
+            else if (a < 135)            return idleUp;
+            else if (a < 225)            return idleLeft;
+            else                         return idleDown;
+        }
+
+        // Khi đang di chuyển tuần tra hoặc bỏ chạy
+        if      (a < 45 || a >= 315) return walkRight.getKeyFrame(stateTime);
+        else if (a < 135)            return walkUp.getKeyFrame(stateTime);
+        else if (a < 225)            return walkLeft.getKeyFrame(stateTime);
+        else                         return walkDown.getKeyFrame(stateTime);
+    }
+
+    /**
+     * Hàm vẽ Sprite nhân vật tuần tra (Thay thế cho render cũ)
+     */
+    public void draw(SpriteBatch batch) {
+        TextureRegion currentFrame = getCurrentFrame();
+        float drawX = position.x + (size / 2f) - (DRAW_W / 2f);
+        float drawY = position.y;
+
+        // Tùy biến màu sắc Sprite dựa vào trạng thái hiệu ứng (Sử dụng tính năng setColor của SpriteBatch)
+        if (stunTimer > 0) {
+            batch.setColor(Color.PURPLE); // Ám tím khi bị choáng
+        } else if (isFleeing) {
+            batch.setColor(Color.BLUE);   // Ám xanh khi hoảng sợ bỏ chạy
+        } else {
+            batch.setColor(Color.WHITE);  // Trở lại bình thường
+        }
+
+        batch.draw(currentFrame, drawX, drawY, DRAW_W, DRAW_H);
+
+        // Trả lại màu mặc định cho Batch để không lỗi màu các vật thể khác
+        batch.setColor(Color.WHITE);
     }
 
     public boolean detects(Player player, Array<Rectangle> walls) {
@@ -158,16 +269,11 @@ public class Enemy extends Entity {
         return new Vector2(endX, endY);
     }
 
-    // CẬP NHẬT: Vẽ tầm nhìn ám vàng, trong suốt kiểu ánh đèn
     public void drawVision(ShapeRenderer shape, Array<Rectangle> walls) {
         if (stunTimer <= 0) {
-            // --- KÍCH HOẠT CHẾ ĐỘ BLENDING ĐỂ HIỆN TRONG SUỐT ---
             Gdx.gl.glEnable(GL20.GL_BLEND);
             Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
-            // --- THIẾT LẬP MÀU ÁM VÀNG (GOLD) ---
-            // Tỉ lệ: Red full, Green hơi cao, Blue thấp -> Ra màu vàng ấm
-            // Alpha: 0.15f (15%) -> Rất trong suốt, giống ánh đèn yếu
             shape.setColor(1f, 0.85f, 0.2f, 0.4f);
 
             float eX = position.x + size/2;
@@ -182,24 +288,26 @@ public class Enemy extends Entity {
                 shape.triangle(eX, eY, p1.x, p1.y, p2.x, p2.y);
             }
 
-            // --- TẮT CHẾ ĐỘ BLENDING (Quan trọng để không ảnh hưởng đến vẽ cái khác) ---
-            shape.end(); // Phải end ShapeRenderer tạm thời
+            shape.end();
             Gdx.gl.glDisable(GL20.GL_BLEND);
-            shape.begin(ShapeRenderer.ShapeType.Filled); // Phải begin lại
+            shape.begin(ShapeRenderer.ShapeType.Filled);
         }
     }
 
     @Override
     public void render(ShapeRenderer shape) {
-        if (stunTimer > 0) shape.setColor(Color.PURPLE);
-        else if (isFleeing) shape.setColor(Color.BLUE);
-        else shape.setColor(Color.RED);
-
-        shape.rect(position.x, position.y, size/2, size/2, size, size, 1, 1, currentAngle);
+        // Đã chuyển tính năng vẽ hình ảnh sang hàm draw(SpriteBatch).
+        // Bạn có thể để trống hàm này hoặc dùng để vẽ thanh máu/hitbox phụ nếu muốn.
     }
 
     public void applySpitEffect() { this.visionRange = originalVisionRange * 0.2f; this.speed = originalSpeed * 0.5f; this.effectTimer = 3.0f; }
     public void applyVomitEffect() { this.visionRange = 5; this.stunTimer = 2.0f; this.speed = originalSpeed * 0.3f; this.effectTimer = 5.0f; }
     public void applyPeeEffect() { this.isFleeing = true; this.effectTimer = 2.0f; this.speed = originalSpeed * 1.8f; }
     public void applyPoopEffect() { this.stunTimer = 4.0f; this.speed = originalSpeed * 0.2f; this.effectTimer = 7.0f; }
+
+    public void dispose() {
+        if (spriteSheet != null) {
+            spriteSheet.dispose();
+        }
+    }
 }

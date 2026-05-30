@@ -5,10 +5,11 @@ import com.agentdung.game.entities.Enemy;
 import com.agentdung.game.entities.Player;
 import com.agentdung.game.entities.Server;
 import com.agentdung.game.entities.Wall;
-import com.agentdung.game.entities.Door; // Nhớ tạo file Door.java trong package entities
+import com.agentdung.game.entities.Door;
 import com.agentdung.game.projectiles.BlobProjectile;
 import com.agentdung.game.projectiles.Projectile;
 import com.agentdung.game.projectiles.StreamProjectile;
+import com.agentdung.game.projectiles.SpriteProjectile;
 import com.agentdung.game.skills.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -57,6 +58,9 @@ public class PlayScreen extends ScreenAdapter {
     private TextureRegion fboRegion;
     private Texture lightMask;
 
+    // --- BIẾN CHO UI MANA MỚI ---
+    private Map<Class<? extends Skill>, Texture> manaTextures;
+
     int currentLevel;
     int currentWorld = 1;
     float mapWidth, mapHeight;
@@ -74,6 +78,7 @@ public class PlayScreen extends ScreenAdapter {
         this.wallRects = new Array<>();
         this.keys = new Array<>();
         this.doors = new Array<>();
+        this.manaTextures = new HashMap<>();
 
         initLevel(currentLevel);
         initFBO();
@@ -120,13 +125,22 @@ public class PlayScreen extends ScreenAdapter {
             mapRenderer = new OrthogonalTiledMapRenderer(map);
 
             int tileWidth  = map.getProperties().get("tilewidth",  Integer.class);
-            int tileHeight = map.getProperties().get("tileheight", Integer.class);
+            int tileHeight = map.getProperties().get("height", Integer.class);
             mapWidth  = map.getProperties().get("width",  Integer.class) * tileWidth;
             mapHeight = map.getProperties().get("height", Integer.class) * tileHeight;
         } catch (Exception e) {
             Gdx.app.error("MapError", "Không tìm thấy map. Quay lại Menu.");
             game.setScreen(new MenuScreen(game));
             return;
+        }
+
+        // 🔥 ĐÃ CẬP NHẬT: Giải phóng bộ nhớ của cả Nôn, Khạc và Ị trước khi dọn dẹp danh sách
+        if (skills != null) {
+            for (Skill s : skills) {
+                if (s instanceof VomitSkill) ((VomitSkill) s).dispose();
+                if (s instanceof SpitSkill) ((SpitSkill) s).dispose();
+                if (s instanceof PoopSkill) ((PoopSkill) s).dispose();
+            }
         }
 
         enemies.clear();
@@ -140,6 +154,15 @@ public class PlayScreen extends ScreenAdapter {
 
         if (keyTexture != null) keyTexture.dispose();
         keyTexture = new Texture("images/key.png");
+
+        for (Texture tex : manaTextures.values()) {
+            if (tex != null) tex.dispose();
+        }
+        manaTextures.clear();
+        manaTextures.put(SpitSkill.class, new Texture("ui/UI_mana_spit.png"));
+        manaTextures.put(VomitSkill.class, new Texture("ui/UI_mana_vomit.png"));
+        manaTextures.put(PeeSkill.class, new Texture("ui/UI_mana_pee.png"));
+        manaTextures.put(PoopSkill.class, new Texture("ui/UI_mana_poop.png"));
 
         MapObjects wallObjects = map.getLayers().get("collisions").getObjects();
         for (MapObject obj : wallObjects) {
@@ -194,10 +217,11 @@ public class PlayScreen extends ScreenAdapter {
         update(delta);
         ScreenUtils.clear(0, 0, 0, 1);
 
-        // --- 1. VẼ GAME BÌNH THƯỜNG ---
+        // --- 1. VẼ BẢN ĐỒ (TILE MAP) ---
         mapRenderer.setView(camera);
         mapRenderer.render();
 
+        // --- 2. VẼ CÁC VẬT THỂ DẠNG KHỐI HÌNH ---
         game.shapeRenderer.setProjectionMatrix(camera.combined);
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
@@ -205,25 +229,53 @@ public class PlayScreen extends ScreenAdapter {
 
         for (Door door : doors) door.render(game.shapeRenderer);
 
-        for (Rectangle trap : poopTraps) {
-            game.shapeRenderer.setColor(new Color(0.5f, 0.25f, 0, 1));
-            game.shapeRenderer.rect(trap.x, trap.y, trap.width, trap.height);
+        // ĐÃ CẬP NHẬT: Xóa vòng lặp vẽ poopTraps dạng khối hình học (rect màu nâu) tại đây
+
+        for (Projectile p : projectiles) {
+            if (!(p instanceof SpriteProjectile)) {
+                p.render(game.shapeRenderer); // Vẽ đạn hạt nhỏ li ti (gồm StreamProjectile của chiêu Ị)
+            }
         }
-        for (Enemy e : enemies) e.render(game.shapeRenderer);
-        for (Projectile p : projectiles) p.render(game.shapeRenderer);
         game.shapeRenderer.end();
 
+        // --- 3. VẼ HÌNH ẢNH SPRITE VIA SPRITEBATCH ---
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
+
         dung.draw(game.batch);
+
+        for (Enemy e : enemies) {
+            e.draw(game.batch);
+        }
 
         for (Rectangle key : keys) {
             game.batch.draw(keyTexture, key.x, key.y, key.width, key.height);
         }
 
+        // ĐÃ THÊM: Vẽ các bẫy mìn cố định dưới sàn bằng Sprite ảnh shit.png lấy từ PoopSkill
+        PoopSkill poopSkillInstance = null;
+        for (Skill s : skills) {
+            if (s instanceof PoopSkill) {
+                poopSkillInstance = (PoopSkill) s;
+                break;
+            }
+        }
+        if (poopSkillInstance != null && poopTraps.size > 0) {
+            TextureRegion poopSprite = poopSkillInstance.getPoopRegion();
+            for (Rectangle trap : poopTraps) {
+                game.batch.draw(poopSprite, trap.x, trap.y, trap.width, trap.height);
+            }
+        }
+
+        // Vẽ riêng các hạt SpriteProjectile (như hạt Nôn trắng)
+        for (Projectile p : projectiles) {
+            if (p instanceof SpriteProjectile) {
+                ((SpriteProjectile) p).render(game.batch);
+            }
+        }
         game.batch.end();
 
-        // --- 2. VẼ LỚP MẶT NẠ BÓNG TỐI TRONG FBO ---
+        // --- 4. VẼ LỚP MẶT NẠ BÓNG TỐI TRONG FBO ---
         fbo.begin();
         Gdx.gl.glClearColor(0, 0, 0, 0.9f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -239,44 +291,40 @@ public class PlayScreen extends ScreenAdapter {
         game.batch.end();
         fbo.end();
 
-        // --- 3. DÁN LỚP BÓNG TỐI LÊN MÀN HÌNH ---
+        // --- 5. DÁN LỚP BÓNG TỐI LÊN TOÀN MÀN HÌNH ---
         game.batch.begin();
         game.batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         game.batch.setProjectionMatrix(new Matrix4().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         game.batch.draw(fboRegion, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         game.batch.end();
 
-        // --- 3.5 VẼ TẦM NHÌN CỦA LÍNH ---
+        // --- 6. VẼ ÁNH ĐÈN TẦM NHÌN CỦA LÍNH XUYÊN QUA BÓNG TỐI ---
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
         game.shapeRenderer.setProjectionMatrix(camera.combined);
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        game.shapeRenderer.setColor(1f, 1f, 0.7f, 0.4f);
-        for (Enemy e : enemies) e.drawVision(game.shapeRenderer, wallRects);
+
+        for (Enemy e : enemies) {
+            e.drawVision(game.shapeRenderer, wallRects);
+        }
         game.shapeRenderer.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
 
-        // --- 4. VẼ HUD VÀ THANH MANA ---
+        // --- 7. VẼ THANH MANA TRÊN ĐẦU NHÂN VẬT ---
         game.shapeRenderer.setProjectionMatrix(camera.combined);
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         dung.render(game.shapeRenderer);
         game.shapeRenderer.end();
 
-        // --- 5. VẼ HUD (TOẠ ĐỘ MÀN HÌNH) ---
+        // --- 8. VẼ GIAO DIỆN HUD ---
         Matrix4 hudMatrix = new Matrix4().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        game.shapeRenderer.setProjectionMatrix(hudMatrix);
-        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        game.batch.setProjectionMatrix(hudMatrix);
+        game.batch.begin();
         renderHUD();
-        game.shapeRenderer.end();
-
-        // VẼ ICON CHÌA KHÓA LÊN HUD
         if (hasKey) {
-            game.batch.setProjectionMatrix(hudMatrix);
-            game.batch.begin();
-            // Vẽ ở góc trên bên phải, cách lề 20px
             game.batch.draw(keyTexture, Gdx.graphics.getWidth() - 50, Gdx.graphics.getHeight() - 50, 32, 32);
-            game.batch.end();
         }
+        game.batch.end();
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) game.setScreen(new MenuScreen(game));
     }
@@ -379,40 +427,94 @@ public class PlayScreen extends ScreenAdapter {
     private void updateProjectiles(float delta) {
         if (targetServer == null) return;
         Rectangle serverRect = new Rectangle(targetServer.x, targetServer.y, targetServer.width, targetServer.height);
+
         for (int i = projectiles.size - 1; i >= 0; i--) {
             Projectile p = projectiles.get(i);
             p.update(delta);
-            Rectangle pRect = new Rectangle(p.getPosition().x, p.getPosition().y, 5, 5);
-            boolean hit = false;
-            for (Wall w : walls) if (pRect.overlaps(w.bounds)) { projectiles.removeIndex(i); hit = true; break; }
-            if (hit) continue;
-            for (Enemy e : enemies) {
-                if (pRect.overlaps(new Rectangle(e.getPosition().x, e.getPosition().y, e.getSize(), e.getSize()))) {
-                    if (p instanceof BlobProjectile) e.applySpitEffect();
-                    else if (p instanceof StreamProjectile) {
-                        if (p.getColor().equals(Color.YELLOW)) e.applyPeeEffect();
-                        else if (p.getColor().equals(Color.WHITE)) e.applyVomitEffect();
-                    }
-                    hit = true; break;
-                }
-            }
-            if (hit) { projectiles.removeIndex(i); continue; }
-            if (p.getColor().equals(Color.YELLOW) && pRect.overlaps(serverRect)) {
-                targetServer.takeDamage(40 * delta);
+
+            if (!p.isActive()) {
                 projectiles.removeIndex(i);
                 continue;
             }
-            if (i < projectiles.size && !p.isActive()) projectiles.removeIndex(i);
+
+            Rectangle pRect = new Rectangle(p.getPosition().x, p.getPosition().y, 5, 5);
+            boolean hit = false;
+
+            // 1. Kiểm tra va chạm với Tường
+            for (Wall w : walls) {
+                if (pRect.overlaps(w.bounds)) {
+                    projectiles.removeIndex(i);
+                    hit = true;
+                    break;
+                }
+            }
+            if (hit) continue;
+
+            // 2. Kiểm tra va chạm với Enemy tuần tra
+            for (Enemy e : enemies) {
+                if (pRect.overlaps(new Rectangle(e.getPosition().x, e.getPosition().y, e.getSize(), e.getSize()))) {
+                    if (p instanceof BlobProjectile) {
+                        e.applySpitEffect();
+                    } else if (p instanceof SpriteProjectile) {
+                        if (p.getColor().equals(Color.WHITE)) {
+                            e.applyVomitEffect();
+                        } else if (p.getColor().equals(Color.CYAN)) {
+                            e.applySpitEffect();
+                        }
+                    } else if (p instanceof StreamProjectile) {
+                        // Phân biệt hiệu ứng dựa trên mã màu hạt li ti (Màu Vàng -> Đái, Màu Nâu -> Ị, Màu Trắng -> Nôn)
+                        if (p.getColor().equals(Color.YELLOW)) {
+                            e.applyPeeEffect();
+                        } else if (p.getColor().equals(new Color(0.5f, 0.25f, 0, 1))) {
+                            e.applyPoopEffect(); // Hạt li ti màu nâu trúng địch kích hoạt hiệu ứng bất động luôn
+                        } else if (p.getColor().equals(Color.WHITE)) {
+                            e.applyVomitEffect();
+                        }
+                    }
+                    projectiles.removeIndex(i);
+                    hit = true;
+                    break;
+                }
+            }
+            if (hit) continue;
+
+            // 3. Kiểm tra va chạm với Máy chủ Server (Chỉ tia Nước tiểu vàng làm hỏng máy)
+            if (p.getColor().equals(Color.YELLOW) && pRect.overlaps(serverRect)) {
+                targetServer.takeDamage(40 * delta);
+                projectiles.removeIndex(i);
+            }
         }
     }
 
     private void renderHUD() {
+        float startX = 20;
+        float targetWidth = 150;
+
         for (int i = 0; i < skills.size; i++) {
             Skill s = skills.get(i);
-            game.shapeRenderer.setColor(Color.DARK_GRAY);
-            game.shapeRenderer.rect(20, Gdx.graphics.getHeight() - 40 - (i * 25), 150, 15);
-            game.shapeRenderer.setColor(s.getManaColor());
-            game.shapeRenderer.rect(20, Gdx.graphics.getHeight() - 40 - (i * 25), 150 * s.getManaPercent(), 15);
+            Texture tex = manaTextures.get(s.getClass());
+
+            if (tex != null) {
+                float progress = s.getManaPercent();
+                float startY = Gdx.graphics.getHeight() - 40 - (i * 25);
+
+                int srcWidth = (int) (tex.getWidth() * progress);
+                int srcHeight = tex.getHeight();
+
+                float drawWidth = targetWidth * progress;
+                float drawHeight = 15;
+
+                if (srcWidth > 0) {
+                    game.batch.draw(
+                        tex,
+                        startX, startY,
+                        drawWidth, drawHeight,
+                        0, 0,
+                        srcWidth, srcHeight,
+                        false, false
+                    );
+                }
+            }
         }
     }
 
@@ -423,5 +525,26 @@ public class PlayScreen extends ScreenAdapter {
         if (fbo != null) fbo.dispose();
         if (lightMask != null) lightMask.dispose();
         if (keyTexture != null) keyTexture.dispose();
+
+        if (manaTextures != null) {
+            for (Texture tex : manaTextures.values()) {
+                if (tex != null) tex.dispose();
+            }
+            manaTextures.clear();
+        }
+
+        if (skills != null) {
+            for (Skill s : skills) {
+                if (s instanceof VomitSkill) ((VomitSkill) s).dispose();
+                if (s instanceof SpitSkill) ((SpitSkill) s).dispose();
+                if (s instanceof PoopSkill) ((PoopSkill) s).dispose();
+            }
+        }
+
+        if (enemies != null) {
+            for (Enemy e : enemies) {
+                e.dispose();
+            }
+        }
     }
 }

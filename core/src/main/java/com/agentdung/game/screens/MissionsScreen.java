@@ -77,7 +77,7 @@ public class MissionsScreen extends ScreenAdapter {
 
         // --- TẠO DANH SÁCH CUỘN BẰNG SCROLLPANE ---
         Table scrollTable = new Table();
-        
+
         float tagWidth = 550f;
         float tagHeight = 70f;
 
