@@ -2,27 +2,29 @@ package com.agentdung.game.skills;
 
 import com.badlogic.gdx.graphics.Color;
 
-// 1. Đổi từ 'implements' sang 'extends' Skill (vì Skill giờ là abstract class)
 public abstract class BaseSkill extends Skill {
     protected float maxMana = 100f;
-    protected float regenRate = 10f;
+    protected float regenRate = 10f; // Tốc độ hồi riêng của BaseSkill (ví dụ chiêu Khạc)
     protected String name;
     protected Color color;
 
-    // 2. Tạo Constructor để các lớp con (Spit, Poop...) truyền thông số lên
     public BaseSkill(String name, float cost, Color color) {
-        super(cost); // Truyền cost lên lớp cha Skill để nó quản lý mana
+        super(cost);
         this.name = name;
         this.color = color;
     }
 
-    // 3. Ghi đè logic update để dùng regenRate của riêng BaseSkill nếu muốn
+    // Ghi đè logic update để chỉ cho phép SpitSkill (Khạc) tự hồi mana
     @Override
     public void update(float delta) {
-        if (mana < maxMana) {
-            mana += regenRate * delta;
-            if (mana > maxMana) mana = maxMana;
+        // Nếu là chiêu Khạc (SpitSkill) thì mới cho tự động hồi theo thời gian
+        if (this instanceof SpitSkill) {
+            if (mana < maxMana) {
+                mana += regenRate * delta;
+                if (mana > maxMana) mana = maxMana;
+            }
         }
+
     }
 
     @Override

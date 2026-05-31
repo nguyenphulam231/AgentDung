@@ -7,31 +7,27 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Array;
 
 public abstract class Skill {
-    // Các thông số dùng chung cho mọi kỹ năng
     public float mana = 100f;
     public float maxMana = 100f;
     public float cost;
-    public float regenSpeed = 5f; // Tốc độ hồi mana mỗi giây
+    public float regenSpeed = 5f;
 
-    // Khởi tạo cost cho từng kỹ năng cụ thể
     public Skill(float cost) {
         this.cost = cost;
     }
 
-    // ĐỔI THÀNH BOOLEAN: Trả về true nếu đủ mana để thi triển
     public boolean activate(Player player, Enemy target, Array<Projectile> projectiles) {
         if (mana >= cost) {
             mana -= cost;
-            handleEffect(player, target, projectiles); // Gọi logic riêng của từng kỹ năng
+            handleEffect(player, target, projectiles);
             return true;
         }
         return false;
     }
 
-    // Mỗi kỹ năng sẽ tự viết logic "chiêu thức" vào đây (vd: tạo đạn, đặt bẫy)
     protected abstract void handleEffect(Player player, Enemy target, Array<Projectile> projectiles);
 
-    // Logic hồi mana dùng chung cho tất cả
+    // Logic hồi mana mặc định theo thời gian
     public void update(float delta) {
         if (mana < maxMana) {
             mana += regenSpeed * delta;
@@ -39,11 +35,15 @@ public abstract class Skill {
         }
     }
 
+    // --- THÊM: Hàm cộng mana trực tiếp khi ăn vật phẩm ---
+    public void gainMana(float amount) {
+        this.mana = Math.min(this.maxMana, this.mana + amount);
+    }
+
     public float getManaPercent() {
         return mana / maxMana;
     }
 
-    // Các hàm getter để lớp con tự định nghĩa màu sắc và tên
     public abstract Color getManaColor();
     public abstract String getName();
 }

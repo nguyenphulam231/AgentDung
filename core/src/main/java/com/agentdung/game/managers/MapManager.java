@@ -1,6 +1,7 @@
 package com.agentdung.game.managers;
 
 import com.agentdung.game.entities.Door;
+import com.agentdung.game.entities.Item;
 import com.agentdung.game.entities.Server;
 import com.agentdung.game.entities.Wall;
 import com.badlogic.gdx.graphics.Texture;
@@ -25,8 +26,16 @@ public class MapManager {
     public Array<Rectangle> wallRects = new Array<>();
     public Array<Door> doors = new Array<>();
     public Array<Rectangle> keys = new Array<>();
+
+    // --- THÊM: Mảng quản lý các vật phẩm hồi mana trên Map ---
+    public Array<Item> items = new Array<>();
+
     public Server targetServer;
     public Texture keyTexture;
+
+    // --- THÊM: Các Texture lưu trữ hình ảnh Sprite cho vật phẩm ---
+    public Texture meatTexture;
+    public Texture waterTexture;
 
     public float mapWidth, mapHeight;
     public Vector2 playerSpawn = new Vector2();
@@ -46,6 +55,9 @@ public class MapManager {
         mapHeight = map.getProperties().get("height", Integer.class) * tileHeight;
 
         keyTexture = new Texture("images/key.png");
+        // --- THÊM: Tải ảnh sprite từ thư mục assets ---
+        meatTexture = new Texture("images/rotten_meat.png");
+        waterTexture = new Texture("images/water.png");
 
         // Đọc collisions
         MapObjects wallObjects = map.getLayers().get("collisions").getObjects();
@@ -53,6 +65,7 @@ public class MapManager {
             Rectangle rect = ((RectangleMapObject) obj).getRectangle();
             walls.add(new Wall(rect.x, rect.y, rect.width, rect.height));
             wallRects.add(rect);
+            System.out.println("Tong so item doc duoc tu map: " + items.size);
         }
 
         // Đọc thực thể tĩnh
@@ -67,6 +80,12 @@ public class MapManager {
                 keys.add(new Rectangle(rect.x, rect.y, 16, 16));
             } else if ("server_door".equals(obj.getName())) {
                 doors.add(new Door(rect.x, rect.y, rect.width, rect.height));
+            }
+            // --- THÊM: Đọc các đối tượng vật phẩm được đặt tên từ Tiled Map ---
+            else if ("item_meat".equals(obj.getName())) {
+                items.add(new Item(rect.x, rect.y, Item.ItemType.ROTTEN_MEAT));
+            } else if ("item_water".equals(obj.getName())) {
+                items.add(new Item(rect.x, rect.y, Item.ItemType.WATER));
             }
         }
 
@@ -91,13 +110,31 @@ public class MapManager {
         for (Rectangle key : keys) {
             batch.draw(keyTexture, key.x, key.y, key.width, key.height);
         }
+
+        // --- THÊM: Vẽ các vật phẩm ăn được bằng SpriteBatch dựa trên ItemType và size kế thừa từ Entity ---
+        for (Item item : items) {
+            Texture tex = (item.type == Item.ItemType.ROTTEN_MEAT) ? meatTexture : waterTexture;
+            batch.draw(tex, item.getPosition().x, item.getPosition().y, item.getSize(), item.getSize());
+        }
     }
 
     public void dispose() {
         if (map != null) map.dispose();
         if (mapRenderer != null) mapRenderer.dispose();
         if (keyTexture != null) keyTexture.dispose();
-        walls.clear(); wallRects.clear(); doors.clear(); keys.clear();
-        enemyStarts.clear(); enemyEnds.clear();
+
+        // --- THÊM: Giải phóng bộ nhớ của các Texture vật phẩm để tránh tràn RAM ---
+        if (meatTexture != null) meatTexture.dispose();
+        if (waterTexture != null) waterTexture.dispose();
+
+        walls.clear();
+        wallRects.clear();
+        doors.clear();
+        keys.clear();
+        items.clear(); // Dọn dẹp danh sách vật phẩm khi đổi màn
+        enemyStarts.clear();
+        enemyEnds.clear();
+
     }
+
 }

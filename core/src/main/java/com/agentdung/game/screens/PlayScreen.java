@@ -2,6 +2,7 @@ package com.agentdung.game.screens;
 
 import com.agentdung.game.core.AgentDungGame;
 import com.agentdung.game.entities.Door;
+import com.agentdung.game.entities.Item;
 import com.agentdung.game.entities.Player;
 import com.agentdung.game.handlers.InputHandler;
 import com.agentdung.game.managers.EntityManager;
@@ -138,13 +139,43 @@ public class PlayScreen extends ScreenAdapter {
         InputHandler.handleTankMovement(delta, dung, camera, mapManager);
         dung.update(delta, dung, mapManager.wallRects);
 
-        // Xử lý ăn chìa khóa
+        // Hộp va chạm của Agent Dũng
         Rectangle dungRect = new Rectangle(dung.getPosition().x, dung.getPosition().y, dung.getSize(), dung.getSize());
+
+        // Xử lý ăn chìa khóa
         for (int i = mapManager.keys.size - 1; i >= 0; i--) {
             if (dungRect.overlaps(mapManager.keys.get(i))) {
                 hasKey = true;
                 mapManager.keys.removeIndex(i);
             }
+        }
+
+        // --- THÊM: Xử lý va chạm ăn vật phẩm hồi mana ---
+        for (int i = mapManager.items.size - 1; i >= 0; i--) {
+            Item item = mapManager.items.get(i);
+            // Lấy trực tiếp tọa độ và kích thước từ lớp cha Entity để tạo vùng va chạm
+            Rectangle itemRect = new Rectangle(item.getPosition().x, item.getPosition().y, item.getSize(), item.getSize());
+
+            if (dungRect.overlaps(itemRect)) {
+                if (item.type == Item.ItemType.ROTTEN_MEAT) {
+                    // Ăn thịt thiu hồi ngay 40 mana cho chiêu Ị và Nôn
+                    for (Skill s : skills) {
+                        if (s instanceof PoopSkill || s instanceof VomitSkill) {
+                            s.gainMana(40f);
+                        }
+                    }
+                } else if (item.type == Item.ItemType.WATER) {
+                    // Uống nước hồi ngay 50 mana cho chiêu Đái
+                    for (Skill s : skills) {
+                        if (s instanceof PeeSkill) {
+                            s.gainMana(50f);
+                        }
+                    }
+                }
+                // Xóa vật phẩm khỏi danh sách sau khi đã ăn thành công
+                mapManager.items.removeIndex(i);
+            }
+
         }
 
         // Cập nhật Cửa
@@ -168,6 +199,8 @@ public class PlayScreen extends ScreenAdapter {
             currentLevel++;
             initLevel(currentLevel);
         }
+
+        // Vòng lặp cập nhật các kỹ năng (Mana Khạc sẽ tự tăng ở đây nhờ BaseSkill mới)
         for (Skill s : skills) s.update(delta);
     }
 

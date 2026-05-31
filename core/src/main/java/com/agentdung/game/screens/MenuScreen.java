@@ -47,6 +47,10 @@ public class MenuScreen extends ScreenAdapter {
         guideButtonTexture = new Texture(Gdx.files.internal("ui/UI_button_guide.png"));
         settingsButtonTexture = new Texture(Gdx.files.internal("ui/UI_button_settings.png"));
 
+        // Giúp ảnh Pixel Art không bị mờ khi phóng to kích thước
+        guideButtonTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        settingsButtonTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+
         Image background = new Image(bgTexture);
         background.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         stage.addActor(background);
@@ -59,11 +63,20 @@ public class MenuScreen extends ScreenAdapter {
         TextureRegionDrawable customizeDrawable = new TextureRegionDrawable(new TextureRegion(customizeButtonTexture));
         ImageButton customizeButton = new ImageButton(customizeDrawable);
 
-        // Tạo Drawable và ImageButton cho 2 nút mới
+        // --- ĐỊNH NGHĨA KÍCH THƯỚC FIX CỨNG CHO HÌNH ẢNH NÚT (Ví dụ: 70x70) ---
+        float targetBtnWidth = 70f;
+        float targetBtnHeight = 70f;
+
+        // Tạo Drawable và ImageButton cho nút Guide + Ép kích thước hình ảnh gốc
         TextureRegionDrawable guideDrawable = new TextureRegionDrawable(new TextureRegion(guideButtonTexture));
+        guideDrawable.setMinWidth(targetBtnWidth);
+        guideDrawable.setMinHeight(targetBtnHeight);
         ImageButton guideButton = new ImageButton(guideDrawable);
 
+        // Tạo Drawable và ImageButton cho nút Settings + Ép kích thước hình ảnh gốc
         TextureRegionDrawable settingsDrawable = new TextureRegionDrawable(new TextureRegion(settingsButtonTexture));
+        settingsDrawable.setMinWidth(targetBtnWidth);
+        settingsDrawable.setMinHeight(targetBtnHeight);
         ImageButton settingsButton = new ImageButton(settingsDrawable);
 
         // --- Gắn sự kiện click ---
@@ -115,8 +128,7 @@ public class MenuScreen extends ScreenAdapter {
         bottomRightTable.setFillParent(true);
         bottomRightTable.bottom().right(); // Đẩy toàn bộ nội dung bảng về góc phải dưới
 
-        // Thêm nút Guide và Settings cạnh nhau, thêm khoảng cách (pad) cách lề dưới và lề phải là 20px
-        // Giữa nút Guide và nút Settings cách nhau một khoảng bên phải (padRight) là 10px
+        // Thêm nút Guide và Settings cạnh nhau vào bảng (Kích thước nút đã được định nghĩa từ Drawable ở trên)
         bottomRightTable.add(guideButton).padRight(5f).padBottom(14f);
         bottomRightTable.add(settingsButton).padRight(10f).padBottom(14f);
 
