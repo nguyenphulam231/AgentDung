@@ -83,6 +83,7 @@ public class MenuScreen extends ScreenAdapter {
         playButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                if (game.clickSound != null) game.clickSound.play();
                 // THAY ĐỔI Ở ĐÂY: Chuyển sang màn hình chọn Missions thay vì vào thẳng PlayScreen
                 game.setScreen(new MissionsScreen(game));
             }
@@ -91,13 +92,16 @@ public class MenuScreen extends ScreenAdapter {
         customizeButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                System.out.println("Mở giao diện Customize cho Agent Dũng!");
+                if (game.clickSound != null) game.clickSound.play();
+                // ĐÃ CẬP NHẬT: Chuyển màn hình thực tế sang giao diện CustomizeScreen mới tạo
+                game.setScreen(new CustomizeScreen(game));
             }
         });
 
         guideButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                if (game.clickSound != null) game.clickSound.play();
                 game.setScreen(new GuideScreen(game));
             }
         });
@@ -105,6 +109,7 @@ public class MenuScreen extends ScreenAdapter {
         settingsButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                if (game.clickSound != null) game.clickSound.play();
                 game.setScreen(new SettingsScreen(game));
             }
         });

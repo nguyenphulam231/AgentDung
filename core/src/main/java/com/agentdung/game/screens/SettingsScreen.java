@@ -108,6 +108,7 @@ public class SettingsScreen extends ScreenAdapter {
         backButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                if (game.clickSound != null) game.clickSound.play();
                 game.setScreen(new MenuScreen(game));
             }
         });
@@ -115,6 +116,7 @@ public class SettingsScreen extends ScreenAdapter {
         masterButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                if (game.clickSound != null) game.clickSound.play();
                 isMasterOn = !masterButton.isChecked();
                 System.out.println("Trạng thái Master Audio: " + (isMasterOn ? "BẬT" : "TẮT"));
                 // Thêm logic tắt/mở âm thanh tổng của game tại đây
@@ -124,6 +126,7 @@ public class SettingsScreen extends ScreenAdapter {
         sfxButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                if (game.clickSound != null) game.clickSound.play();
                 isSfxOn = !sfxButton.isChecked();
                 System.out.println("Trạng thái SFX (Hiệu ứng): " + (isSfxOn ? "BẬT" : "TẮT"));
                 // Thêm logic tắt/mở tiếng bước chân, tiếng súng... tại đây
@@ -133,6 +136,7 @@ public class SettingsScreen extends ScreenAdapter {
         musicButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                if (game.clickSound != null) game.clickSound.play();
                 isMusicOn = !musicButton.isChecked();
                 System.out.println("Trạng thái Music (Nhạc nền): " + (isMusicOn ? "BẬT" : "TẮT"));
                 // Thêm logic dừng/phát nhạc nền game tại đây

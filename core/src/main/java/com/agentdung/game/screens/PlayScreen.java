@@ -132,7 +132,10 @@ public class PlayScreen extends ScreenAdapter {
         if (hasKey) game.batch.draw(mapManager.keyTexture, Gdx.graphics.getWidth() - 50, Gdx.graphics.getHeight() - 50, 32, 32);
         game.batch.end();
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) game.setScreen(new MenuScreen(game));
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            if (game.clickSound != null) game.clickSound.play();
+            game.setScreen(new MenuScreen(game));
+        }
     }
 
     private void update(float delta) {
@@ -145,6 +148,8 @@ public class PlayScreen extends ScreenAdapter {
         // Xử lý ăn chìa khóa
         for (int i = mapManager.keys.size - 1; i >= 0; i--) {
             if (dungRect.overlaps(mapManager.keys.get(i))) {
+                // ĐÃ CẬP NHẬT: Phát âm thanh khi nhặt được chìa khóa
+                if (game.clickSound != null) game.clickSound.play();
                 hasKey = true;
                 mapManager.keys.removeIndex(i);
             }
@@ -158,6 +163,9 @@ public class PlayScreen extends ScreenAdapter {
 
             if (dungRect.overlaps(itemRect)) {
                 if (item.type == Item.ItemType.ROTTEN_MEAT) {
+                    // ĐÃ CẬP NHẬT: Phát âm thanh nhặt thịt thiu (Tận dụng tạm clickSound hoặc bạn tùy biến sau)
+                    if (game.clickSound != null) game.clickSound.play();
+
                     // Ăn thịt thiu hồi ngay 40 mana cho chiêu Ị và Nôn
                     for (Skill s : skills) {
                         if (s instanceof PoopSkill || s instanceof VomitSkill) {
@@ -165,6 +173,9 @@ public class PlayScreen extends ScreenAdapter {
                         }
                     }
                 } else if (item.type == Item.ItemType.WATER) {
+                    // ĐÃ CẬP NHẬT: Phát âm thanh nhặt/uống chai nước từ tổng kho AgentDungGame
+                    if (game.pickWaterSound != null) game.pickWaterSound.play();
+
                     // Uống nước hồi ngay 50 mana cho chiêu Đái
                     for (Skill s : skills) {
                         if (s instanceof PeeSkill) {
@@ -175,7 +186,6 @@ public class PlayScreen extends ScreenAdapter {
                 // Xóa vật phẩm khỏi danh sách sau khi đã ăn thành công
                 mapManager.items.removeIndex(i);
             }
-
         }
 
         // Cập nhật Cửa

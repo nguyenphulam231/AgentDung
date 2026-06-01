@@ -1,31 +1,56 @@
 package com.agentdung.game.core;
 
-import com.agentdung.game.screens.MenuScreen;
 import com.badlogic.gdx.Game;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch; // Thêm dòng này
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.agentdung.game.screens.MenuScreen;
 
 public class AgentDungGame extends Game {
+    public Music backgroundMusic;
+    public Sound clickSound;
+    public Sound pickWaterSound;
     public ShapeRenderer shapeRenderer;
-    public SpriteBatch batch; // Thêm dòng này để các Screen dùng chung
+    public SpriteBatch batch;
 
     @Override
     public void create() {
         shapeRenderer = new ShapeRenderer();
-        batch = new SpriteBatch(); // Khởi tạo batch ở đây
+        batch = new SpriteBatch();
 
-        // Chuyển đến Menu
+        try {
+            backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("sounds/theme_music.mp3"));
+            backgroundMusic.setLooping(true);
+            backgroundMusic.setVolume(0.5f);
+            backgroundMusic.play();
+
+            clickSound = Gdx.audio.newSound(Gdx.files.internal("sounds/click_sound.ogg"));
+
+            pickWaterSound = Gdx.audio.newSound(Gdx.files.internal("sounds/pick_water.ogg"));
+
+        } catch (Exception e) {
+            Gdx.app.error("AgentDungGame", "Không thể tải tài nguyên âm thanh: " + e.getMessage());
+        }
+
         this.setScreen(new MenuScreen(this));
     }
 
     @Override
     public void render() {
-        super.render(); // Rất quan trọng: Để các Screen có thể render được
+        super.render();
     }
 
     @Override
     public void dispose() {
-        shapeRenderer.dispose();
-        batch.dispose(); // Nhớ giải phóng bộ nhớ cho batch
+        super.dispose();
+        if (backgroundMusic != null) backgroundMusic.dispose();
+        if (clickSound != null) clickSound.dispose();
+
+        if (pickWaterSound != null) pickWaterSound.dispose();
+
+        if (shapeRenderer != null) shapeRenderer.dispose();
+        if (batch != null) batch.dispose();
     }
 }
