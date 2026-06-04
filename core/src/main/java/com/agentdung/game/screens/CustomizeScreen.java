@@ -47,11 +47,11 @@ public class CustomizeScreen extends ScreenAdapter {
 
     private void initCharacterData() {
         characterList = new Array<>();
-        characterList.add(new CharacterData("Agent Dũng", 1, 3));
-        characterList.add(new CharacterData("Shadow Agent", 2, 4));
-        characterList.add(new CharacterData("Cyber Soldier", 3, 2));
-        characterList.add(new CharacterData("Ghost Fighter", 4, 3));
-        characterList.add(new CharacterData("Medic Agent", 5, 2));
+        characterList.add(new CharacterData("Agent Dũng", 1, 5));
+        characterList.add(new CharacterData("Shadow Agent", 2, 5));
+        characterList.add(new CharacterData("Cyber Soldier", 3, 5));
+        characterList.add(new CharacterData("Ghost Fighter", 4, 5));
+        characterList.add(new CharacterData("Medic Agent", 5, 5));
         characterList.add(new CharacterData("Heavy Gunner", 6, 5));
     }
 
