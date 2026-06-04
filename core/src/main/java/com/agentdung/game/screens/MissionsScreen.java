@@ -26,13 +26,10 @@ public class MissionsScreen extends ScreenAdapter {
     private Texture mapTagTexture;
     private Texture progressTexture;
     private Texture perTexture;
-    private Texture titleMissionsTexture; // Thêm texture cho tiêu đề Missions
+    private Texture titleMissionsTexture;
 
     private Texture[] mapTitleTextures;
     private final String[] mapNames = {"UI_Ronin", "UI_Nostra", "UI_Sinal", "UI_Gumi", "UI_Cartel"};
-
-    private final int[] completedLevels = {10, 3, 8, 4, 7};
-    private final int[] totalLevels = {10, 10, 10, 10, 10};
 
     public MissionsScreen(AgentDungGame game) {
         this.game = game;
@@ -48,7 +45,7 @@ public class MissionsScreen extends ScreenAdapter {
         mapTagTexture = new Texture(Gdx.files.internal("ui/UI_maptag.png"));
         progressTexture = new Texture(Gdx.files.internal("ui/UI_progress.png"));
         perTexture = new Texture(Gdx.files.internal("ui/UI_per.png"));
-        titleMissionsTexture = new Texture(Gdx.files.internal("ui/UI_title_mission.png")); // Load tiêu đề
+        titleMissionsTexture = new Texture(Gdx.files.internal("ui/UI_title_mission.png"));
 
         mapTitleTextures = new Texture[5];
         for (int i = 0; i < 5; i++) {
@@ -65,7 +62,7 @@ public class MissionsScreen extends ScreenAdapter {
         backButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (game.clickSound != null) game.clickSound.play();
+                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
                 game.setScreen(new MenuScreen(game));
             }
         });
@@ -83,16 +80,22 @@ public class MissionsScreen extends ScreenAdapter {
         float tagHeight = 70f;
 
         for (int i = 0; i < 5; i++) {
+            // mapIndex đại diện cho số thứ tự Map thực tế (Ví dụ: Map 1, Map 2, ...)
             final int mapIndex = i + 1;
+
+            // --- ĐẤU NỐI THỰC TẾ: Lấy dữ liệu tiến trình từ Core Game ---
+            int completed = game.completedLevelsReal[i];
+            int total = game.totalLevelsReal[i];
+
+            // Xác định level tiếp theo người chơi cần vào đá (Không vượt quá tổng số level)
+            final int nextLevelToPlay = (completed < total) ? (completed + 1) : 1;
 
             Stack mapStack = new Stack();
 
-            // LỚP 1 (DƯỚI CÙNG): Thanh maptag nền thực tế co giãn bằng NinePatch qua cơ chế Table Background
-            // Bạn có thể chỉnh lại 4 thông số 10, 10, 10, 10 cho đúng với số lượng pixel bo góc của file UI_maptag.png
+            // LỚP 1 (DƯỚI CÙNG): Thanh maptag nền thực tế co giãn bằng NinePatch
             com.badlogic.gdx.graphics.g2d.NinePatch mapTagPatch = new com.badlogic.gdx.graphics.g2d.NinePatch(mapTagTexture, 10, 10, 10, 10);
             com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable patchDrawable = new com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable(mapTagPatch);
 
-            // Tạo một Table đại diện cho nền, ép kích thước vật lý và gán ảnh nền co giãn vào
             Table bgTable = new Table();
             bgTable.setBackground(patchDrawable);
             mapStack.add(bgTable);
@@ -105,13 +108,15 @@ public class MissionsScreen extends ScreenAdapter {
             mapTagButton.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    if (game.clickSound != null) game.clickSound.play();
-                    System.out.println("Vào chơi Map " + mapIndex);
-                    game.setScreen(new PlayScreen(game, mapIndex));
+                    if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
+
+                    // --- ĐẤU NỐI THỰC TẾ: Vào đúng Map và Level tiếp theo cần chơi ---
+                    System.out.println("Vào chơi thực tế: Map " + mapIndex + " - Level " + nextLevelToPlay);
+                    game.setScreen(new PlayScreen(game, mapIndex, nextLevelToPlay));
                 }
             });
 
-            // LỚP 2 (Ở GIỮA): Chữ và Số tiến độ
+            // LỚP 2 (Ở GIỮA): Chữ tên Map và Số tiến độ thực tế dạng ảnh
             Table infoTable = new Table();
             infoTable.setFillParent(false);
 
@@ -119,32 +124,34 @@ public class MissionsScreen extends ScreenAdapter {
             infoTable.add(titleImage).left().padLeft(30f).expandX();
 
             Table progressTextTable = new Table();
-            addNumberImagesToTable(progressTextTable, completedLevels[i]);
+            // Vẽ ảnh số lượng level đã qua chạy thật
+            addNumberImagesToTable(progressTextTable, completed);
             progressTextTable.add(new Image(perTexture)).pad(0, 1, 0, 1);
-            addNumberImagesToTable(progressTextTable, totalLevels[i]);
+            // Vẽ ảnh tổng số level chạy thật
+            addNumberImagesToTable(progressTextTable, total);
             infoTable.add(progressTextTable).right().padRight(30f);
 
-            // Tự do chỉnh khoảng cách chữ so với đáy maptag thực tế tại đây
             infoTable.padBottom(10f);
             mapStack.add(infoTable);
 
-            // LỚP 3 (TRÊN CÙNG): Thanh UI_progress được đưa vào khung bao
+            // LỚP 3 (TRÊN CÙNG): Thanh UI_progress tỉ lệ thuận với số màn chơi thực tế đã vượt qua
             Table progressTableWrapper = new Table();
-            progressTableWrapper.bottom().left(); // Định vị vùng chứa sát đáy trái
+            progressTableWrapper.bottom().left();
 
             Image progressImage = new Image(progressTexture);
-            float ratio = (float) completedLevels[i] / totalLevels[i];
+            float ratio = (float) completed / total;
             float progressWidth = tagWidth * ratio;
 
-            // Tự do chỉnh khoảng cách thanh màu vàng so với đáy maptag thực tế tại đây
-            progressTableWrapper.add(progressImage)
-                .width(progressWidth)
-                .height(8f)
-                .left()
-                .padLeft(4f)
-                .padBottom(12f);
-
-            mapStack.add(progressTableWrapper);
+            // Chỉ hiển thị thanh tiến trình màu vàng nếu người chơi đã vượt qua ít nhất 1 màn
+            if (progressWidth > 0) {
+                progressTableWrapper.add(progressImage)
+                    .width(progressWidth)
+                    .height(8f)
+                    .left()
+                    .padLeft(4f)
+                    .padBottom(12f);
+                mapStack.add(progressTableWrapper);
+            }
 
             // Thêm vào bảng cuộn
             scrollTable.add(mapStack).size(tagWidth, tagHeight).padBottom(12f);
@@ -153,26 +160,23 @@ public class MissionsScreen extends ScreenAdapter {
 
         // Tạo cấu trúc cuộn chuột cho danh sách map
         ScrollPane scrollPane = new ScrollPane(scrollTable);
-        scrollPane.setScrollingDisabled(true, false); // Khóa cuộn ngang, mở cuộn dọc
-        scrollPane.setFadeScrollBars(false);          // Để thanh cuộn luôn hiện rõ
+        scrollPane.setScrollingDisabled(true, false);
+        scrollPane.setFadeScrollBars(false);
 
         // Bảng chính chứa cả chữ Missions và ScrollPane danh sách chọn map
         Table mainTable = new Table();
         mainTable.setFillParent(true);
         mainTable.center();
 
-        // Thêm chữ tiêu đề "Missions" vào trên cùng
         Image missionsTitle = new Image(titleMissionsTexture);
         mainTable.add(missionsTitle).size(400f, 90f).padBottom(20f);
         mainTable.row();
 
-        // Thêm khung cuộn ScrollPane ngay phía dưới chữ tiêu đề
         mainTable.add(scrollPane).size(tagWidth + 40f, 290f);
 
         stage.addActor(mainTable);
 
-        // 🔥 FIX QUAN TRỌNG NHẤT Ở ĐÂY:
-        // Ép hệ thống tập trung sự kiện cuộn chuột (Scroll Focus) vào chiếc ScrollPane này ngay khi mở trang.
+        // Ép hệ thống tập trung sự kiện cuộn chuột (Scroll Focus)
         stage.setScrollFocus(scrollPane);
     }
 
@@ -215,7 +219,7 @@ public class MissionsScreen extends ScreenAdapter {
         if (mapTagTexture != null) mapTagTexture.dispose();
         if (progressTexture != null) progressTexture.dispose();
         if (perTexture != null) perTexture.dispose();
-        if (titleMissionsTexture != null) titleMissionsTexture.dispose(); // Giải phóng bộ nhớ tiêu đề
+        if (titleMissionsTexture != null) titleMissionsTexture.dispose();
 
         if (mapTitleTextures != null) {
             for (Texture t : mapTitleTextures) {

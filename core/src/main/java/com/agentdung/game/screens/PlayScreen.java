@@ -39,10 +39,12 @@ public class PlayScreen extends ScreenAdapter {
 
     private boolean hasKey = false;
     int currentLevel;
-    int currentWorld = 1;
+    int currentWorld; // Chuyển thành biến động nhận từ màn hình chọn Map
 
-    public PlayScreen(AgentDungGame game, int level) {
+    // --- ĐÃ CẬP NHẬT: Constructor nhận cả Map (World) và Level thực tế ---
+    public PlayScreen(AgentDungGame game, int world, int level) {
         this.game = game;
+        this.currentWorld = world;
         this.currentLevel = level;
         this.camera = new OrthographicCamera();
         camera.setToOrtho(false, 400, 400 * (float) Gdx.graphics.getHeight() / Gdx.graphics.getWidth());
@@ -67,6 +69,7 @@ public class PlayScreen extends ScreenAdapter {
             }
         }
 
+        // Tải map động theo cấu trúc map[currentWorld]_[level].tmx bên trong MapManager
         mapManager.loadLevel(currentWorld, level);
 
         // --- CẬP NHẬT: TRUYỀN THÊM THAM SỐ GAME VÀO KHỞI TẠO PLAYER ---
@@ -137,7 +140,7 @@ public class PlayScreen extends ScreenAdapter {
         game.batch.end();
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            if (game.clickSound != null) game.clickSound.play();
+            if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
             game.setScreen(new MenuScreen(game));
         }
     }
@@ -152,23 +155,22 @@ public class PlayScreen extends ScreenAdapter {
         // Xử lý ăn chìa khóa
         for (int i = mapManager.keys.size - 1; i >= 0; i--) {
             if (dungRect.overlaps(mapManager.keys.get(i))) {
-                // ĐÃ CẬP NHẬT: Phát âm thanh khi nhặt được chìa khóa
-                if (game.clickSound != null) game.clickSound.play();
+                // ĐÃ CẬP NHẬT: Chỉ phát âm thanh nếu SFX hệ thống đang bật
+                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
                 hasKey = true;
                 mapManager.keys.removeIndex(i);
             }
         }
 
-        // --- THÊM: Xử lý va chạm ăn vật phẩm hồi mana ---
+        // Xử lý va chạm ăn vật phẩm hồi mana
         for (int i = mapManager.items.size - 1; i >= 0; i--) {
             Item item = mapManager.items.get(i);
-            // Lấy trực tiếp tọa độ và kích thước từ lớp cha Entity để tạo vùng va chạm
             Rectangle itemRect = new Rectangle(item.getPosition().x, item.getPosition().y, item.getSize(), item.getSize());
 
             if (dungRect.overlaps(itemRect)) {
                 if (item.type == Item.ItemType.ROTTEN_MEAT) {
-                    // ĐÃ CẬP NHẬT: Phát âm thanh nhặt thịt thiu (Tận dụng tạm clickSound hoặc bạn tùy biến sau)
-                    if (game.clickSound != null) game.clickSound.play();
+                    // ĐÃ CẬP NHẬT: Kiểm tra cài đặt âm thanh khi nhặt thịt thiu
+                    if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
 
                     // Ăn thịt thiu hồi ngay 40 mana cho chiêu Ị và Nôn
                     for (Skill s : skills) {
@@ -177,8 +179,8 @@ public class PlayScreen extends ScreenAdapter {
                         }
                     }
                 } else if (item.type == Item.ItemType.WATER) {
-                    // ĐÃ CẬP NHẬT: Phát âm thanh nhặt/uống chai nước từ tổng kho AgentDungGame
-                    if (game.pickWaterSound != null) game.pickWaterSound.play();
+                    // ĐÃ CẬP NHẬT: Kiểm tra cài đặt âm thanh khi nhặt/uống chai nước
+                    if (game.isMasterOn && game.isSfxOn && game.pickWaterSound != null) game.pickWaterSound.play();
 
                     // Uống nước hồi ngay 50 mana cho chiêu Đái
                     for (Skill s : skills) {
@@ -187,7 +189,6 @@ public class PlayScreen extends ScreenAdapter {
                         }
                     }
                 }
-                // Xóa vật phẩm khỏi danh sách sau khi đã ăn thành công
                 mapManager.items.removeIndex(i);
             }
         }
@@ -198,7 +199,7 @@ public class PlayScreen extends ScreenAdapter {
             door.update(delta, dist < 60f, hasKey);
         }
 
-        // --- CẬP NHẬT: Truyền thêm tham số this.game vào để InputHandler xử lý âm thanh kỹ năng ---
+        // Cập nhật âm thanh kỹ năng tuân thủ cấu hình Settings
         InputHandler.handleSkillInput(dung, skills, entityManager, this.game);
 
         // Gọi EntityManager cập nhật thực thể sống kèm hàm callback nếu bị lính bắt
@@ -209,13 +210,25 @@ public class PlayScreen extends ScreenAdapter {
         camera.position.y = MathUtils.clamp(dung.getPosition().y + dung.getSize() / 2, camera.viewportHeight / 2, mapManager.mapHeight - camera.viewportHeight / 2);
         camera.update();
 
-        // Kiểm tra điều kiện qua màn khi sập nguồn Server
+        // --- ĐÃ ĐẤU NỐI CHẠY THẬT: Kiểm tra điều kiện qua màn khi sập nguồn Server ---
         if (mapManager.targetServer != null && mapManager.targetServer.hp <= 0) {
-            currentLevel++;
-            initLevel(currentLevel);
+            // Nếu level vừa qua lớn hơn kỉ lục cũ của map này, cập nhật kỉ lục mới chạy thật
+            if (currentLevel > game.completedLevelsReal[currentWorld - 1]) {
+                game.completedLevelsReal[currentWorld - 1] = currentLevel;
+            }
+
+            // Kiểm tra xem Map này còn level tiếp theo trong assets không
+            if (currentLevel < game.totalLevelsReal[currentWorld - 1]) {
+                currentLevel++;
+                initLevel(currentLevel);
+            } else {
+                // Đã phá đảo toàn bộ level của map hiện tại -> Trả người chơi về màn hình chọn thế giới
+                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
+                game.setScreen(new MissionsScreen(game));
+            }
         }
 
-        // Vòng lặp cập nhật các kỹ năng (Mana Khạc sẽ tự tăng ở đây nhờ BaseSkill mới)
+        // Vòng lặp cập nhật các kỹ năng
         for (Skill s : skills) s.update(delta);
     }
 
@@ -239,7 +252,7 @@ public class PlayScreen extends ScreenAdapter {
 
     @Override
     public void dispose() {
-        // --- CẬP NHẬT: Chủ động ngắt toàn bộ âm thanh kỹ năng đang lặp khi rời màn hình chơi ---
+        // Chủ động ngắt toàn bộ âm thanh kỹ năng đang lặp khi rời màn hình chơi
         InputHandler.stopLoopingSounds(this.game);
 
         mapManager.dispose();
