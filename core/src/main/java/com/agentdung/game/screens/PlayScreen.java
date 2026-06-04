@@ -66,7 +66,8 @@ public class PlayScreen extends ScreenAdapter {
 
         mapManager.loadLevel(currentWorld, level);
 
-        dung = new Player(mapManager.playerSpawn.x, mapManager.playerSpawn.y);
+        // --- CẬP NHẬT: TRUYỀN THÊM THAM SỐ GAME VÀO KHỞI TẠO PLAYER ---
+        dung = new Player(mapManager.playerSpawn.x, mapManager.playerSpawn.y, this.game);
         dung.setSize(26);
 
         entityManager.initEnemies(mapManager);

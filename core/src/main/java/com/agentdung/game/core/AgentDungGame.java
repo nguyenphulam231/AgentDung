@@ -15,6 +15,11 @@ public class AgentDungGame extends Game {
     public ShapeRenderer shapeRenderer;
     public SpriteBatch batch;
 
+    // --- LOGIC LƯU TRỮ NHÂN VẬT ĐƯỢC CHỌN ---
+    // Mặc định ban đầu là Agent Dũng (ID: 1) - Biến thể 1 (Variant: 1)
+    public int selectedCharacterId = 1;
+    public int selectedVariantId = 1;
+
     @Override
     public void create() {
         shapeRenderer = new ShapeRenderer();

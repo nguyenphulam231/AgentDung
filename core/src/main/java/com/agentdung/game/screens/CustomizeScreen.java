@@ -143,7 +143,12 @@ public class CustomizeScreen extends ScreenAdapter {
                         @Override
                         public void clicked(InputEvent event, float x, float y) {
                             if (game.clickSound != null) game.clickSound.play();
-                            System.out.println("Đã chọn nhân vật ID: " + charId + " - Biến thể: " + variantId);
+
+                            // --- CẬP NHẬT TRỰC TIẾP LOGIC LỰA CHỌN VÀO GAME CORE ---
+                            game.selectedCharacterId = charId;
+                            game.selectedVariantId = variantId;
+
+                            System.out.println("Đã chọn và lưu nhân vật ID: " + game.selectedCharacterId + " - Biến thể: " + game.selectedVariantId);
                         }
                     });
 

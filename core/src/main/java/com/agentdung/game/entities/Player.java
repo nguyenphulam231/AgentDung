@@ -1,5 +1,7 @@
 package com.agentdung.game.entities;
 
+// --- IMPORT THÊM AGENTDUNGGAME ĐỂ LIÊN KẾT LOGIC ---
+import com.agentdung.game.core.AgentDungGame;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -35,52 +37,50 @@ public class Player extends Entity {
     private static final float DRAW_W = 32f;
     private static final float DRAW_H = 33f; // cao nhất trong các hàng có nội dung
 
-    public Player(float x, float y) {
+    // --- CẬP NHẬT CONSTRUCTOR: NHẬN THÊM AGENTDUNGGAME GAME ---
+    public Player(float x, float y, AgentDungGame game) {
         super(x, y, 150, 16);
 
-        spriteSheet = new Texture(Gdx.files.internal("images/Player1.png"));
+        // Tự động dựng đường dẫn động dựa trên cấu hình nhân vật đang được chọn
+        String path = "images/player" + game.selectedCharacterId + "_" + game.selectedVariantId + ".png";
+        Gdx.app.log("Player", "Đang nạp sprite sheet động: " + path);
+
+        spriteSheet = new Texture(Gdx.files.internal(path));
         spriteSheet.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
-        // Cắt thủ công từng hàng theo boundary thực tế
-        TextureRegion[][] rows = new TextureRegion[5][FRAME_COLS];
-        for (int r = 0; r < 5; r++) {
-            for (int c = 0; c < FRAME_COLS; c++) {
-                rows[r][c] = new TextureRegion(
-                    spriteSheet,
-                    c * TILE_W,   // x
-                    ROW_Y[r],     // y
-                    TILE_W,       // width
-                    ROW_H[r]      // height đúng của hàng đó
-                );
-            }
-        }
+        // Kích thước cố định cho lưới 6x6 trên ảnh 192x192
+        int cols = 6;
+        int rows = 6;
+        int tileW = 32;
+        int tileH = 32;
 
-        // ---- IDLE FRAMES (frame đầu mỗi hàng) ----
-        idleDown  = rows[0][0]; // Hàng 0: mặt về phía mình (Nam)
-        idleRight = rows[1][0]; // Hàng 1: chếch phải (Đông)
-        idleUp    = rows[2][0]; // Hàng 2: quay lưng (Bắc)
+        // Sử dụng hàm split có sẵn của LibGDX (tự động cắt theo lưới)
+        TextureRegion[][] tmp = TextureRegion.split(spriteSheet, tileW, tileH);
 
-        // Tây = flip ngang Đông
+        // ---- IDLE FRAMES ----
+        // Hàng 0: Nam, 1: Đông, 2: Bắc
+        idleDown  = tmp[0][0];
+        idleRight = tmp[1][0];
+        idleUp    = tmp[2][0];
+
         idleLeft = new TextureRegion(idleRight);
         idleLeft.flip(true, false);
 
         // ---- WALK ANIMATIONS ----
         float frameDuration = 0.1f;
 
-        walkDown  = new Animation<>(frameDuration, rows[3]); // Hàng 3: chạy Nam
-        walkRight = new Animation<>(frameDuration, rows[4]); // Hàng 4: chạy Đông
-        // Hàng 5 còn trống → tạm dùng idle Bắc lặp lại
-        // TODO: đổi thành rows[5] khi vẽ xong animation chạy Bắc
-        walkUp    = new Animation<>(frameDuration, rows[2]);
+        walkDown  = new Animation<>(frameDuration, tmp[3]);
+        walkRight = new Animation<>(frameDuration, tmp[4]);
+        walkUp    = new Animation<>(frameDuration, tmp[5]); // Giờ đã có hàng 5!
 
         walkDown.setPlayMode(Animation.PlayMode.LOOP);
         walkRight.setPlayMode(Animation.PlayMode.LOOP);
         walkUp.setPlayMode(Animation.PlayMode.LOOP);
 
-        // Chạy Tây = flip từng frame của chạy Đông
-        TextureRegion[] leftFrames = new TextureRegion[FRAME_COLS];
-        for (int i = 0; i < FRAME_COLS; i++) {
-            leftFrames[i] = new TextureRegion(rows[4][i]);
+        // Chạy Tây = flip từng frame của hàng chạy Đông (hàng 4)
+        TextureRegion[] leftFrames = new TextureRegion[cols];
+        for (int i = 0; i < cols; i++) {
+            leftFrames[i] = new TextureRegion(tmp[4][i]);
             leftFrames[i].flip(true, false);
         }
         walkLeft = new Animation<>(frameDuration, leftFrames);
@@ -100,7 +100,7 @@ public class Player extends Entity {
     /**
      * Chọn frame theo góc và trạng thái di chuyển.
      * angle từ atan2 của LibGDX:
-     *   0°   = Đông,  90° = Bắc,  180° = Tây,  270° = Nam
+     * 0°   = Đông,  90° = Bắc,  180° = Tây,  270° = Nam
      */
     private TextureRegion getCurrentFrame() {
         float a = ((angle % 360) + 360) % 360;
