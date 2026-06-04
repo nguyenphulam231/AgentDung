@@ -2,6 +2,7 @@ package com.agentdung.game.screens;
 
 import com.agentdung.game.core.AgentDungGame;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -27,11 +28,6 @@ public class SettingsScreen extends ScreenAdapter {
     private Texture soundOffTexture;
     private Texture musicOnTexture;
     private Texture musicOffTexture;
-
-    // Biến lưu trạng thái bật tắt (để sau này bạn kết nối vào Sound/Music Manager của game)
-    private boolean isMasterOn = true;
-    private boolean isSfxOn = true;
-    private boolean isMusicOn = true;
 
     public SettingsScreen(AgentDungGame game) {
         this.game = game;
@@ -69,16 +65,14 @@ public class SettingsScreen extends ScreenAdapter {
         TextureRegionDrawable musicOff = new TextureRegionDrawable(new TextureRegion(musicOffTexture));
 
         // Khởi tạo ImageButton với cấu trúc: ImageButton(ImageUp, ImageDown, ImageChecked)
-        // Khi nút được "Check" (Tắt), nó sẽ tự động hiển thị ảnh SoundOff/MusicOff
         final ImageButton masterButton = new ImageButton(soundOn, soundOn, soundOff);
         final ImageButton sfxButton = new ImageButton(soundOn, soundOn, soundOff);
         final ImageButton musicButton = new ImageButton(musicOn, musicOn, musicOff);
 
-        // Đặt trạng thái ban đầu cho các nút bấm dựa theo biến cấu hình hệ thống
-        masterButton.setChecked(!isMasterOn);
-        sfxButton.setChecked(!isSfxOn);
-        musicButton.setChecked(!isMusicOn);
-
+        // --- ĐÃ KẾT NỐI: Đặt trạng thái ban đầu dựa theo biến cấu hình hệ thống lưu trong lớp Game ---
+        masterButton.setChecked(!game.isMasterOn);
+        sfxButton.setChecked(!game.isSfxOn);
+        musicButton.setChecked(!game.isMusicOn);
 
         float bigbtn = 85f;
         float btnSize = 60f;
@@ -89,26 +83,29 @@ public class SettingsScreen extends ScreenAdapter {
         // --- ĐỊNH VỊ VỊ TRÍ THỦ CÔNG ĐỂ KHỚP VỚI HÌNH NỀN --
 
         // 1. Định vị nút Master
-        float masterX = Gdx.graphics.getWidth() * 0.30f; // Chỉnh con số này để dịch trái/phải nút Master
-        float masterY = Gdx.graphics.getHeight() * 0.53f; // Chỉnh con số này để dịch lên/xuống nút Master
+        float masterX = Gdx.graphics.getWidth() * 0.30f;
+        float masterY = Gdx.graphics.getHeight() * 0.53f;
         masterButton.setPosition(masterX, masterY);
 
         // 2. Định vị nút SFX
-        float sfxX = Gdx.graphics.getWidth() * 0.42f;    // Chỉnh con số này để dịch trái/phải nút SFX
-        float sfxY = Gdx.graphics.getHeight() * 0.31f;   // Chỉnh con số này để dịch lên/xuống nút SFX
+        float sfxX = Gdx.graphics.getWidth() * 0.42f;
+        float sfxY = Gdx.graphics.getHeight() * 0.31f;
         sfxButton.setPosition(sfxX, sfxY);
 
         // 3. Định vị nút Music
-        float musicX = Gdx.graphics.getWidth() * 0.42f;  // Chỉnh con số này để dịch trái/phải nút Music
-        float musicY = Gdx.graphics.getHeight() * 0.10f;  // Chỉnh con số này để dịch lên/xuống nút Music
+        float musicX = Gdx.graphics.getWidth() * 0.42f;
+        float musicY = Gdx.graphics.getHeight() * 0.10f;
         musicButton.setPosition(musicX, musicY);
 
-        // --- GẮN SỰ KIỆN CLICK VÀ LOGIC BẬT/TẮT ---
+        // --- GẮN SỰ KIỆN CLICK VÀ LOGIC BẬT/TẮT VẬT LÝ ---
 
         backButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (game.clickSound != null) game.clickSound.play();
+                // Chỉ phát tiếng click nếu SFX và Master đang bật
+                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) {
+                    game.clickSound.play();
+                }
                 game.setScreen(new MenuScreen(game));
             }
         });
@@ -116,30 +113,50 @@ public class SettingsScreen extends ScreenAdapter {
         masterButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (game.clickSound != null) game.clickSound.play();
-                isMasterOn = !masterButton.isChecked();
-                System.out.println("Trạng thái Master Audio: " + (isMasterOn ? "BẬT" : "TẮT"));
-                // Thêm logic tắt/mở âm thanh tổng của game tại đây
+                // Cập nhật trạng thái vào Core Game
+                game.isMasterOn = !masterButton.isChecked();
+
+                // Thực hiện thay đổi vật lý cho Music và SFX tổng
+                game.updateMusicState();
+                game.updateSfxState();
+
+                // Chỉ phát tiếng click phản hồi nếu Master vừa được BẬT lên
+                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) {
+                    game.clickSound.play();
+                }
+                System.out.println("Trạng thái Master Audio chạy thật: " + (game.isMasterOn ? "BẬT" : "TẮT"));
             }
         });
 
         sfxButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (game.clickSound != null) game.clickSound.play();
-                isSfxOn = !sfxButton.isChecked();
-                System.out.println("Trạng thái SFX (Hiệu ứng): " + (isSfxOn ? "BẬT" : "TẮT"));
-                // Thêm logic tắt/mở tiếng bước chân, tiếng súng... tại đây
+                // Cập nhật trạng thái vào Core Game
+                game.isSfxOn = !sfxButton.isChecked();
+
+                // Áp dụng thay đổi (ví dụ dừng âm thanh loop nếu vừa tắt SFX)
+                game.updateSfxState();
+
+                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) {
+                    game.clickSound.play();
+                }
+                System.out.println("Trạng thái SFX chạy thật: " + (game.isSfxOn ? "BẬT" : "TẮT"));
             }
         });
 
         musicButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (game.clickSound != null) game.clickSound.play();
-                isMusicOn = !musicButton.isChecked();
-                System.out.println("Trạng thái Music (Nhạc nền): " + (isMusicOn ? "BẬT" : "TẮT"));
-                // Thêm logic dừng/phát nhạc nền game tại đây
+                // Cập nhật trạng thái vào Core Game
+                game.isMusicOn = !musicButton.isChecked();
+
+                // Thực hiện pause/play nhạc nền ngay lập tức
+                game.updateMusicState();
+
+                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) {
+                    game.clickSound.play();
+                }
+                System.out.println("Trạng thái Music chạy thật: " + (game.isMusicOn ? "BẬT" : "TẮT"));
             }
         });
 

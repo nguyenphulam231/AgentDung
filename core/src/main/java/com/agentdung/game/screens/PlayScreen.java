@@ -56,6 +56,9 @@ public class PlayScreen extends ScreenAdapter {
     }
 
     private void initLevel(int level) {
+        // --- CẬP NHẬT: Dừng toàn bộ âm thanh đang lặp (như tiếng đái) trước khi nạp lại map/level ---
+        InputHandler.stopLoopingSounds(this.game);
+
         if (skills != null) {
             for (Skill s : skills) {
                 if (s instanceof VomitSkill) ((VomitSkill) s).dispose();
@@ -195,7 +198,8 @@ public class PlayScreen extends ScreenAdapter {
             door.update(delta, dist < 60f, hasKey);
         }
 
-        InputHandler.handleSkillInput(dung, skills, entityManager);
+        // --- CẬP NHẬT: Truyền thêm tham số this.game vào để InputHandler xử lý âm thanh kỹ năng ---
+        InputHandler.handleSkillInput(dung, skills, entityManager, this.game);
 
         // Gọi EntityManager cập nhật thực thể sống kèm hàm callback nếu bị lính bắt
         entityManager.update(delta, dung, mapManager, () -> initLevel(currentLevel));
@@ -235,6 +239,9 @@ public class PlayScreen extends ScreenAdapter {
 
     @Override
     public void dispose() {
+        // --- CẬP NHẬT: Chủ động ngắt toàn bộ âm thanh kỹ năng đang lặp khi rời màn hình chơi ---
+        InputHandler.stopLoopingSounds(this.game);
+
         mapManager.dispose();
         entityManager.dispose();
         lightRenderer.dispose();
