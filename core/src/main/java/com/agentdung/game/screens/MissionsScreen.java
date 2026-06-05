@@ -87,9 +87,6 @@ public class MissionsScreen extends ScreenAdapter {
             int completed = game.completedLevelsReal[i];
             int total = game.totalLevelsReal[i];
 
-            // Xác định level tiếp theo người chơi cần vào đá (Không vượt quá tổng số level)
-            final int nextLevelToPlay = (completed < total) ? (completed + 1) : 1;
-
             Stack mapStack = new Stack();
 
             // LỚP 1 (DƯỚI CÙNG): Thanh maptag nền thực tế co giãn bằng NinePatch
@@ -110,9 +107,9 @@ public class MissionsScreen extends ScreenAdapter {
                 public void clicked(InputEvent event, float x, float y) {
                     if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
 
-                    // --- ĐẤU NỐI THỰC TẾ: Vào đúng Map và Level tiếp theo cần chơi ---
-                    System.out.println("Vào chơi thực tế: Map " + mapIndex + " - Level " + nextLevelToPlay);
-                    game.setScreen(new PlayScreen(game, mapIndex, nextLevelToPlay));
+                    // --- ĐÃ ĐẤU NỐI CHẠY THẬT: Thay vì vào thẳng PlayScreen, dẫn sang ProgressScreen của Map này ---
+                    System.out.println("Chuyển hướng đến màn hình Progress: Map " + mapIndex);
+                    game.setScreen(new ProgressScreen(game, mapIndex));
                 }
             });
 
