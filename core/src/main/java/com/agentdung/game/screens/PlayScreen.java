@@ -215,12 +215,10 @@ public class PlayScreen extends ScreenAdapter {
         InputHandler.handleSkillInput(dung, skills, entityManager, this.game);
 
         // Gọi EntityManager cập nhật thực thể sống kèm hàm callback nếu bị lính bắt
-        //entityManager.update(delta, dung, mapManager, () -> initLevel(currentLevel));
         // SỬA TẠM THỜI: Đổi hàm gọi lại thành rỗng để lính bắt không bị reset màn
         entityManager.update(delta, dung, mapManager, () -> {
             // Không làm gì cả, tha cho Agent Dũng test map
         });
-
 
         // Camera theo dõi nhân vật mượt mà
         camera.position.x = MathUtils.clamp(dung.getPosition().x + dung.getSize() / 2, camera.viewportWidth / 2, mapManager.mapWidth - camera.viewportWidth / 2);
@@ -234,15 +232,8 @@ public class PlayScreen extends ScreenAdapter {
                 game.completedLevelsReal[currentWorld - 1] = currentLevel;
             }
 
-            // Kiểm tra xem Map này còn level tiếp theo trong assets không
-            if (currentLevel < game.totalLevelsReal[currentWorld - 1]) {
-                currentLevel++;
-                initLevel(currentLevel);
-            } else {
-                // Đã phá đảo toàn bộ level của map hiện tại -> Trả người chơi về màn hình chọn thế giới
-                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
-                game.setScreen(new MissionsScreen(game));
-            }
+            // --- ĐÃ CẬP NHẬT: Thay vì tăng level ngay lập tức, chuyển hướng sang giao diện kết quả LevelDoneScreen ---
+            game.setScreen(new LevelDoneScreen(game, currentWorld, currentLevel));
         }
 
         // Vòng lặp cập nhật các kỹ năng
