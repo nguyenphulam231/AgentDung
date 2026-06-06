@@ -3,12 +3,15 @@ package com.agentdung.game.screens;
 import com.agentdung.game.core.AgentDungGame;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -21,18 +24,21 @@ public class CustomizeScreen extends ScreenAdapter {
     private final AgentDungGame game;
     private Stage stage;
     private Texture bgTexture;
-    private Texture slotBgTexture; // Texture làm nền ô vuông bo góc
-    private Texture backButtonTexture; // Thêm Texture cho nút quay lại
+    private Texture slotBgTexture;
+    private Texture backButtonTexture;
+
+    private Label selectionLabel;
+    private BitmapFont font;
 
     public static class CharacterData {
         public String name;
         public int id;
-        public int variantCount;
+        public String[] variants; // Mảng lưu tên biến thể riêng biệt của từng nhân vật
 
-        public CharacterData(String name, int id, int variantCount) {
+        public CharacterData(String name, int id, String[] variants) {
             this.name = name;
             this.id = id;
-            this.variantCount = variantCount;
+            this.variants = variants;
         }
     }
 
@@ -47,12 +53,25 @@ public class CustomizeScreen extends ScreenAdapter {
 
     private void initCharacterData() {
         characterList = new Array<>();
-        characterList.add(new CharacterData("Agent Dũng", 1, 5));
-        characterList.add(new CharacterData("Shadow Agent", 2, 5));
-        characterList.add(new CharacterData("Cyber Soldier", 3, 5));
-        characterList.add(new CharacterData("Ghost Fighter", 4, 5));
-        characterList.add(new CharacterData("Medic Agent", 5, 5));
-        characterList.add(new CharacterData("Heavy Gunner", 6, 5));
+
+        // --- ĐỊNH NGHĨA TÊN BIẾN THỂ RIÊNG BIỆT CHO TỪNG NHÂN VẬT THEO ĐÚNG Ý BẠN ---
+        characterList.add(new CharacterData("Agent Dung", 1,
+            new String[]{"Classic", "Snow", "Desert", "Stealth", "VIP"}));
+
+        characterList.add(new CharacterData("Shadow Agent", 2,
+            new String[]{"Ninja", "Assassin", "Ghost", "Midnight", "Eclipse"}));
+
+        characterList.add(new CharacterData("Cyber Soldier", 3,
+            new String[]{"Matrix", "Neon", "Mecha", "Quantum", "Overdrive"}));
+
+        characterList.add(new CharacterData("Ghost Fighter", 4,
+            new String[]{"Phantom", "Specter", "Wraith", "Haunted", "Spirit"}));
+
+        characterList.add(new CharacterData("Medic Agent", 5,
+            new String[]{"Doctor", "Biohazard", "Vaccine", "Nanotech", "FirstAid"}));
+
+        characterList.add(new CharacterData("Heavy Gunner", 6,
+            new String[]{"Commando", "Juggernaut", "Doomsday", "Wasteland", "Vulcan"}));
     }
 
     @Override
@@ -60,22 +79,28 @@ public class CustomizeScreen extends ScreenAdapter {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
+        // --- CẤU HÌNH FONT CHỮ CHUẨN ĐỒ HỌA PIXEL ART SẮC NÉT ---
+        font = new BitmapFont();
+        font.getData().setScale(1.8f); // Phóng to font chữ lên một chút cho rõ ràng
+
+        // Mẹo LibGDX: Bật vẽ tọa độ nguyên (Integer) giúp font chữ vuông vức, không bị mờ nhòe răng cưa pixel
+        font.setUseIntegerPositions(true);
+        font.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+
         // 1. Load Background Frame cho Customize
         bgTexture = new Texture(Gdx.files.internal("ui/UI_frame_customize.png"));
         Image background = new Image(bgTexture);
         background.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         stage.addActor(background);
 
-        // Load ảnh ô vuông bo góc dùng chung cho tất cả các nút slot
         slotBgTexture = new Texture(Gdx.files.internal("ui/UI_slot_background.png"));
         slotBgTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
-        // --- THÊM NÚT QUAY LẠI (BACK BUTTON) Ở GÓC TRÁI TRÊN ---
+        // --- NÚT QUAY LẠI ---
         backButtonTexture = new Texture(Gdx.files.internal("ui/UI_arrow_left.png"));
         backButtonTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
         TextureRegionDrawable backDrawable = new TextureRegionDrawable(new TextureRegion(backButtonTexture));
-        // Đặt kích thước hiển thị cho nút quay lại (Ví dụ: 50x50 pixel)
         backDrawable.setMinWidth(50f);
         backDrawable.setMinHeight(50f);
 
@@ -83,76 +108,71 @@ public class CustomizeScreen extends ScreenAdapter {
         backButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (game.clickSound != null) game.clickSound.play();
-                // Chuyển màn hình về lại MenuScreen
+                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
                 game.setScreen(new MenuScreen(game));
             }
         });
 
-        // Tạo bảng riêng cho nút Back để neo nó cố định ở góc trên bên trái màn hình
         Table topLeftTable = new Table();
         topLeftTable.setFillParent(true);
         topLeftTable.top().left();
-        // Tạo khoảng cách (padding) so với mép rìa màn hình cho đẹp mắt
         topLeftTable.add(backButton).padTop(15f).padLeft(15f);
         stage.addActor(topLeftTable);
-        // -----------------------------------------------------
 
-        // 2. Tạo Table chứa danh sách cuộn
+        // 2. Tạo Table chứa danh sách cuộn nhân vật
         Table scrollTable = new Table();
         scrollTable.top().left();
 
-        // Định nghĩa kích thước ô vuông bo góc chứa nhân vật (Ví dụ: 70x70)
         float slotSize = 70f;
 
         for (CharacterData character : characterList) {
             Table rowTable = new Table();
             rowTable.left();
 
-            for (int v = 1; v <= character.variantCount; v++) {
-                String fileName = "thumbnails/thumbnail_player_" + character.id + "_" + v + ".png";
+            for (int i = 0; i < character.variants.length; i++) {
+                final int variantId = i + 1;
+                final String variantName = character.variants[i]; // Lấy chuẩn tên biến thể riêng biệt của nhân vật này
+
+                String fileName = "thumbnails/thumbnail_player_" + character.id + "_" + variantId + ".png";
 
                 try {
                     Texture slotTex = new Texture(Gdx.files.internal(fileName));
                     slotTex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
                     loadedTextures.add(slotTex);
 
-                    // Tạo nền ô vuông bo góc cho nút bấm
                     TextureRegionDrawable baseStyle = new TextureRegionDrawable(new TextureRegion(slotBgTexture));
                     baseStyle.setMinWidth(slotSize);
                     baseStyle.setMinHeight(slotSize);
 
-                    // Tạo ảnh nhân vật đè lên trên ô vuông
                     TextureRegionDrawable characterIcon = new TextureRegionDrawable(new TextureRegion(slotTex));
-
-                    // Ép kích thước hiển thị vật lý cho ảnh nhân vật to lên
                     float targetCharSize = 60f;
                     characterIcon.setMinWidth(targetCharSize);
                     characterIcon.setMinHeight(targetCharSize);
 
-                    // Khởi tạo ImageButtonStyle để lồng ảnh nhân vật nằm TRÊN nền ô vuông bo góc
                     ImageButton.ImageButtonStyle buttonStyle = new ImageButton.ImageButtonStyle();
-                    buttonStyle.up = baseStyle;           // Ảnh nền ô vuông trạng thái bình thường
-                    buttonStyle.imageUp = characterIcon;  // Ảnh nhân vật nằm đè lên trên
+                    buttonStyle.up = baseStyle;
+                    buttonStyle.imageUp = characterIcon;
 
                     ImageButton variantBtn = new ImageButton(buttonStyle);
 
+                    final String charName = character.name;
                     final int charId = character.id;
-                    final int variantId = v;
+
                     variantBtn.addListener(new ClickListener() {
                         @Override
                         public void clicked(InputEvent event, float x, float y) {
-                            if (game.clickSound != null) game.clickSound.play();
+                            if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
 
-                            // --- CẬP NHẬT TRỰC TIẾP LOGIC LỰA CHỌN VÀO GAME CORE ---
                             game.selectedCharacterId = charId;
                             game.selectedVariantId = variantId;
 
-                            System.out.println("Đã chọn và lưu nhân vật ID: " + game.selectedCharacterId + " - Biến thể: " + game.selectedVariantId);
+                            // Cập nhật text hiển thị chuẩn format mong muốn
+                            selectionLabel.setText(charName + " - " + variantName);
+
+                            System.out.println("Đã chọn: " + charName + " - Biến thể: " + variantName);
                         }
                     });
 
-                    // Thêm ô vuông vào hàng ngang
                     rowTable.add(variantBtn).size(slotSize).padRight(15f);
 
                 } catch (Exception e) {
@@ -160,26 +180,32 @@ public class CustomizeScreen extends ScreenAdapter {
                 }
             }
 
-            // Ép cái cell chứa hàng này phải tự động dạt về lề TRÁI (.left()) của bảng cuộn chính
             scrollTable.add(rowTable).padBottom(20f).left();
             scrollTable.row();
         }
 
-        // 3. Bọc bảng vào vùng cuộn dọc
+        // 3. Bọc bảng vào vùng cuộn dọc (Chiều cao thu gọn 260f)
         ScrollPane scrollPane = new ScrollPane(scrollTable);
         scrollPane.setScrollingDisabled(true, false);
         scrollPane.setFadeScrollBars(false);
 
-        // 4. Định vị Table chính chứa ScrollPane nằm DƯỚI chữ Customize
+        // 4. Khởi tạo Label hiển thị thông tin chữ (ĐÃ ĐỔI SANG MÀU XANH LÁ - Color.GREEN)
+        Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.GREEN);
+
+        // Lấy tên mặc định ban đầu của Agent Dung và biến thể thứ nhất
+        selectionLabel = new Label(characterList.get(0).name + " - " + characterList.get(0).variants[0], labelStyle);
+        selectionLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
+
+        // 5. Định vị Table chính
         Table mainTable = new Table();
         mainTable.setFillParent(true);
-
-        // Đẩy Table lên trên cùng trước, sau đó dùng padTop để hạ xuống đúng vị trí mong muốn
         mainTable.top();
 
-        // Lệnh này đảm bảo bản thân cái "Panel mặt nạ ảo" rộng 450px sẽ nằm chình ình giữa màn hình,
-        // trong khi ruột bên trong nó đã được cấu hình dạt trái hoàn toàn ở trên!
-        mainTable.add(scrollPane).size(450f, 350f).padTop(110f).center();
+        mainTable.add(scrollPane).size(450f, 260f).padTop(110f).center();
+        mainTable.row();
+
+        // Đẩy dòng chữ màu xanh lá nằm gọn ngay dưới bảng cuộn
+        mainTable.add(selectionLabel).padTop(25f).center();
 
         stage.addActor(mainTable);
     }
@@ -206,7 +232,8 @@ public class CustomizeScreen extends ScreenAdapter {
         if (stage != null) stage.dispose();
         if (bgTexture != null) bgTexture.dispose();
         if (slotBgTexture != null) slotBgTexture.dispose();
-        if (backButtonTexture != null) backButtonTexture.dispose(); // Giải phóng Texture nút quay lại
+        if (backButtonTexture != null) backButtonTexture.dispose();
+        if (font != null) font.dispose();
 
         for (Texture tex : loadedTextures) {
             if (tex != null) tex.dispose();
