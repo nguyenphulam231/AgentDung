@@ -65,7 +65,6 @@ public class MapManager {
             Rectangle rect = ((RectangleMapObject) obj).getRectangle();
             walls.add(new Wall(rect.x, rect.y, rect.width, rect.height));
             wallRects.add(rect);
-            System.out.println("Tong so item doc duoc tu map: " + items.size);
         }
 
         // Đọc thực thể tĩnh
@@ -102,7 +101,7 @@ public class MapManager {
     }
 
     public void renderShapes(ShapeRenderer shapeRenderer) {
-        if (targetServer != null) targetServer.render(shapeRenderer);
+        // --- ĐÃ CẬP NHẬT: Xóa bỏ dòng targetServer.render cũ để không vẽ khối màu xám đè lên ảnh nữa ---
         for (Door door : doors) door.render(shapeRenderer);
     }
 
@@ -127,6 +126,11 @@ public class MapManager {
         if (meatTexture != null) meatTexture.dispose();
         if (waterTexture != null) waterTexture.dispose();
 
+        // --- THÊM: Giải phóng bộ nhớ kết cấu hình ảnh server.png ---
+        if (targetServer != null) {
+            targetServer.dispose();
+        }
+
         walls.clear();
         wallRects.clear();
         doors.clear();
@@ -134,7 +138,5 @@ public class MapManager {
         items.clear(); // Dọn dẹp danh sách vật phẩm khi đổi màn
         enemyStarts.clear();
         enemyEnds.clear();
-
     }
-
 }

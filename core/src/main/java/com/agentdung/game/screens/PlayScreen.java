@@ -107,6 +107,12 @@ public class PlayScreen extends ScreenAdapter {
         game.shapeRenderer.setProjectionMatrix(camera.combined);
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         mapManager.renderShapes(game.shapeRenderer);
+
+        // --- CẬP NHẬT: Vẽ thanh máu của Server bằng ShapeRenderer lên trên màn chơi ---
+        if (mapManager.targetServer != null) {
+            mapManager.targetServer.renderHpBar(game.shapeRenderer);
+        }
+
         entityManager.renderShapes(game.shapeRenderer);
         game.shapeRenderer.end();
 
@@ -116,6 +122,12 @@ public class PlayScreen extends ScreenAdapter {
         dung.draw(game.batch);
         for (com.agentdung.game.entities.Enemy e : entityManager.enemies) e.draw(game.batch);
         mapManager.renderSprites(game.batch);
+
+        // --- CẬP NHẬT: Vẽ hình ảnh ảnh kết cấu kết cấu server.png ---
+        if (mapManager.targetServer != null) {
+            mapManager.targetServer.renderSprite(game.batch);
+        }
+
         entityManager.renderSprites(game.batch, skills);
         game.batch.end();
 
@@ -203,7 +215,12 @@ public class PlayScreen extends ScreenAdapter {
         InputHandler.handleSkillInput(dung, skills, entityManager, this.game);
 
         // Gọi EntityManager cập nhật thực thể sống kèm hàm callback nếu bị lính bắt
-        entityManager.update(delta, dung, mapManager, () -> initLevel(currentLevel));
+        //entityManager.update(delta, dung, mapManager, () -> initLevel(currentLevel));
+        // SỬA TẠM THỜI: Đổi hàm gọi lại thành rỗng để lính bắt không bị reset màn
+        entityManager.update(delta, dung, mapManager, () -> {
+            // Không làm gì cả, tha cho Agent Dũng test map
+        });
+
 
         // Camera theo dõi nhân vật mượt mà
         camera.position.x = MathUtils.clamp(dung.getPosition().x + dung.getSize() / 2, camera.viewportWidth / 2, mapManager.mapWidth - camera.viewportWidth / 2);
