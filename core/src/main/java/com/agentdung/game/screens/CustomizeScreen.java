@@ -26,6 +26,7 @@ public class CustomizeScreen extends ScreenAdapter {
     private Texture bgTexture;
     private Texture slotBgTexture;
     private Texture backButtonTexture;
+    private Texture titleTexture; // Thêm biến lưu Texture tiêu đề chữ Customize
 
     private Label selectionLabel;
     private BitmapFont font;
@@ -33,7 +34,7 @@ public class CustomizeScreen extends ScreenAdapter {
     public static class CharacterData {
         public String name;
         public int id;
-        public String[] variants; // Mảng lưu tên biến thể riêng biệt của từng nhân vật
+        public String[] variants;
 
         public CharacterData(String name, int id, String[] variants) {
             this.name = name;
@@ -54,7 +55,6 @@ public class CustomizeScreen extends ScreenAdapter {
     private void initCharacterData() {
         characterList = new Array<>();
 
-        // --- ĐỊNH NGHĨA TÊN BIẾN THỂ RIÊNG BIỆT CHO TỪNG NHÂN VẬT ---
         characterList.add(new CharacterData("Agent Dung", 1,
             new String[]{"Classic", "Snow", "Desert", "Stealth", "VIP"}));
 
@@ -81,20 +81,24 @@ public class CustomizeScreen extends ScreenAdapter {
 
         // --- CẤU HÌNH FONT CHỮ ---
         font = new BitmapFont();
-        font.getData().setScale(1.8f); // Phóng to font chữ
-
-        // Bật vẽ tọa độ nguyên (Integer) giúp font chữ vuông vức, không bị mờ nhòe răng cưa pixel
+        font.getData().setScale(1.8f);
         font.setUseIntegerPositions(true);
         font.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
-        // 1. Load Background Frame cho Customize
-        bgTexture = new Texture(Gdx.files.internal("ui/UI_frame_customize.png"));
+        // 1. Đổi sang nền UI_frame_general chuẩn theo yêu cầu của bạn
+        bgTexture = new Texture(Gdx.files.internal("ui/UI_frame_general.png"));
         Image background = new Image(bgTexture);
         background.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         stage.addActor(background);
 
         slotBgTexture = new Texture(Gdx.files.internal("ui/UI_slot_background.png"));
         slotBgTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+
+        // --- NẠP ẢNH TIÊU ĐỀ "CUSTOMIZE" ---
+        titleTexture = new Texture(Gdx.files.internal("ui/UI_title_customize.png"));
+        titleTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        Image titleImage = new Image(titleTexture);
+
 
         // --- NÚT QUAY LẠI ---
         backButtonTexture = new Texture(Gdx.files.internal("ui/UI_arrow_left.png"));
@@ -119,7 +123,7 @@ public class CustomizeScreen extends ScreenAdapter {
         topLeftTable.add(backButton).padTop(15f).padLeft(15f);
         stage.addActor(topLeftTable);
 
-        //Tạo Table chứa danh sách cuộn nhân vật
+        // 2. Tạo Table chứa danh sách cuộn nhân vật
         Table scrollTable = new Table();
         scrollTable.top().left();
 
@@ -131,7 +135,7 @@ public class CustomizeScreen extends ScreenAdapter {
 
             for (int i = 0; i < character.variants.length; i++) {
                 final int variantId = i + 1;
-                final String variantName = character.variants[i]; // Lấy chuẩn tên biến thể riêng biệt của nhân vật
+                final String variantName = character.variants[i];
 
                 String fileName = "thumbnails/thumbnail_player_" + character.id + "_" + variantId + ".png";
 
@@ -188,20 +192,25 @@ public class CustomizeScreen extends ScreenAdapter {
         scrollPane.setScrollingDisabled(true, false);
         scrollPane.setFadeScrollBars(false);
 
-        // 4. Khởi tạo Label hiển thị thông tin chữ
+        // 4. Khởi tạo Label hiển thị thông tin chữ (Xanh lá)
         Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.GREEN);
-
         selectionLabel = new Label(characterList.get(0).name + " - " + characterList.get(0).variants[0], labelStyle);
         selectionLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
 
-        // Định vị Table chính
+        // 5. Cấu trúc lại Table chính để xếp từ trên xuống: Tiêu đề -> Vùng cuộn -> Chữ thông tin nhân vật
         Table mainTable = new Table();
         mainTable.setFillParent(true);
         mainTable.top();
 
-        mainTable.add(scrollPane).size(450f, 260f).padTop(110f).center();
+        // Thêm ảnh chữ tiêu đề lên trên cùng, bạn có thể chỉnh padTop/padBottom để đẩy tiêu đề lên xuống cho vừa vặn
+        mainTable.add(titleImage).size(420f, 90f).padTop(60f).padBottom(15f).center();
         mainTable.row();
 
+        // Đưa vùng cuộn ScrollPane xuống ngay dưới ảnh tiêu đề (hạ padTop xuống để không bị đẩy quá sâu)
+        mainTable.add(scrollPane).size(450f, 260f).center();
+        mainTable.row();
+
+        // Đặt Label hiển thị tên nhân vật dưới cùng
         mainTable.add(selectionLabel).padTop(25f).center();
 
         stage.addActor(mainTable);
@@ -230,6 +239,7 @@ public class CustomizeScreen extends ScreenAdapter {
         if (bgTexture != null) bgTexture.dispose();
         if (slotBgTexture != null) slotBgTexture.dispose();
         if (backButtonTexture != null) backButtonTexture.dispose();
+        if (titleTexture != null) titleTexture.dispose(); // Giải phóng bộ nhớ của ảnh tiêu đề
         if (font != null) font.dispose();
 
         for (Texture tex : loadedTextures) {

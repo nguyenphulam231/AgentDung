@@ -25,6 +25,7 @@ public class LevelDoneScreen extends ScreenAdapter {
     private Texture btnNextTexture;
     private Texture btnProgressTexture;
     private Texture btnMainTexture;
+    private Texture titleTexture; // Thêm biến lưu Texture tiêu đề chữ Level Done
 
     public LevelDoneScreen(AgentDungGame game, int world, int level) {
         this.game = game;
@@ -37,25 +38,32 @@ public class LevelDoneScreen extends ScreenAdapter {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
-        // 1. Nạp ảnh từ assets (Đã sửa chuẩn 100% cú pháp LibGDX)
-        bgTexture = new Texture(Gdx.files.internal("ui/UI_frame_leveldone.png"));
+        // 1. Cập nhật nền thành UI_frame_general tràn màn hình đồng bộ với các menu khác
+        bgTexture = new Texture(Gdx.files.internal("ui/UI_frame_general.png"));
+        Image background = new Image(bgTexture);
+        background.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        stage.addActor(background);
+
+        // --- NẠP ẢNH TIÊU ĐỀ "LEVEL DONE" ---
+        titleTexture = new Texture(Gdx.files.internal("ui/UI_title_leveldone.png"));
+        titleTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        Image titleImage = new Image(titleTexture);
+        // Bạn có thể chỉnh kích thước tiêu đề tại đây nếu cần thiết, ví dụ:
+        // titleImage.setSize(220f, 50f);
+
+        // Nạp ảnh các nút bấm từ assets
         btnNextTexture = new Texture(Gdx.files.internal("ui/UI_button_nextlevel.png"));
         btnProgressTexture = new Texture(Gdx.files.internal("ui/UI_button_progressmenu.png"));
         btnMainTexture = new Texture(Gdx.files.internal("ui/UI_button_mainmenu.png"));
 
-        // Khử mờ cho Pixel Art giống MenuScreen của bạn
+        // Khử mờ cho Pixel Art
         bgTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         btnNextTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         btnProgressTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         btnMainTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
-        // 2. Làm ảnh nền full toàn màn hình y chang các menu khác
-        Image background = new Image(bgTexture);
-        background.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        stage.addActor(background);
-
-        // 3. Ép size cố định cho ảnh nút từ Drawable gốc giống MenuScreen của bạn (Dễ căn chỉnh, không lo mờ/bé)
-        float targetBtnWidth =360f;
+        // 3. Ép size cố định cho ảnh nút từ Drawable gốc (Giữ nguyên kích thước 360x50 của bạn)
+        float targetBtnWidth = 360f;
         float targetBtnHeight = 50f;
 
         TextureRegionDrawable nextDrawable = new TextureRegionDrawable(new TextureRegion(btnNextTexture));
@@ -102,18 +110,23 @@ public class LevelDoneScreen extends ScreenAdapter {
             }
         });
 
-        // 5. Một Table duy nhất căn giữa màn hình để xếp 3 nút từ trên xuống dưới
-        Table table = new Table();
-        table.setFillParent(true);
-        table.center();
+        // 5. Cấu trúc lại Table chính để xếp dọc từ trên xuống: Tiêu đề -> Các nút bấm
+        Table mainTable = new Table();
+        mainTable.setFillParent(true);
+        mainTable.top(); // Neo từ đỉnh xuống để đồng bộ khoảng cách với các màn hình khác
 
-        table.add(nextButton).padBottom(20f); // Giãn cách nút 20px
-        table.row();
-        table.add(progressButton).padBottom(20f);
-        table.row();
-        table.add(mainButton);
+        // Thêm tiêu đề chữ "Level Done" lên hàng đầu
+        mainTable.add(titleImage).size(420f, 90f).padTop(60f).padBottom(25f).center();
+        mainTable.row();
 
-        stage.addActor(table);
+        // Xếp lần lượt các nút thanh ngang nằm ngay dưới tiêu đề
+        mainTable.add(nextButton).padBottom(20f);
+        mainTable.row();
+        mainTable.add(progressButton).padBottom(20f);
+        mainTable.row();
+        mainTable.add(mainButton);
+
+        stage.addActor(mainTable);
     }
 
     @Override
@@ -140,5 +153,6 @@ public class LevelDoneScreen extends ScreenAdapter {
         if (btnNextTexture != null) btnNextTexture.dispose();
         if (btnProgressTexture != null) btnProgressTexture.dispose();
         if (btnMainTexture != null) btnMainTexture.dispose();
+        if (titleTexture != null) titleTexture.dispose(); // Giải phóng Texture tiêu đề tránh rò rỉ bộ nhớ
     }
 }
