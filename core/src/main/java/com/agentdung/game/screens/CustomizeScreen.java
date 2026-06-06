@@ -54,7 +54,7 @@ public class CustomizeScreen extends ScreenAdapter {
     private void initCharacterData() {
         characterList = new Array<>();
 
-        // --- ĐỊNH NGHĨA TÊN BIẾN THỂ RIÊNG BIỆT CHO TỪNG NHÂN VẬT THEO ĐÚNG Ý BẠN ---
+        // --- ĐỊNH NGHĨA TÊN BIẾN THỂ RIÊNG BIỆT CHO TỪNG NHÂN VẬT ---
         characterList.add(new CharacterData("Agent Dung", 1,
             new String[]{"Classic", "Snow", "Desert", "Stealth", "VIP"}));
 
@@ -79,11 +79,11 @@ public class CustomizeScreen extends ScreenAdapter {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
-        // --- CẤU HÌNH FONT CHỮ CHUẨN ĐỒ HỌA PIXEL ART SẮC NÉT ---
+        // --- CẤU HÌNH FONT CHỮ ---
         font = new BitmapFont();
-        font.getData().setScale(1.8f); // Phóng to font chữ lên một chút cho rõ ràng
+        font.getData().setScale(1.8f); // Phóng to font chữ
 
-        // Mẹo LibGDX: Bật vẽ tọa độ nguyên (Integer) giúp font chữ vuông vức, không bị mờ nhòe răng cưa pixel
+        // Bật vẽ tọa độ nguyên (Integer) giúp font chữ vuông vức, không bị mờ nhòe răng cưa pixel
         font.setUseIntegerPositions(true);
         font.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
@@ -119,7 +119,7 @@ public class CustomizeScreen extends ScreenAdapter {
         topLeftTable.add(backButton).padTop(15f).padLeft(15f);
         stage.addActor(topLeftTable);
 
-        // 2. Tạo Table chứa danh sách cuộn nhân vật
+        //Tạo Table chứa danh sách cuộn nhân vật
         Table scrollTable = new Table();
         scrollTable.top().left();
 
@@ -131,7 +131,7 @@ public class CustomizeScreen extends ScreenAdapter {
 
             for (int i = 0; i < character.variants.length; i++) {
                 final int variantId = i + 1;
-                final String variantName = character.variants[i]; // Lấy chuẩn tên biến thể riêng biệt của nhân vật này
+                final String variantName = character.variants[i]; // Lấy chuẩn tên biến thể riêng biệt của nhân vật
 
                 String fileName = "thumbnails/thumbnail_player_" + character.id + "_" + variantId + ".png";
 
@@ -166,17 +166,16 @@ public class CustomizeScreen extends ScreenAdapter {
                             game.selectedCharacterId = charId;
                             game.selectedVariantId = variantId;
 
-                            // Cập nhật text hiển thị chuẩn format mong muốn
                             selectionLabel.setText(charName + " - " + variantName);
 
-                            System.out.println("Đã chọn: " + charName + " - Biến thể: " + variantName);
+                            System.out.println("Character: " + charName + " - Variant: " + variantName);
                         }
                     });
 
                     rowTable.add(variantBtn).size(slotSize).padRight(15f);
 
                 } catch (Exception e) {
-                    Gdx.app.error("CustomizeScreen", "Không tìm thấy file ảnh: " + fileName);
+                    Gdx.app.error("CustomizeScreen", "Cannot find png file: " + fileName);
                 }
             }
 
@@ -184,19 +183,18 @@ public class CustomizeScreen extends ScreenAdapter {
             scrollTable.row();
         }
 
-        // 3. Bọc bảng vào vùng cuộn dọc (Chiều cao thu gọn 260f)
+        // 3. Bọc bảng vào vùng cuộn
         ScrollPane scrollPane = new ScrollPane(scrollTable);
         scrollPane.setScrollingDisabled(true, false);
         scrollPane.setFadeScrollBars(false);
 
-        // 4. Khởi tạo Label hiển thị thông tin chữ (ĐÃ ĐỔI SANG MÀU XANH LÁ - Color.GREEN)
+        // 4. Khởi tạo Label hiển thị thông tin chữ
         Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.GREEN);
 
-        // Lấy tên mặc định ban đầu của Agent Dung và biến thể thứ nhất
         selectionLabel = new Label(characterList.get(0).name + " - " + characterList.get(0).variants[0], labelStyle);
         selectionLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
 
-        // 5. Định vị Table chính
+        // Định vị Table chính
         Table mainTable = new Table();
         mainTable.setFillParent(true);
         mainTable.top();
@@ -204,7 +202,6 @@ public class CustomizeScreen extends ScreenAdapter {
         mainTable.add(scrollPane).size(450f, 260f).padTop(110f).center();
         mainTable.row();
 
-        // Đẩy dòng chữ màu xanh lá nằm gọn ngay dưới bảng cuộn
         mainTable.add(selectionLabel).padTop(25f).center();
 
         stage.addActor(mainTable);
