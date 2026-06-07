@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.agentdung.game.screens.MenuScreen;
+import com.agentdung.game.screens.IntroScreen;
 
 public class AgentDungGame extends Game {
     public Music backgroundMusic;
@@ -85,7 +86,7 @@ public class AgentDungGame extends Game {
             Gdx.app.error("AgentDungGame", "Không thể tải tài nguyên hệ thống: " + e.getMessage());
         }
 
-        this.setScreen(new MenuScreen(this));
+        setScreen(new IntroScreen(this)); // ← đổi từ MenuScreen sang IntroScreen
     }
 
     // --- ĐÃ THÊM: HÀM TỰ ĐỘNG TẢI TIẾN TRÌNH TỪ Ổ CỨNG ---
