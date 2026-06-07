@@ -76,7 +76,7 @@ public class AgentDungGame extends Game {
             }
 
             // Tự động tải lại kỉ lục tiến trình cũ và số xu từ ổ cứng ngay khi bật game
-            loadProgress();
+            //loadProgress();
 
         } catch (Exception e) {
             Gdx.app.error("AgentDungGame", "Không thể tải tài nguyên hệ thống: " + e.getMessage());

@@ -11,7 +11,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector3;
 import java.util.Map;
 
@@ -167,7 +166,6 @@ public class InventoryOverlay {
     }
 
     public void handleInput() {
-        // ESC đã được chuyển sang PlayScreen quản lý tập trung
         if (Gdx.input.justTouched()) {
             Vector3 touch = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
             touch.x = (touch.x / (float) Gdx.graphics.getWidth()) * VIRTUAL_WIDTH;
@@ -198,7 +196,6 @@ public class InventoryOverlay {
     }
 
     private void applyItemEffect(Item.ItemType type) {
-        // ... (Giữ nguyên switch case)
         switch (type) {
             case BEER:
                 for (Skill s : screen.skills) {
@@ -210,6 +207,7 @@ public class InventoryOverlay {
                 screen.amuletCount++;
                 break;
             case CARROT:
+                screen.carrotTimer = 10.0f; // Kích hoạt hiệu ứng nhìn xa 10 giây
                 break;
             case CLOCK:
                 screen.clockTimer = 2.0f;
@@ -266,7 +264,6 @@ public class InventoryOverlay {
         public Item.ItemType assignedType;
 
         public ItemSlot() {
-            this.bounds = new Rectangle();
             this.bounds = new Rectangle();
             this.assignedType = null;
         }

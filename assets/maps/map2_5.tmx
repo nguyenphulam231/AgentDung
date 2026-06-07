@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="60" height="40" tilewidth="16" tileheight="16" infinite="0" nextlayerid="10" nextobjectid="121">
+ <tileset firstgid="1" name="Set 1.0" tilewidth="16" tileheight="16" tilecount="48" columns="12">
+  <image source="tilesetAD/map1/Dungeon Gathering Free Version/Set 1.0.png" width="192" height="64"/>
+ </tileset>
+ <tileset firstgid="49" name="Set 1.2" tilewidth="16" tileheight="16" tilecount="96" columns="16">
+  <image source="tilesetAD/map1/Dungeon Gathering Free Version/Set 1.2.png" width="256" height="96"/>
+ </tileset>
+ <tileset firstgid="145" name="lavaonland1 - Copy (2)" tilewidth="16" tileheight="16" tilecount="70" columns="10">
+  <image source="tilesetAD/Top Down Lava Tileset 16x16 Free/Top Down Lava Tileset 16x16 Free/FREE TILESET FILES/Environment ( With Animations )/Land on Lava Tile/lavaonland1 - Copy (2).png" width="160" height="112"/>
+ </tileset>
+ <tileset firstgid="215" name="lavaonland1 - Copy (3)" tilewidth="16" tileheight="16" tilecount="70" columns="10">
+  <image source="tilesetAD/Top Down Lava Tileset 16x16 Free/Top Down Lava Tileset 16x16 Free/FREE TILESET FILES/Environment ( With Animations )/Land on Lava Tile/lavaonland1 - Copy (3).png" width="160" height="112"/>
+ </tileset>
+ <tileset firstgid="285" name="lavaonland1 - Copy" tilewidth="16" tileheight="16" tilecount="70" columns="7">
+  <image source="tilesetAD/Top Down Lava Tileset 16x16 Free/Top Down Lava Tileset 16x16 Free/FREE TILESET FILES/Environment ( With Animations )/Land on Lava Tile/lavaonland1 - Copy.png" width="112" height="160"/>
+ </tileset>
+ <tileset firstgid="355" name="lavaonland1" tilewidth="16" tileheight="16" tilecount="70" columns="7">
+  <image source="tilesetAD/Top Down Lava Tileset 16x16 Free/Top Down Lava Tileset 16x16 Free/FREE TILESET FILES/Environment ( With Animations )/Land on Lava Tile/lavaonland1.png" width="112" height="160"/>
+ </tileset>
+ <objectgroup id="2" name="collisions" offsetx="-3.12373" offsety="1.56186">
+  <object id="13" name="wall" x="304.737" y="128.211" width="15.2463" height="191.504"/>
+  <object id="14" name="wall" x="575.791" y="122.773" width="14.4636" height="310.002"/>
+  <object id="16" name="wall" x="831.674" y="82.4432" width="13.2285" height="542.331"/>
+  <object id="17" name="wall" x="232.121" y="464.815" width="600.632" height="13.6237"/>
+  <object id="99" name="wall" x="261.121" y="559.815" width="570.965" height="13.6237"/>
+  <object id="20" name="wall" x="96.4143" y="304.197" width="207.805" height="15"/>
+  <object id="21" name="wall" x="319.775" y="304.572" width="511.352" height="14.152"/>
+  <object id="22" name="wall" x="62.213" y="224.255" width="112.667" height="14.2948"/>
+  <object id="24" name="wall" x="0" y="-1" width="955" height="16"/>
+  <object id="25" name="wall" x="946" y="0" width="16" height="630"/>
+  <object id="26" name="wall" x="655.967" y="16.502" width="13.8093" height="219.58"/>
+  <object id="108" name="wall" x="319.301" y="129.169" width="139.809" height="14.2467"/>
+  <object id="28" name="wall" x="175.064" y="16.4644" width="15.6667" height="222.93"/>
+  <object id="30" name="wall" x="14.547" y="463.341" width="115.527" height="13.3333"/>
+  <object id="31" name="wall" x="0.729083" y="14.2212" width="14.6667" height="609.862"/>
+  <object id="32" name="wall" x="846.484" y="193.277" width="55.3673" height="14.1237"/>
+  <object id="109" name="wall" x="670.484" y="129.277" width="124.034" height="15.457"/>
+  <object id="34" name="wall" x="0" y="624.667" width="962.371" height="13.1427"/>
+  <object id="106" name="wall" x="14.466" y="560.737" width="180.114" height="14.6943"/>
+ </objectgroup>
+ <objectgroup id="5" name="entities" offsetx="15.6186" offsety="9.37119">
+  <object id="51" name="player_spawn" x="724" y="591.333" width="14.6667" height="17.3333"/>
+  <object id="52" name="server" x="877.376" y="549.517" width="31.1667" height="33.5"/>
+  <object id="116" name="wall" x="704.381" y="147.962" width="65.3333" height="69.3333"/>
+  <object id="117" name="wall" x="-8.95193" y="-4.03786" width="177.333" height="225.333"/>
+  <object id="118" name="wall" x="576.381" y="310.629" width="238.667" height="93.3333"/>
+  <object id="119" name="wall" x="611.048" y="406.629" width="208" height="46.6667"/>
+  <object id="120" x="675.048" y="681.295"/>
+ </objectgroup>
+ <objectgroup id="6" name="enemies" offsetx="-6.24746" offsety="9.37119">
+  <object id="78" name="guard_start" x="369.167" y="591.559" width="14.5" height="15">
+   <properties>
+    <property name="id" type="int" value="12"/>
+    <property name="viewAngle" type="int" value="60"/>
+    <property name="viewRadius" type="int" value="120"/>
+   </properties>
+  </object>
+  <object id="79" name="guard_end" x="640.704" y="593.843" width="15" height="14.5">
+   <properties>
+    <property name="id" type="int" value="12"/>
+    <property name="viewAngle" type="int" value="60"/>
+    <property name="viewRadius" type="int" value="120"/>
+   </properties>
+  </object>
+  <object id="80" name="guard_end" x="529.078" y="256.93" width="14" height="13">
+   <properties>
+    <property name="id" type="int" value="13"/>
+    <property name="viewAngle" type="int" value="60"/>
+    <property name="viewRadius" type="int" value="120"/>
+   </properties>
+  </object>
+  <object id="81" name="guard_start" x="529.2" y="47.6433" width="13.5" height="14.5">
+   <properties>
+    <property name="id" type="int" value="13"/>
+    <property name="viewAngle" type="int" value="60"/>
+    <property name="viewRadius" type="int" value="120"/>
+   </properties>
+  </object>
+  <object id="82" name="guard_start" x="46.7257" y="401.591" width="15.3333" height="16">
+   <properties>
+    <property name="id" type="int" value="14"/>
+    <property name="viewAngle" type="int" value="60"/>
+    <property name="viewRadius" type="int" value="120"/>
+   </properties>
+  </object>
+  <object id="83" name="guard_end" x="49.124" y="254.851" width="15.3333" height="16.6667">
+   <properties>
+    <property name="id" type="int" value="14"/>
+    <property name="viewAngle" type="int" value="60"/>
+    <property name="viewRadius" type="int" value="120"/>
+   </properties>
+  </object>
+  <object id="84" name="guard_end" x="337.903" y="413.195" width="16" height="16.6667">
+   <properties>
+    <property name="id" type="int" value="15"/>
+    <property name="viewAngle" type="int" value="60"/>
+    <property name="viewRadius" type="int" value="120"/>
+   </properties>
+  </object>
+  <object id="85" name="guard_start" x="127" y="417.233" width="14" height="16">
+   <properties>
+    <property name="id" type="int" value="15"/>
+    <property name="viewAngle" type="int" value="60"/>
+    <property name="viewRadius" type="int" value="120"/>
+   </properties>
+  </object>
+  <object id="86" name="guard_start" x="270.119" y="22.1463" width="14" height="15.3333">
+   <properties>
+    <property name="id" type="int" value="16"/>
+    <property name="viewAngle" type="int" value="60"/>
+    <property name="viewRadius" type="int" value="120"/>
+   </properties>
+  </object>
+  <object id="87" name="guard_end" x="272.031" y="240.268" width="15.3333" height="14.6667">
+   <properties>
+    <property name="id" type="int" value="16"/>
+    <property name="viewAngle" type="int" value="60"/>
+    <property name="viewRadius" type="int" value="120"/>
+   </properties>
+  </object>
+  <object id="88" name="guard_end" x="320.27" y="527.875" width="15.3333" height="15.3333">
+   <properties>
+    <property name="id" type="int" value="17"/>
+    <property name="viewAngle" type="int" value="60"/>
+    <property name="viewRadius" type="int" value="120"/>
+   </properties>
+  </object>
+  <object id="89" name="guard_start" x="64.433" y="526.504" width="13.3333" height="14.6667">
+   <properties>
+    <property name="id" type="int" value="17"/>
+    <property name="viewAngle" type="int" value="60"/>
+    <property name="viewRadius" type="int" value="120"/>
+   </properties>
+  </object>
+  <object id="90" name="guard_start" x="177.776" y="590.867" width="16" height="16.6667">
+   <properties>
+    <property name="id" type="int" value="18"/>
+    <property name="viewAngle" type="int" value="60"/>
+    <property name="viewRadius" type="int" value="120"/>
+   </properties>
+  </object>
+  <object id="91" name="guard_end" x="47.0432" y="592.982" width="14.6667" height="14.6667">
+   <properties>
+    <property name="id" type="int" value="18"/>
+    <property name="viewAngle" type="int" value="60"/>
+    <property name="viewRadius" type="int" value="120"/>
+   </properties>
+  </object>
+  <object id="93" name="guard_start" x="321.077" y="479.563" width="14" height="15">
+   <properties>
+    <property name="id" type="int" value="19"/>
+    <property name="viewAngle" type="int" value="60"/>
+    <property name="viewRadius" type="int" value="120"/>
+   </properties>
+  </object>
+  <object id="94" name="guard_end" x="62.56" y="480.416" width="16" height="14.5">
+   <properties>
+    <property name="id" type="int" value="19"/>
+    <property name="viewAngle" type="int" value="60"/>
+    <property name="viewRadius" type="int" value="120"/>
+   </properties>
+  </object>
+  <object id="95" name="guard_end" x="908.354" y="30.2533" width="17.5" height="17.5">
+   <properties>
+    <property name="id" type="int" value="22"/>
+    <property name="viewAngle" type="int" value="60"/>
+    <property name="viewRadius" type="int" value="120"/>
+   </properties>
+  </object>
+  <object id="113" name="guard_end" x="911.688" y="380.92" width="17.5" height="17.5">
+   <properties>
+    <property name="id" type="int" value="23"/>
+    <property name="viewAngle" type="int" value="60"/>
+    <property name="viewRadius" type="int" value="120"/>
+   </properties>
+  </object>
+  <object id="110" name="guard_end" x="801.021" y="268.92" width="17.5" height="17.5">
+   <properties>
+    <property name="id" type="int" value="20"/>
+    <property name="viewAngle" type="int" value="60"/>
+    <property name="viewRadius" type="int" value="120"/>
+   </properties>
+  </object>
+  <object id="96" name="guard_start" x="688.186" y="271.292" width="16" height="14.5">
+   <properties>
+    <property name="id" type="int" value="20"/>
+    <property name="viewAngle" type="int" value="60"/>
+    <property name="viewRadius" type="int" value="120"/>
+   </properties>
+  </object>
+  <object id="97" name="guard_start" x="622.65" y="270.642" width="15.5" height="18">
+   <properties>
+    <property name="id" type="int" value="21"/>
+    <property name="viewAngle" type="int" value="60"/>
+    <property name="viewRadius" type="int" value="120"/>
+   </properties>
+  </object>
+  <object id="111" name="guard_start" x="705.317" y="27.9757" width="15.5" height="18">
+   <properties>
+    <property name="id" type="int" value="22"/>
+    <property name="viewAngle" type="int" value="60"/>
+    <property name="viewRadius" type="int" value="120"/>
+   </properties>
+  </object>
+  <object id="112" name="guard_start" x="911.317" y="221.976" width="15.5" height="18">
+   <properties>
+    <property name="id" type="int" value="23"/>
+    <property name="viewAngle" type="int" value="60"/>
+    <property name="viewRadius" type="int" value="120"/>
+   </properties>
+  </object>
+  <object id="98" name="guard_end" x="624.976" y="30.1229" width="14.5" height="16">
+   <properties>
+    <property name="id" type="int" value="21"/>
+    <property name="viewAngle" type="int" value="60"/>
+    <property name="viewRadius" type="int" value="120"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <layer id="9" name="Tile Layer 2" width="60" height="40">
+  <data encoding="csv">
+2,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,4,
+14,291,291,291,291,291,291,291,291,291,412,13,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,36,
+14,291,291,291,292,292,291,292,291,291,412,13,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,36,
+14,291,287,287,292,292,291,291,291,291,412,13,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,36,
+14,291,287,292,291,291,291,291,292,291,412,13,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,36,
+14,291,291,291,291,291,292,292,292,291,412,13,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,36,
+14,291,287,287,291,288,288,292,288,291,412,13,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,36,
+14,291,287,291,291,291,291,292,288,291,412,13,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,0,23,23,23,23,13,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,36,
+14,291,291,291,291,291,291,291,291,291,412,13,23,23,23,23,23,23,23,13,3,3,3,3,3,3,3,3,3,23,23,23,23,23,23,23,13,23,23,23,23,13,3,3,3,3,3,3,3,3,23,23,13,23,23,23,23,23,23,36,
+14,291,291,292,292,292,292,292,291,291,412,13,23,23,23,23,23,23,23,13,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,13,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,36,
+14,291,291,291,288,292,292,288,291,291,412,13,23,23,23,23,23,23,23,13,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,13,23,23,23,303,414,303,303,23,23,23,13,23,23,23,23,23,23,36,
+14,297,291,291,291,291,291,288,288,286,293,13,23,23,23,23,23,23,23,13,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,13,23,23,23,303,422,422,303,23,23,23,13,23,23,23,23,23,23,36,
+14,309,297,288,288,291,291,291,292,293,300,13,23,23,23,23,23,23,23,13,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,13,23,23,23,303,297,422,303,23,23,23,13,3,3,3,23,23,23,36,
+14,309,309,309,297,288,288,288,293,300,301,13,23,23,23,23,23,23,23,13,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,13,23,23,23,303,303,303,303,23,23,23,13,23,23,23,23,23,23,36,
+14,23,23,23,3,3,3,3,3,3,3,13,23,23,23,23,23,23,23,13,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,13,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,36,
+14,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,36,
+14,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,36,
+14,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,36,
+14,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,36,
+14,23,23,23,23,3,3,3,3,3,3,3,3,3,3,3,3,3,3,13,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,13,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,13,23,23,23,23,23,23,36,
+14,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,291,291,291,291,291,291,291,291,291,291,291,291,291,291,291,13,23,23,23,23,23,23,36,
+14,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,291,291,286,286,286,286,286,291,291,291,286,286,286,286,291,13,23,23,23,23,23,23,36,
+14,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,291,286,286,291,286,286,286,291,291,291,291,291,291,291,291,13,23,23,23,23,23,23,36,
+14,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,291,291,291,291,291,291,286,286,286,286,291,291,291,291,291,13,23,23,23,23,23,23,36,
+14,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,289,289,289,289,291,291,291,286,291,286,286,286,286,291,291,13,23,23,23,23,23,23,36,
+14,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,294,294,294,297,297,291,291,286,286,291,291,291,291,291,291,13,23,23,23,23,23,23,36,
+14,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,294,294,297,291,291,286,286,286,286,291,291,291,291,13,23,23,23,23,23,23,36,
+14,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,294,294,297,290,291,291,291,286,291,291,291,291,291,13,23,23,23,23,23,23,36,
+14,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,294,294,297,291,291,291,291,291,291,291,291,291,13,23,23,23,23,23,23,36,
+14,3,3,3,3,3,3,3,23,23,23,23,23,23,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,13,23,23,23,23,23,23,36,
+14,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,36,
+14,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,36,
+14,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,36,
+14,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,36,
+14,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,36,
+14,3,3,3,3,3,3,3,3,3,3,3,23,23,23,23,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,13,23,23,23,90,90,23,36,
+14,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,90,90,23,36,
+14,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,36,
+14,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,13,23,23,23,23,23,23,36,
+41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,28
+</data>
+ </layer>
+</map>

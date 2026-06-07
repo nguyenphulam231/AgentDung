@@ -6,6 +6,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
@@ -16,6 +17,7 @@ public class GameHUD {
     private final AgentDungGame game;
     private final Map<Class<? extends Skill>, Texture> manaTextures;
     private final BitmapFont font;
+    private final GlyphLayout glyphLayout; // Thêm GlyphLayout để tính độ rộng chữ chính xác
 
     private Texture btnPauseTex;
     private final Rectangle rectPauseBtn;
@@ -31,6 +33,7 @@ public class GameHUD {
         this.rectPauseBtn = new Rectangle();
         this.rectBagBtn = new Rectangle();
         this.font = new BitmapFont();
+        this.glyphLayout = new GlyphLayout();
         // THIẾT LẬP FONT: Tăng size để chắc chắn nhìn thấy được
         this.font.getData().setScale(1.5f);
     }
@@ -83,17 +86,26 @@ public class GameHUD {
 
         // 4. Vẽ Coin và số xu
         float coinSize = 30f;
-        float coinX = bagX - coinSize - 50f;
-        float coinY = bagY + 5f; // Chỉnh lại cho đồng bộ nút Bag
+        // Đẩy hình xu sát lại nút Bag hơn (cách 20px thay vì 50px) để nhường chỗ cho chữ bên trái
+        float coinX = bagX - coinSize - 20f;
+        float coinY = bagY + 5f;
 
         if (coinTex != null) {
             game.batch.draw(coinTex, coinX, coinY, coinSize, coinSize);
         }
 
-        // Vẽ số xu
+        // Vẽ số xu ở bên TRÁI hình xu
         font.setColor(Color.GOLD);
-        // Lưu ý: Nếu vẫn không hiện, hãy thử đổi thành Color.RED để kiểm tra
-        font.draw(game.batch, String.valueOf(game.globalCoinCount), coinX + coinSize + 10, coinY + 25);
+        String coinText = String.valueOf(game.globalCoinCount);
+
+        // Đo kích thước chuỗi text thực tế (giúp tự động co dãn khi số xu tăng từ 1 chữ số lên nhiều chữ số)
+        glyphLayout.setText(font, coinText);
+
+        // Tọa độ X của chữ = Tọa độ xu - Độ rộng của chữ - Khoảng cách đệm (10px)
+        float textX = coinX - glyphLayout.width - 10f;
+        float textY = coinY + 25f;
+
+        font.draw(game.batch, coinText, textX, textY);
         font.setColor(Color.WHITE);
 
         game.batch.end();

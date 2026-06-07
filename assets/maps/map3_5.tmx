@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="60" height="40" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="119">
- <tileset firstgid="1" source="tilesetAD/Set 1.0.tsx"/>
- <tileset firstgid="49" source="tilesetAD/Set 1.2.tsx"/>
- <tileset firstgid="145" source="tilesetAD/Structure.tsx"/>
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="60" height="40" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="99">
+ <tileset firstgid="1" source="tilesetAD/map1/Set 1.0.tsx"/>
+ <tileset firstgid="49" source="tilesetAD/map1/Set 1.2.tsx"/>
+ <tileset firstgid="145" source="tilesetAD/map1/Structure.tsx"/>
  <layer id="1" name="Tile Layer 1" width="60" height="40">
   <data encoding="csv">
 2,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,4,
@@ -77,26 +77,8 @@
   <object id="47" name="wall" x="857.333" y="416.667" width="6" height="150"/>
  </objectgroup>
  <objectgroup id="5" name="entities">
-  <object id="51" name="player_spawn" x="22.6667" y="595.5" width="14.6667" height="17.3333"/>
+  <object id="51" name="player_spawn" x="42.6667" y="584" width="14.6667" height="17.3333"/>
   <object id="52" name="server" x="800.167" y="255.833" width="31.1667" height="33.5"/>
-  <object id="99" name="server_door" x="831.75" y="224" width="63.75" height="7"/>
-  <object id="100" name="key" x="373" y="351" width="9.5" height="11.5"/>
-  <object id="102" name="item_water" x="246.667" y="317.333" width="12" height="12.6667"/>
-  <object id="103" name="item_meat" x="136" y="554.667" width="14.6667" height="13.3333"/>
-  <object id="105" name="vending_machine" x="52.5" y="571.5" width="44.5" height="52.5"/>
-  <object id="106" name="item_coin" x="99" y="421.5" width="18" height="16"/>
-  <object id="107" name="item_coin" x="101" y="326" width="16" height="13"/>
-  <object id="108" name="item_beer" x="44.5" y="214" width="14.5" height="17.5"/>
-  <object id="109" name="item_meat" x="149" y="181.5" width="17" height="19"/>
-  <object id="110" name="item_meat" x="356.5" y="246.5" width="15" height="15.5"/>
-  <object id="111" name="item_coin" x="447" y="328.5" width="15" height="15"/>
-  <object id="112" name="item_coin" x="625.5" y="202.5" width="15.5" height="17.5"/>
-  <object id="113" name="item_coin" x="684.5" y="356" width="16.5" height="15"/>
-  <object id="114" name="item_coin" x="569.5" y="372" width="16" height="15.5"/>
-  <object id="115" name="item_coin" x="694.5" y="39" width="17.5" height="16"/>
-  <object id="116" name="item_coin" x="846.5" y="122" width="16" height="17"/>
-  <object id="117" name="item_meat" x="892.5" y="440.5" width="15" height="20.5"/>
-  <object id="118" name="item_beer" x="261" y="420" width="15.5" height="16"/>
  </objectgroup>
  <objectgroup id="6" name="enemies">
   <object id="54" name="guard_start" x="270" y="604" width="12" height="12">

@@ -1,0 +1,574 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="60" height="40" tilewidth="16" tileheight="16" infinite="0" nextlayerid="15" nextobjectid="188">
+ <tileset firstgid="1" name="Map3" tilewidth="16" tileheight="16" tilecount="112" columns="16">
+  <image source="tilesetAD/map4/Pixel Lands Dungeons Demo/Pixel Lands Dungeons Demo/dungeons_demo.png" width="256" height="112"/>
+ </tileset>
+ <tileset firstgid="113" name="3" tilewidth="16" tileheight="16" tilecount="72" columns="8">
+  <image source="tilesetAD/map4/Pixel Lands Dungeons Demo/Pixel Lands Dungeons Demo/dungeons_demo_animated.png" width="128" height="144"/>
+ </tileset>
+ <tileset firstgid="185" name="farm" tilewidth="16" tileheight="16" tilecount="128" columns="16">
+  <image source="tilesetAD/map4/Pixel Lands Farm Demo/Pixel Lands Farm Demo/objects_demo.png" width="256" height="128"/>
+ </tileset>
+ <tileset firstgid="313" name="farm1" tilewidth="16" tileheight="16" tilecount="128" columns="16">
+  <image source="tilesetAD/map4/Pixel Lands Farm Demo/Pixel Lands Farm Demo/terrain_demo.png" width="256" height="128"/>
+ </tileset>
+ <tileset firstgid="441" source="tilesetAD/map1/Structure.tsx"/>
+ <layer id="1" name="Tile Layer 1" width="60" height="40">
+  <data encoding="csv">
+1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,18,2,2,2,2,2,2,2,2,2,2,2,3,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+17,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,19,
+33,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,35
+</data>
+ </layer>
+ <objectgroup id="11" name="key" visible="0">
+  <object id="81" name="key" x="294" y="106"/>
+ </objectgroup>
+ <objectgroup id="12" name="collisions" visible="0">
+  <object id="84" name="wall" x="1" y="-1" width="15" height="640.333"/>
+  <object id="85" name="wall" x="0" y="0" width="960" height="16"/>
+  <object id="86" name="wall" x="944" y="0" width="16" height="640"/>
+  <object id="87" name="wall" x="0" y="624" width="960" height="16"/>
+ </objectgroup>
+ <objectgroup id="13" name="entities">
+  <object id="88" name="player_spawn" x="80" y="96" width="16" height="16"/>
+  <object id="89" name="sever" x="687.333" y="396.667" width="34.25" height="29.5"/>
+ </objectgroup>
+ <objectgroup id="14" name="enemies">
+  <object id="90" name="guard_start" x="224" y="48" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="1"/>
+   </properties>
+  </object>
+  <object id="91" name="guard_end" x="224" y="176" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="1"/>
+   </properties>
+  </object>
+  <object id="92" name="guard_start" x="32" y="176" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="93" name="guard_end" x="144" y="176" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="94" name="guard_start" x="288" y="176" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="3"/>
+   </properties>
+  </object>
+  <object id="95" name="guard_end" x="288" y="48" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="3"/>
+   </properties>
+  </object>
+  <object id="96" name="guard_start" x="144" y="240" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="4"/>
+   </properties>
+  </object>
+  <object id="97" name="guard_end" x="32" y="240" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="4"/>
+   </properties>
+  </object>
+  <object id="98" name="guard_start" x="240" y="256" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="5"/>
+   </properties>
+  </object>
+  <object id="99" name="guard_end" x="176" y="112" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="5"/>
+   </properties>
+  </object>
+  <object id="100" name="guard_start" x="256" y="112" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="6"/>
+   </properties>
+  </object>
+  <object id="101" name="guard_end" x="368" y="112" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="6"/>
+   </properties>
+  </object>
+  <object id="103" name="guard_start" x="32" y="320" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="7"/>
+   </properties>
+  </object>
+  <object id="104" name="guard_end" x="240" y="304" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="7"/>
+   </properties>
+  </object>
+  <object id="105" name="guard_start" x="112" y="288" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="8"/>
+   </properties>
+  </object>
+  <object id="106" name="guard_end" x="160" y="368" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="8"/>
+   </properties>
+  </object>
+  <object id="107" name="guard_start" x="48" y="384" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="9"/>
+   </properties>
+  </object>
+  <object id="108" name="guard_end" x="176" y="288" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="9"/>
+   </properties>
+  </object>
+  <object id="109" name="guard_start" x="416" y="32" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="10"/>
+   </properties>
+  </object>
+  <object id="110" name="guard_end" x="368" y="176" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="10"/>
+   </properties>
+  </object>
+  <object id="111" name="guard_strat" x="48" y="432" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="11"/>
+   </properties>
+  </object>
+  <object id="112" name="guard_end" x="272" y="416" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="11"/>
+   </properties>
+  </object>
+  <object id="113" name="guard_end" x="144" y="432" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="12"/>
+   </properties>
+  </object>
+  <object id="114" name="guard_start" x="288" y="352" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="12"/>
+   </properties>
+  </object>
+  <object id="117" name="guard_start" x="336" y="256" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="12"/>
+   </properties>
+  </object>
+  <object id="118" name="guard_start" x="400" y="304" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="13"/>
+   </properties>
+  </object>
+  <object id="119" name="guard_end" x="352" y="352" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="13"/>
+   </properties>
+  </object>
+  <object id="120" name="guard_start" x="496" y="64" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="14"/>
+   </properties>
+  </object>
+  <object id="121" name="guard_end" x="464" y="192" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="14"/>
+   </properties>
+  </object>
+  <object id="122" name="guard_start" x="624" y="208" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="15"/>
+   </properties>
+  </object>
+  <object id="123" name="guard_end" x="528" y="112" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="15"/>
+   </properties>
+  </object>
+  <object id="124" name="guard_start" x="464" y="272" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="16"/>
+   </properties>
+  </object>
+  <object id="125" name="guard_end" x="624" y="80" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="16"/>
+   </properties>
+  </object>
+  <object id="126" name="guard_start" x="544" y="192" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="17"/>
+   </properties>
+  </object>
+  <object id="127" name="guard_end" x="688" y="128" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="17"/>
+   </properties>
+  </object>
+  <object id="128" name="guard_start" x="80" y="512" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="18"/>
+   </properties>
+  </object>
+  <object id="129" name="guard_end" x="240" y="496" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="18"/>
+   </properties>
+  </object>
+  <object id="130" name="guard_start" x="160" y="512" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="19"/>
+   </properties>
+  </object>
+  <object id="131" name="guard_end" x="208" y="560" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="19"/>
+   </properties>
+  </object>
+  <object id="132" name="guard_start" x="464" y="368" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="20"/>
+   </properties>
+  </object>
+  <object id="133" name="guard_end" x="368" y="400" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="20"/>
+   </properties>
+  </object>
+  <object id="134" name="guard_start" x="560" y="272" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="21"/>
+   </properties>
+  </object>
+  <object id="135" name="guard_end" x="544" y="352" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="21"/>
+   </properties>
+  </object>
+  <object id="136" name="guard_start" x="704" y="320" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="22"/>
+   </properties>
+  </object>
+  <object id="137" name="guard_end" x="640" y="336" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="22"/>
+   </properties>
+  </object>
+  <object id="138" name="guard_start" x="608" y="384" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="23"/>
+   </properties>
+  </object>
+  <object id="139" name="guard_end" x="672" y="352" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="23"/>
+   </properties>
+  </object>
+  <object id="140" name="guard_start" x="672" y="256" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="24"/>
+   </properties>
+  </object>
+  <object id="141" name="guard_end" x="640" y="432" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="24"/>
+   </properties>
+  </object>
+  <object id="142" name="guard_start" x="560" y="400" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="25"/>
+   </properties>
+  </object>
+  <object id="143" name="guard_end" x="592" y="448" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="25"/>
+   </properties>
+  </object>
+  <object id="144" name="guard_start" x="624" y="480" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="26"/>
+   </properties>
+  </object>
+  <object id="145" name="guard_end" x="544" y="416" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="26"/>
+   </properties>
+  </object>
+  <object id="146" name="guard_start" x="720" y="256" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="27"/>
+   </properties>
+  </object>
+  <object id="147" name="guard_end" x="592" y="304" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="27"/>
+   </properties>
+  </object>
+  <object id="148" name="guard_start" x="512" y="304" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="28"/>
+   </properties>
+  </object>
+  <object id="149" name="guard_end" x="480" y="432" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="28"/>
+   </properties>
+  </object>
+  <object id="150" name="guard_start" x="496" y="480" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="29"/>
+   </properties>
+  </object>
+  <object id="151" name="guard_end" x="608" y="512" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="29"/>
+   </properties>
+  </object>
+  <object id="152" name="guard_start" x="720" y="464" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="30"/>
+   </properties>
+  </object>
+  <object id="153" name="guard_end" x="688" y="496" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="30"/>
+   </properties>
+  </object>
+  <object id="155" name="guard_start" x="496" y="368" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="31"/>
+   </properties>
+  </object>
+  <object id="156" name="guard_end" x="560" y="464" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="31"/>
+   </properties>
+  </object>
+  <object id="157" name="guard_start" x="640" y="272" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="32"/>
+   </properties>
+  </object>
+  <object id="158" name="guard_end" x="592" y="400" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="32"/>
+   </properties>
+  </object>
+  <object id="160" name="guard_start" x="544" y="512" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="33"/>
+   </properties>
+  </object>
+  <object id="161" name="guard_end" x="656" y="384" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="33"/>
+   </properties>
+  </object>
+  <object id="162" name="guard_start" x="592" y="336" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="35"/>
+   </properties>
+  </object>
+  <object id="163" name="guard_end" x="448" y="432" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="35"/>
+   </properties>
+  </object>
+  <object id="164" name="guard_start" x="432" y="96" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="36"/>
+   </properties>
+  </object>
+  <object id="165" name="guard_end" x="352" y="288" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="36"/>
+   </properties>
+  </object>
+  <object id="166" name="guard_start" x="432" y="144" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="37"/>
+   </properties>
+  </object>
+  <object id="167" name="guard_end" x="208" y="144" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="37"/>
+   </properties>
+  </object>
+  <object id="168" name="guard_start" x="224" y="352" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="38"/>
+   </properties>
+  </object>
+  <object id="169" name="guard_end" x="416" y="224" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="38"/>
+   </properties>
+  </object>
+  <object id="170" name="guard_start" x="752" y="336" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="39"/>
+   </properties>
+  </object>
+  <object id="171" name="guard_end" x="752" y="400" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="39"/>
+   </properties>
+  </object>
+  <object id="172" name="guard_start" x="768" y="208" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="40"/>
+   </properties>
+  </object>
+  <object id="173" name="guard_end" x="848" y="432" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="40"/>
+   </properties>
+  </object>
+  <object id="175" name="guard_start" x="880" y="240" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="41"/>
+   </properties>
+  </object>
+  <object id="176" name="guard_end" x="800" y="288" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="41"/>
+   </properties>
+  </object>
+  <object id="177" name="guard_start" x="880" y="320" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="42"/>
+   </properties>
+  </object>
+  <object id="179" name="guard_end" x="784" y="464" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="42"/>
+   </properties>
+  </object>
+  <object id="180" name="guard_start" x="832" y="176" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="43"/>
+   </properties>
+  </object>
+  <object id="181" name="guard_end" x="848" y="512" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="43"/>
+   </properties>
+  </object>
+  <object id="182" name="guard_end" x="928" y="160" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="44"/>
+   </properties>
+  </object>
+  <object id="183" name="guard_start" x="816" y="384" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="44"/>
+   </properties>
+  </object>
+  <object id="184" name="guard_start" x="772" y="257.333" width="12" height="14.6667">
+   <properties>
+    <property name="id" type="int" value="45"/>
+   </properties>
+  </object>
+  <object id="185" name="guard_end" x="800" y="432" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="45"/>
+   </properties>
+  </object>
+  <object id="186" name="guard_start" x="743.333" y="522.667" width="14" height="14">
+   <properties>
+    <property name="id" type="int" value="46"/>
+   </properties>
+  </object>
+  <object id="187" name="guard_end" x="816" y="336" width="16" height="16">
+   <properties>
+    <property name="id" type="int" value="46"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <layer id="10" name="Tile Layer 2" width="60" height="40">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,24,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,40,41,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+</map>

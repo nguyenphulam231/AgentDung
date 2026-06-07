@@ -47,7 +47,7 @@ public class LightRenderer {
         pixmap.dispose();
     }
 
-    public void renderDarkness(SpriteBatch batch, Player dung, OrthographicCamera camera) {
+    public void renderDarkness(SpriteBatch batch, Player dung, OrthographicCamera camera, boolean isCarrotActive) {
         fbo.begin();
         Gdx.gl.glClearColor(0, 0, 0, 0.9f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -55,7 +55,10 @@ public class LightRenderer {
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         batch.setBlendFunction(GL20.GL_ZERO, GL20.GL_ONE_MINUS_SRC_ALPHA);
-        float viewRadius = 350f;
+
+        // Bán kính tầm nhìn mở rộng khi Carrot kích hoạt
+        float viewRadius = isCarrotActive ? 550f : 350f;
+
         batch.draw(lightMask,
             dung.getPosition().x + dung.getSize()/2f - viewRadius/2f,
             dung.getPosition().y + dung.getSize()/2f - viewRadius/2f,

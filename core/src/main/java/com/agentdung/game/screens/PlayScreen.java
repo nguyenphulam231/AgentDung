@@ -37,7 +37,6 @@ public class PlayScreen extends ScreenAdapter {
     private CapturedOverlay capturedOverlay;
     private PauseOverlay pauseOverlay;
 
-    // --- HAI OVERLAY UI MỚI ---
     private InventoryOverlay inventoryOverlay;
     private VendingMachineOverlay vendingMachineOverlay;
 
@@ -50,24 +49,20 @@ public class PlayScreen extends ScreenAdapter {
     private boolean isCaptured = false;
     private boolean isPaused = false;
 
-    // --- DỮ LIỆU KHO ĐỒ (Chỉ lưu trong từng level chơi, đổi level sẽ reset) ---
     public final Map<Item.ItemType, Integer> inventory = new HashMap<>();
 
-    // Trạng thái bật/tắt UI phủ
     public boolean isInventoryOpen = false;
     public boolean isVendingOpen = false;
 
-    // Máy bán hàng tự động đang đứng gần
     private VendingMachine activeVending = null;
 
-    // --- BỘ ĐẾM THỜI GIAN HIỆU ỨNG VẬT PHẨM ---
     public float invisibilityTimer = 0f;
     public float shoesTimer = 0f;
     public float clockTimer = 0f;
     public float lemonTimer = 0f;
     public float orangeTimer = 0f;
+    public float carrotTimer = 0f;
 
-    // Thuộc tính bổ trợ amulet (bảo hiểm bị lính bắt)
     public int amuletCount = 0;
 
     public PlayScreen(AgentDungGame game, int world, int level) {
@@ -85,7 +80,6 @@ public class PlayScreen extends ScreenAdapter {
         this.capturedOverlay = new CapturedOverlay(this);
         this.pauseOverlay = new PauseOverlay(this);
 
-        // Khởi tạo thực thể Overlay UI mới
         this.inventoryOverlay = new InventoryOverlay(this);
         this.vendingMachineOverlay = new VendingMachineOverlay(this);
 
@@ -100,18 +94,16 @@ public class PlayScreen extends ScreenAdapter {
         isVendingOpen = false;
         activeVending = null;
 
-        // Reset bộ đếm hiệu ứng vật phẩm
         invisibilityTimer = 0f;
         shoesTimer = 0f;
         clockTimer = 0f;
         lemonTimer = 0f;
         orangeTimer = 0f;
+        carrotTimer = 0f;
 
-        // Đồ đạc và bùa bảo hiểm dọn sạch hoàn toàn khi nạp màn chơi mới
         amuletCount = 0;
         hasKey = false;
 
-        // Khởi tạo sạch balo đồ (Không giữ lại bất kỳ đồ nào từ level cũ)
         inventory.clear();
         for (Item.ItemType type : Item.ItemType.values()) {
             inventory.put(type, 0);
@@ -147,11 +139,9 @@ public class PlayScreen extends ScreenAdapter {
         update(delta);
         ScreenUtils.clear(0, 0, 0, 1);
 
-        // Render Bản đồ
         mapManager.mapRenderer.setView(camera);
         mapManager.mapRenderer.render();
 
-        // Render Khối hình học
         game.shapeRenderer.setProjectionMatrix(camera.combined);
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         mapManager.renderShapes(game.shapeRenderer);
@@ -161,7 +151,6 @@ public class PlayScreen extends ScreenAdapter {
         entityManager.renderShapes(game.shapeRenderer);
         game.shapeRenderer.end();
 
-        // Render Sprites
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
 
@@ -185,11 +174,11 @@ public class PlayScreen extends ScreenAdapter {
         }
         game.batch.end();
 
-        lightRenderer.renderDarkness(game.batch, dung, camera);
+        lightRenderer.renderDarkness(game.batch, dung, camera, carrotTimer > 0);
+
         game.shapeRenderer.setProjectionMatrix(camera.combined);
-        if (invisibilityTimer <= 0) {
-            lightRenderer.renderEnemyVision(game.shapeRenderer, entityManager, mapManager);
-        }
+        // Luôn render tầm nhìn lính (để người chơi thấy vùng nguy hiểm dù đang tàng hình)
+        lightRenderer.renderEnemyVision(game.shapeRenderer, entityManager, mapManager);
 
         Matrix4 hudMatrix = new Matrix4().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
@@ -218,7 +207,6 @@ public class PlayScreen extends ScreenAdapter {
             pauseOverlay.render(game.shapeRenderer, hudMatrix);
         }
 
-        // --- CẬP NHẬT: Logic phím ESC tập trung ---
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && !isCaptured) {
             if (isInventoryOpen) {
                 isInventoryOpen = false;
@@ -227,11 +215,9 @@ public class PlayScreen extends ScreenAdapter {
                 isVendingOpen = false;
                 if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
             } else if (!isPaused) {
-                // Chỉ Pause nếu không mở Overlay nào
                 if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
                 setPaused(true);
             } else if (isPaused) {
-                // Resume game
                 if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
                 setPaused(false);
             }
@@ -249,18 +235,15 @@ public class PlayScreen extends ScreenAdapter {
             return;
         }
 
-        // --- CẬP NHẬT BỘ ĐẾM THỜI GIAN HIỆU ỨNG VẬT PHẨM ---
         if (invisibilityTimer > 0) invisibilityTimer -= delta;
         if (shoesTimer > 0) shoesTimer -= delta;
         if (clockTimer > 0) clockTimer -= delta;
         if (lemonTimer > 0) lemonTimer -= delta;
         if (orangeTimer > 0) orangeTimer -= delta;
+        if (carrotTimer > 0) carrotTimer -= delta;
 
-        // Quản lý đóng mở và bắt sự kiện đầu vào của Inventory / Vending UI độc lập
         if (isInventoryOpen) {
             inventoryOverlay.handleInput();
-
-            // Cho phép nhấn I một lần nữa hoặc click chuột ngoài nút Bag để đóng nhanh balo đồ
             if (Gdx.input.isKeyJustPressed(Input.Keys.I)) {
                 if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
                 isInventoryOpen = false;
@@ -269,46 +252,37 @@ public class PlayScreen extends ScreenAdapter {
 
         if (isVendingOpen) {
             vendingMachineOverlay.handleInput();
-            return; // Khác với inventory, mở máy bán hàng sẽ đóng băng di chuyển nhân vật
+            return;
         }
 
-        // Bắt phím mở hòm đồ khẩn cấp bằng phím I
         if (Gdx.input.isKeyJustPressed(Input.Keys.I) && !isInventoryOpen) {
             if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
             isInventoryOpen = true;
         }
 
-        // --- NHẬN DIỆN CLICK CHUỘT VÀO NÚT PAUSE HOẶC NÚT BAG TRÊN HUD ---
         if (Gdx.input.justTouched()) {
             Vector3 touchPoint = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
-            touchPoint.y = Gdx.graphics.getHeight() - touchPoint.y; // Đảo ngược Y chuẩn LibGDX
+            touchPoint.y = Gdx.graphics.getHeight() - touchPoint.y;
 
-            // 1. Kiểm tra click nút Pause (Chỉ nhận diện khi hòm đồ cá nhân đang đóng)
             if (!isInventoryOpen && gameHUD.getRectPauseBtn().contains(touchPoint.x, touchPoint.y)) {
                 if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
                 setPaused(true);
                 return;
             }
 
-            // 2. Kiểm tra click nút Bag (Hoạt động như công tắc bật/tắt hòm đồ)
             if (gameHUD.getRectBagBtn().contains(touchPoint.x, touchPoint.y)) {
                 if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
-
                 if (isInventoryOpen) {
-                    isInventoryOpen = false; // Nếu đang mở thì đóng lại
+                    isInventoryOpen = false;
                 } else if (!isVendingOpen) {
-                    isInventoryOpen = true;  // Nếu đang đóng (and không mở máy bán hàng) thì bật lên
+                    isInventoryOpen = true;
                 }
                 return;
             }
         }
 
-        // Nếu hòm đồ đang mở, chặn toàn bộ logic gameplay cốt lõi (di chuyển, kỹ năng) bên dưới
-        if (isInventoryOpen) {
-            return;
-        }
+        if (isInventoryOpen) return;
 
-        // Kiểm tra khoảng cách đứng gần Vending Machine để bật/tắt prompt nhắc nhở
         activeVending = null;
         for (VendingMachine vm : mapManager.vendingMachines) {
             float dist = Vector2.dst(dung.getPosition().x, dung.getPosition().y, vm.bounds.x + vm.bounds.width/2, vm.bounds.y + vm.bounds.height/2);
@@ -318,15 +292,13 @@ public class PlayScreen extends ScreenAdapter {
             }
         }
 
-        // Nếu đứng gần máy bán hàng và nhấn phím E, mở giao diện Vending Machine công cộng
         if (activeVending != null && Gdx.input.isKeyJustPressed(Input.Keys.E)) {
             if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
             isVendingOpen = true;
-            isInventoryOpen = false; // Tắt luôn inventory tránh chồng chéo UI
+            isInventoryOpen = false;
             return;
         }
 
-        // Áp dụng chỉ số tốc độ dựa trên hiệu ứng của Shoes vật phẩm cứu trợ
         float originalSpeed = 150f;
         if (shoesTimer > 0) {
             dung.setSpeed(originalSpeed * 1.3f);
@@ -334,15 +306,11 @@ public class PlayScreen extends ScreenAdapter {
             dung.setSpeed(originalSpeed);
         }
 
-        // Cập nhật trạng thái Player
         dung.update(delta, dung, mapManager.wallRects);
-
-        // Di chuyển nhân vật
         InputHandler.handleTankMovement(delta, dung, camera, mapManager);
 
         Rectangle dungRect = new Rectangle(dung.getPosition().x, dung.getPosition().y, dung.getSize(), dung.getSize());
 
-        // Kiểm tra va chạm nhặt Key bí mật ngoài Map thế giới
         for (int i = mapManager.keys.size - 1; i >= 0; i--) {
             if (dungRect.overlaps(mapManager.keys.get(i))) {
                 if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
@@ -352,16 +320,13 @@ public class PlayScreen extends ScreenAdapter {
             }
         }
 
-        // --- HỆ THỐNG VA CHẠM NHẶT VẬT PHẨM ĐƯA VÀO BALO/VÍ TIỀN TOÀN CỤC ---
         for (int i = mapManager.items.size - 1; i >= 0; i--) {
             Item item = mapManager.items.get(i);
             Rectangle itemRect = new Rectangle(item.getPosition().x, item.getPosition().y, item.getSize(), item.getSize());
 
             if (dungRect.overlaps(itemRect)) {
                 if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
-
                 if (item.type == Item.ItemType.COIN) {
-                    // CẬP NHẬT: Tăng số xu toàn cục của Game chính, không dùng coinCount cục bộ
                     game.globalCoinCount++;
                 } else {
                     inventory.put(item.type, inventory.getOrDefault(item.type, 0) + 1);
@@ -371,7 +336,6 @@ public class PlayScreen extends ScreenAdapter {
             }
         }
 
-        // Cập nhật Cửa phòng máy chủ
         for (Door door : mapManager.doors) {
             float dist = Vector2.dst(dung.getPosition().x, dung.getPosition().y, door.bounds.x, door.bounds.y);
             door.update(delta, dist < 60f, hasKey);
@@ -379,11 +343,10 @@ public class PlayScreen extends ScreenAdapter {
 
         InputHandler.handleSkillInput(dung, skills, entityManager, this.game);
 
-        // --- KIỂM TRA ĐIỀU KIỆN LÍNH TUẦN TRA BẮT GIỮ ---
-        if (invisibilityTimer <= 0) {
-            float deltaLogic = (clockTimer > 0) ? 0f : delta;
-
-            entityManager.update(deltaLogic, dung, mapManager, () -> {
+        // Cập nhật trạng thái lính luôn chạy, nhưng logic bắt giữ chỉ chạy khi KHÔNG tàng hình
+        float deltaLogic = (clockTimer > 0) ? 0f : delta;
+        entityManager.update(deltaLogic, dung, mapManager, () -> {
+            if (invisibilityTimer <= 0) {
                 if (!isCaptured) {
                     if (amuletCount > 0) {
                         amuletCount--;
@@ -395,24 +358,19 @@ public class PlayScreen extends ScreenAdapter {
                     InputHandler.stopLoopingSounds(this.game);
                     capturedOverlay.playSound();
                 }
-            });
-        }
+            }
+        });
 
-        // Di chuyển Camera
         camera.position.x = MathUtils.clamp(dung.getPosition().x + dung.getSize() / 2, camera.viewportWidth / 2, mapManager.mapWidth - camera.viewportWidth / 2);
         camera.position.y = MathUtils.clamp(dung.getPosition().y + dung.getSize() / 2, camera.viewportHeight / 2, mapManager.mapHeight - camera.viewportHeight / 2);
         camera.update();
 
-        // Kiểm tra điều kiện thắng cuộc
         if (mapManager.targetServer != null && mapManager.targetServer.hp <= 0) {
             if (currentLevel > game.completedLevelsReal[currentWorld - 1]) {
                 game.completedLevelsReal[currentWorld - 1] = currentLevel;
             }
             InputHandler.stopLoopingSounds(this.game);
-
-            // CẬP NHẬT: Tự động ghi vật lý cả tiến trình map lẫn số xu tích lũy xuống ổ cứng khi qua màn thành công
             game.saveProgress();
-
             game.setScreen(new LevelDoneScreen(game, currentWorld, currentLevel));
         }
 
