@@ -97,6 +97,10 @@ public class Player extends Entity {
         }
     }
 
+    public void setSpeed(float speed) {
+        this.speed = speed;
+    }
+
     /**
      * Chọn frame theo góc và trạng thái di chuyển.
      * angle từ atan2 của LibGDX:

@@ -64,7 +64,7 @@ public class InputHandler {
 
         // --- 1. CHIÊU SPIT (Khạc - Ấn phát một) ---
         // Đổi từ Input.Keys.NUM_1 sang Input.Keys.Q
-        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) || Gdx.input.isKeyJustPressed(Input.Keys.Q)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.Q)) {
             if (skills.get(0).activate(dung, target, entityManager.projectiles)) {
                 // ĐÃ ĐẤU NỐI VẬT LÝ: Kiểm tra cài đặt SFX hệ thống trước khi phát âm thanh
                 if (game.isMasterOn && game.isSfxOn && game.spitSound != null) {

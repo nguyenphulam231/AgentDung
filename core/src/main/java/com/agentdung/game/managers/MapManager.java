@@ -4,6 +4,8 @@ import com.agentdung.game.entities.Door;
 import com.agentdung.game.entities.Item;
 import com.agentdung.game.entities.Server;
 import com.agentdung.game.entities.Wall;
+import com.agentdung.game.entities.VendingMachine;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -26,16 +28,27 @@ public class MapManager {
     public Array<Rectangle> wallRects = new Array<>();
     public Array<Door> doors = new Array<>();
     public Array<Rectangle> keys = new Array<>();
-
-    // --- THÊM: Mảng quản lý các vật phẩm hồi mana trên Map ---
     public Array<Item> items = new Array<>();
+
+    // --- Mảng quản lý máy bán hàng trên Map ---
+    public Array<VendingMachine> vendingMachines = new Array<>();
 
     public Server targetServer;
     public Texture keyTexture;
 
-    // --- THÊM: Các Texture lưu trữ hình ảnh Sprite cho vật phẩm ---
-    public Texture meatTexture;
-    public Texture waterTexture;
+    // --- THÊM MỚI: Texture hiển thị cho Máy bán hàng tự động ---
+    public Texture vendingMachineTexture;
+
+    // Nút tương tác nhanh hiện lên khi đứng gần Vending Machine
+    public Texture btnUsePromptTex;
+
+    // --- TỐI ƯU: Dùng Map quản lý toàn bộ ảnh vật phẩm tự động ---
+    private final Map<ItemTypeHolder, Texture> itemTextures = new HashMap<>();
+
+    // Lớp vỏ bọc tạm thời để tránh xung đột trước khi biên dịch xong
+    private enum ItemTypeHolder {
+        BEER, AMULET, CARROT, CLOCK, COIN, INVISIBILITY, KEY, LEMON, ORANGE, ROTTEN_EGG, ROTTEN_MEAT, SHOES, WATER, WHISKEY
+    }
 
     public float mapWidth, mapHeight;
     public Vector2 playerSpawn = new Vector2();
@@ -50,16 +63,25 @@ public class MapManager {
         mapRenderer = new OrthogonalTiledMapRenderer(map);
 
         int tileWidth  = map.getProperties().get("tilewidth", Integer.class);
-        int tileHeight = map.getProperties().get("height", Integer.class);
         mapWidth  = map.getProperties().get("width", Integer.class) * tileWidth;
-        mapHeight = map.getProperties().get("height", Integer.class) * tileHeight;
+        mapHeight = map.getProperties().get("height", Integer.class) * map.getProperties().get("height", Integer.class);
 
         keyTexture = new Texture("images/key.png");
-        // --- THÊM: Tải ảnh sprite từ thư mục assets ---
-        meatTexture = new Texture("images/rotten_meat.png");
-        waterTexture = new Texture("images/water.png");
+        btnUsePromptTex = new Texture("ui/UI_button_use.png");
 
-        // Đọc collisions
+        // --- THÊM MỚI: Nạp texture cho máy bán hàng tự động (Hãy đảm bảo có file này trong assets) ---
+        vendingMachineTexture = new Texture("images/vending_machine.png");
+        vendingMachineTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+
+        // Nạp tự động toàn bộ Texture ảnh từ thư mục assets/images/ theo danh sách Enum
+        for (Item.ItemType type : Item.ItemType.values()) {
+            Texture tex = new Texture(type.texturePath);
+            tex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+            // Ánh xạ gián tiếp để đảm bảo tính an toàn dữ liệu
+            itemTextures.put(ItemTypeHolder.valueOf(type.name()), tex);
+        }
+
+        // Đọc va chạm tường
         MapObjects wallObjects = map.getLayers().get("collisions").getObjects();
         for (MapObject obj : wallObjects) {
             Rectangle rect = ((RectangleMapObject) obj).getRectangle();
@@ -67,24 +89,46 @@ public class MapManager {
             wallRects.add(rect);
         }
 
-        // Đọc thực thể tĩnh
+        // Đọc các thực thể tĩnh từ layer entities
         MapObjects entityObjects = map.getLayers().get("entities").getObjects();
         for (MapObject obj : entityObjects) {
             Rectangle rect = ((RectangleMapObject) obj).getRectangle();
-            if ("player_spawn".equals(obj.getName())) {
+            String name = obj.getName();
+
+            if ("player_spawn".equals(name)) {
                 playerSpawn.set(rect.x, rect.y);
-            } else if ("server".equals(obj.getName())) {
+            } else if ("server".equals(name)) {
                 targetServer = new Server(rect.x, rect.y);
-            } else if ("key".equals(obj.getName())) {
+            } else if ("key".equals(name)) {
                 keys.add(new Rectangle(rect.x, rect.y, 16, 16));
-            } else if ("server_door".equals(obj.getName())) {
+            } else if ("server_door".equals(name)) {
                 doors.add(new Door(rect.x, rect.y, rect.width, rect.height));
             }
-            // --- THÊM: Đọc các đối tượng vật phẩm được đặt tên từ Tiled Map ---
-            else if ("item_meat".equals(obj.getName())) {
+            // --- Đọc thực thể máy bán hàng tự động Vending Machine ---
+            else if ("vending_machine".equals(name)) {
+                vendingMachines.add(new VendingMachine(rect.x, rect.y, rect.width, rect.height));
+            }
+            // --- Đọc các vật phẩm rơi tự do ngoài Map (Đã mở rộng đầy đủ loại item) ---
+            else if ("item_meat".equals(name) || "item_rotten_meat".equals(name)) {
                 items.add(new Item(rect.x, rect.y, Item.ItemType.ROTTEN_MEAT));
-            } else if ("item_water".equals(obj.getName())) {
+            } else if ("item_water".equals(name)) {
                 items.add(new Item(rect.x, rect.y, Item.ItemType.WATER));
+            } else if ("item_beer".equals(name)) {
+                items.add(new Item(rect.x, rect.y, Item.ItemType.BEER));
+            } else if ("item_coin".equals(name)) {
+                items.add(new Item(rect.x, rect.y, Item.ItemType.COIN));
+            } else if ("item_shoes".equals(name)) {
+                items.add(new Item(rect.x, rect.y, Item.ItemType.SHOES));
+            } else if ("item_clock".equals(name)) {
+                items.add(new Item(rect.x, rect.y, Item.ItemType.CLOCK));
+            } else if ("item_amulet".equals(name)) {
+                items.add(new Item(rect.x, rect.y, Item.ItemType.AMULET));
+            } else if ("item_invisibility".equals(name)) {
+                items.add(new Item(rect.x, rect.y, Item.ItemType.INVISIBILITY));
+            } else if ("item_lemon".equals(name)) {
+                items.add(new Item(rect.x, rect.y, Item.ItemType.LEMON));
+            } else if ("item_orange".equals(name)) {
+                items.add(new Item(rect.x, rect.y, Item.ItemType.ORANGE));
             }
         }
 
@@ -101,19 +145,28 @@ public class MapManager {
     }
 
     public void renderShapes(ShapeRenderer shapeRenderer) {
-        // --- ĐÃ CẬP NHẬT: Xóa bỏ dòng targetServer.render cũ để không vẽ khối màu xám đè lên ảnh nữa ---
         for (Door door : doors) door.render(shapeRenderer);
     }
 
     public void renderSprites(SpriteBatch batch) {
+        // 1. Vẽ máy bán hàng tự động (Vending Machines) lên bản đồ trước để tránh đè lên item nhỏ
+        for (VendingMachine vm : vendingMachines) {
+            if (vendingMachineTexture != null) {
+                batch.draw(vendingMachineTexture, vm.bounds.x, vm.bounds.y, vm.bounds.width, vm.bounds.height);
+            }
+        }
+
+        // 2. Vẽ chìa khóa bí mật
         for (Rectangle key : keys) {
             batch.draw(keyTexture, key.x, key.y, key.width, key.height);
         }
 
-        // --- THÊM: Vẽ các vật phẩm ăn được bằng SpriteBatch dựa trên ItemType và size kế thừa từ Entity ---
+        // 3. Vẽ tự động toàn bộ danh sách item rơi trên mặt đất bằng bộ Texture Map tập trung
         for (Item item : items) {
-            Texture tex = (item.type == Item.ItemType.ROTTEN_MEAT) ? meatTexture : waterTexture;
-            batch.draw(tex, item.getPosition().x, item.getPosition().y, item.getSize(), item.getSize());
+            Texture tex = itemTextures.get(ItemTypeHolder.valueOf(item.type.name()));
+            if (tex != null) {
+                batch.draw(tex, item.getPosition().x, item.getPosition().y, item.getSize(), item.getSize());
+            }
         }
     }
 
@@ -121,12 +174,20 @@ public class MapManager {
         if (map != null) map.dispose();
         if (mapRenderer != null) mapRenderer.dispose();
         if (keyTexture != null) keyTexture.dispose();
+        if (btnUsePromptTex != null) btnUsePromptTex.dispose();
 
-        // --- THÊM: Giải phóng bộ nhớ của các Texture vật phẩm để tránh tràn RAM ---
-        if (meatTexture != null) meatTexture.dispose();
-        if (waterTexture != null) waterTexture.dispose();
+        // --- THÊM MỚI: Giải phóng vùng nhớ của ảnh Máy bán hàng ---
+        if (vendingMachineTexture != null) {
+            vendingMachineTexture.dispose();
+            vendingMachineTexture = null;
+        }
 
-        // --- THÊM: Giải phóng bộ nhớ kết cấu hình ảnh server.png ---
+        // Giải phóng sạch sẽ vùng nhớ tránh memory leak cho 14 Texture
+        for (Texture tex : itemTextures.values()) {
+            if (tex != null) tex.dispose();
+        }
+        itemTextures.clear();
+
         if (targetServer != null) {
             targetServer.dispose();
         }
@@ -135,7 +196,8 @@ public class MapManager {
         wallRects.clear();
         doors.clear();
         keys.clear();
-        items.clear(); // Dọn dẹp danh sách vật phẩm khi đổi màn
+        items.clear();
+        vendingMachines.clear(); // Xóa sạch danh sách máy khi chuyển cảnh
         enemyStarts.clear();
         enemyEnds.clear();
     }

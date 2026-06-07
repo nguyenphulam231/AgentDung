@@ -18,10 +18,15 @@ public class GameHUD {
     private Texture btnPauseTex;
     private final Rectangle rectPauseBtn;
 
+    // --- THÊM MỚI: Quản lý tài nguyên và vùng va chạm của nút Balo (Bag) ---
+    private Texture btnBagTex;
+    private final Rectangle rectBagBtn;
+
     public GameHUD(AgentDungGame game) {
         this.game = game;
         this.manaTextures = new HashMap<>();
         this.rectPauseBtn = new Rectangle();
+        this.rectBagBtn = new Rectangle(); // <-- Khởi tạo vùng va chạm cho nút Bag
     }
 
     public void loadTextures() {
@@ -36,6 +41,10 @@ public class GameHUD {
         // Nạp texture cho nút Pause
         btnPauseTex = new Texture(Gdx.files.internal("ui/UI_button_pause.png"));
         btnPauseTex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+
+        // --- THÊM MỚI: Nạp texture cho nút Bag từ thư mục ui ---
+        btnBagTex = new Texture(Gdx.files.internal("ui/UI_button_bag.png"));
+        btnBagTex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
     }
 
     // Hàm render nhận đầy đủ 3 tham số: skills, hudMatrix, và hasKey để đồng bộ với PlayScreen
@@ -73,12 +82,26 @@ public class GameHUD {
             game.batch.draw(btnPauseTex, rectPauseBtn.x, rectPauseBtn.y, rectPauseBtn.width, rectPauseBtn.height);
         }
 
+        // --- THÊM MỚI: Định vị và vẽ nút Bag nằm dịch sang bên trái nút Pause 15px ---
+        float bagX = pauseX - btnSize - 15f;
+        float bagY = pauseY;
+        rectBagBtn.set(bagX, bagY, btnSize, btnSize);
+
+        if (btnBagTex != null) {
+            game.batch.draw(btnBagTex, rectBagBtn.x, rectBagBtn.y, rectBagBtn.width, rectBagBtn.height);
+        }
+
         game.batch.end();
     }
 
-    // Cung cấp Rectangle va chạm để PlayScreen kiểm tra click chuột
+    // Cung cấp Rectangle va chạm để PlayScreen kiểm tra click chuột vào nút Pause
     public Rectangle getRectPauseBtn() {
         return rectPauseBtn;
+    }
+
+    // --- THÊM MỚI: Cung cấp Rectangle va chạm để PlayScreen kiểm tra click chuột vào nút Bag ---
+    public Rectangle getRectBagBtn() {
+        return rectBagBtn;
     }
 
     public void clearTextures() {
@@ -92,6 +115,12 @@ public class GameHUD {
         if (btnPauseTex != null) {
             btnPauseTex.dispose();
             btnPauseTex = null;
+        }
+
+        // --- THÊM MỚI: Giải phóng triệt để texture nút bag ---
+        if (btnBagTex != null) {
+            btnBagTex.dispose();
+            btnBagTex = null;
         }
     }
 

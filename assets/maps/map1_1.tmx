@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="60" height="40" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="105">
+<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="60" height="40" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="113">
  <tileset firstgid="1" source="tilesetAD/Set 1.0.tsx"/>
  <tileset firstgid="49" source="tilesetAD/Set 1.2.tsx"/>
  <tileset firstgid="145" source="tilesetAD/Structure.tsx"/>
@@ -77,12 +77,20 @@
   <object id="47" name="wall" x="857.333" y="416.667" width="6" height="150"/>
  </objectgroup>
  <objectgroup id="5" name="entities">
-  <object id="51" name="player_spawn" x="42.6667" y="584" width="14.6667" height="17.3333"/>
+  <object id="51" name="player_spawn" x="24" y="514.667" width="14.6667" height="17.3333"/>
   <object id="52" name="server" x="800.167" y="255.833" width="31.1667" height="33.5"/>
   <object id="99" name="server_door" x="831.75" y="224" width="63.75" height="7"/>
   <object id="100" name="key" x="373" y="351" width="9.5" height="11.5"/>
   <object id="102" name="item_water" x="246.667" y="317.333" width="12" height="12.6667"/>
   <object id="103" name="item_meat" x="136" y="554.667" width="14.6667" height="13.3333"/>
+  <object id="105" name="vending_machine" x="57.3333" y="572.667" width="40" height="50"/>
+  <object id="106" name="item_coin" x="98" y="394" width="17.3333" height="18"/>
+  <object id="107" name="item_coin" x="343.333" y="42.6667" width="16.6667" height="16.6667"/>
+  <object id="108" name="item_coin" x="249.333" y="379.333" width="13.3333" height="16.6667"/>
+  <object id="109" name="item_coin" x="462" y="537.333" width="16.6667" height="16.6667"/>
+  <object id="110" name="item_coin" x="615" y="205" width="14.5" height="17"/>
+  <object id="111" name="item_coin" x="849.5" y="101.5" width="15.5" height="17"/>
+  <object id="112" name="item_beer" x="166" y="582.667" width="15.3333" height="14.6667"/>
  </objectgroup>
  <objectgroup id="6" name="enemies">
   <object id="54" name="guard_start" x="270" y="604" width="12" height="12">
