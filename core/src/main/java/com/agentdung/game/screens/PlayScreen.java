@@ -41,7 +41,7 @@ public class PlayScreen extends ScreenAdapter {
     int currentLevel;
     int currentWorld; // Chuyển thành biến động nhận từ màn hình chọn Map
 
-    // --- ĐÃ CẬP NHẬT: Constructor nhận cả Map (World) và Level thực tế ---
+    // --- Constructor nhận cả Map (World) và Level thực tế ---
     public PlayScreen(AgentDungGame game, int world, int level) {
         this.game = game;
         this.currentWorld = world;
@@ -58,7 +58,7 @@ public class PlayScreen extends ScreenAdapter {
     }
 
     private void initLevel(int level) {
-        // --- CẬP NHẬT: Dừng toàn bộ âm thanh đang lặp (như tiếng đái) trước khi nạp lại map/level ---
+        // --- Dừng toàn bộ âm thanh đang lặp trước khi nạp lại map/level ---
         InputHandler.stopLoopingSounds(this.game);
 
         if (skills != null) {
@@ -72,7 +72,7 @@ public class PlayScreen extends ScreenAdapter {
         // Tải map động theo cấu trúc map[currentWorld]_[level].tmx bên trong MapManager
         mapManager.loadLevel(currentWorld, level);
 
-        // --- CẬP NHẬT: TRUYỀN THÊM THAM SỐ GAME VÀO KHỞI TẠO PLAYER ---
+
         dung = new Player(mapManager.playerSpawn.x, mapManager.playerSpawn.y, this.game);
         dung.setSize(26);
 
@@ -99,16 +99,16 @@ public class PlayScreen extends ScreenAdapter {
         update(delta);
         ScreenUtils.clear(0, 0, 0, 1);
 
-        // 1. Render Bản đồ
+        // Render Bản đồ
         mapManager.mapRenderer.setView(camera);
         mapManager.mapRenderer.render();
 
-        // 2. Render Khối hình học (ShapeRenderer)
+        // Render Khối hình học (ShapeRenderer)
         game.shapeRenderer.setProjectionMatrix(camera.combined);
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         mapManager.renderShapes(game.shapeRenderer);
 
-        // --- CẬP NHẬT: Vẽ thanh máu của Server bằng ShapeRenderer lên trên màn chơi ---
+        // --- Vẽ thanh máu của Server bằng ShapeRenderer lên trên màn chơi ---
         if (mapManager.targetServer != null) {
             mapManager.targetServer.renderHpBar(game.shapeRenderer);
         }
@@ -116,14 +116,14 @@ public class PlayScreen extends ScreenAdapter {
         entityManager.renderShapes(game.shapeRenderer);
         game.shapeRenderer.end();
 
-        // 3. Render Sprite ảnh (SpriteBatch)
+        // 3. Render Sprite ảnh
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
         dung.draw(game.batch);
         for (com.agentdung.game.entities.Enemy e : entityManager.enemies) e.draw(game.batch);
         mapManager.renderSprites(game.batch);
 
-        // --- CẬP NHẬT: Vẽ hình ảnh ảnh kết cấu kết cấu server.png ---
+        // --- Vẽ hình ảnh ảnh
         if (mapManager.targetServer != null) {
             mapManager.targetServer.renderSprite(game.batch);
         }
@@ -131,18 +131,13 @@ public class PlayScreen extends ScreenAdapter {
         entityManager.renderSprites(game.batch, skills);
         game.batch.end();
 
-        // 4 & 5. Render Mặt nạ Bóng tối FBO
+        // Render Mặt nạ Bóng tối FBO
         lightRenderer.renderDarkness(game.batch, dung, camera);
 
-        // 6. Render Đèn pin của Lính xuyên bóng tối
+        // Render Đèn pin của Lính xuyên bóng tối
         game.shapeRenderer.setProjectionMatrix(camera.combined);
         lightRenderer.renderEnemyVision(game.shapeRenderer, entityManager, mapManager);
 
-        // 7. Vẽ thanh Mana trên đầu nhân vật
-        game.shapeRenderer.setProjectionMatrix(camera.combined);
-        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        dung.render(game.shapeRenderer);
-        game.shapeRenderer.end();
 
         // 8. Vẽ HUD
         game.batch.setProjectionMatrix(new Matrix4().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
@@ -151,8 +146,10 @@ public class PlayScreen extends ScreenAdapter {
         if (hasKey) game.batch.draw(mapManager.keyTexture, Gdx.graphics.getWidth() - 50, Gdx.graphics.getHeight() - 50, 32, 32);
         game.batch.end();
 
+        // --- SỬA LỖI: Thêm stopLoopingSounds khi bấm ESCAPE để tránh lặp tiếng đái ---
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
+            InputHandler.stopLoopingSounds(this.game);
             game.setScreen(new MenuScreen(game));
         }
     }
@@ -225,14 +222,17 @@ public class PlayScreen extends ScreenAdapter {
         camera.position.y = MathUtils.clamp(dung.getPosition().y + dung.getSize() / 2, camera.viewportHeight / 2, mapManager.mapHeight - camera.viewportHeight / 2);
         camera.update();
 
-        // --- ĐÃ ĐẤU NỐI CHẠY THẬT: Kiểm tra điều kiện qua màn khi sập nguồn Server ---
+        // --- Kiểm tra điều kiện qua màn khi sập nguồn Server ---
         if (mapManager.targetServer != null && mapManager.targetServer.hp <= 0) {
             // Nếu level vừa qua lớn hơn kỉ lục cũ của map này, cập nhật kỉ lục mới chạy thật
             if (currentLevel > game.completedLevelsReal[currentWorld - 1]) {
                 game.completedLevelsReal[currentWorld - 1] = currentLevel;
             }
 
-            // --- ĐÃ CẬP NHẬT: Thay vì tăng level ngay lập tức, chuyển hướng sang giao diện kết quả LevelDoneScreen ---
+            // --- Dập tắt âm thanh PeeSkill ngay lập tức trước khi nhảy sang LevelDoneScreen ---
+            InputHandler.stopLoopingSounds(this.game);
+
+            // Chuyển hướng sang giao diện kết quả LevelDoneScreen
             game.setScreen(new LevelDoneScreen(game, currentWorld, currentLevel));
         }
 

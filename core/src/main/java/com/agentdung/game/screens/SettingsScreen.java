@@ -2,7 +2,6 @@ package com.agentdung.game.screens;
 
 import com.agentdung.game.core.AgentDungGame;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -22,12 +21,18 @@ public class SettingsScreen extends ScreenAdapter {
 
     private Texture settingsBgTexture;
     private Texture backButtonTexture;
+    private Texture titleTexture; // Tiêu đề Settings
 
-    // Khai báo các Texture âm thanh và nhạc
+    // Texture của các nút bấm Toggle
     private Texture soundOnTexture;
     private Texture soundOffTexture;
     private Texture musicOnTexture;
     private Texture musicOffTexture;
+
+    // Các Texture của nhãn chữ (Label dạng ảnh)
+    private Texture textMasterTexture;
+    private Texture textSfxTexture;
+    private Texture textMusicTexture;
 
     public SettingsScreen(AgentDungGame game) {
         this.game = game;
@@ -38,74 +43,68 @@ public class SettingsScreen extends ScreenAdapter {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
-        // 1. Nạp file ảnh từ assets
-        settingsBgTexture = new Texture(Gdx.files.internal("ui/UI_frame_settings.png"));
-        backButtonTexture = new Texture(Gdx.files.internal("ui/UI_arrow_left.png"));
+        // 1. Nạp file ảnh nền UI_frame_general
+        settingsBgTexture = new Texture(Gdx.files.internal("ui/UI_frame_general.png"));
+        Image settingsBg = new Image(settingsBgTexture);
+        settingsBg.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        stage.addActor(settingsBg);
 
+        // Nạp ảnh tiêu đề Settings
+        titleTexture = new Texture(Gdx.files.internal("ui/UI_title_settings.png"));
+
+        // Nạp ảnh các nút bấm hệ thống và ảnh nhãn chữ tương ứng
+        backButtonTexture = new Texture(Gdx.files.internal("ui/UI_arrow_left.png"));
         soundOnTexture = new Texture(Gdx.files.internal("ui/UI_soundon.png"));
         soundOffTexture = new Texture(Gdx.files.internal("ui/UI_soundoff.png"));
         musicOnTexture = new Texture(Gdx.files.internal("ui/UI_musicon.png"));
         musicOffTexture = new Texture(Gdx.files.internal("ui/UI_musicoff.png"));
 
-        // 2. Tạo ảnh nền cài đặt full màn hình
-        Image settingsBg = new Image(settingsBgTexture);
-        settingsBg.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        stage.addActor(settingsBg);
+        textMasterTexture = new Texture(Gdx.files.internal("ui/UI_text_master.png"));
+        textSfxTexture = new Texture(Gdx.files.internal("ui/UI_text_sfx.png"));
+        textMusicTexture = new Texture(Gdx.files.internal("ui/UI_text_music.png"));
 
-        // --- KHỞI TẠO CÁC NÚT BẤM ---
+        // Khử mờ đồng loạt cho Pixel Art sắc nét
+        settingsBgTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        titleTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        backButtonTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        soundOnTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        soundOffTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        musicOnTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        musicOffTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        textMasterTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        textSfxTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        textMusicTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
-        // Nút Quay lại (Back)
+        // Tạo đối tượng hiển thị hình ảnh từ Texture
+        Image titleImage = new Image(titleTexture);
+        Image textMaster = new Image(textMasterTexture);
+        Image textSfx = new Image(textSfxTexture);
+        Image textMusic = new Image(textMusicTexture);
+
+        // --- KHỞI TẠO CÁC NÚT BẤM VÀ ĐỔI KIỂU DRAWABLE ---
         TextureRegionDrawable backDrawable = new TextureRegionDrawable(new TextureRegion(backButtonTexture));
         ImageButton backButton = new ImageButton(backDrawable);
 
-        // Chuyển đổi các Texture On/Off sang dạng Drawable để nạp vào nút bấm dạng Toggle (Bật/Tắt)
+        // Chuyển đổi các Texture sang định dạng Drawable
         TextureRegionDrawable soundOn = new TextureRegionDrawable(new TextureRegion(soundOnTexture));
         TextureRegionDrawable soundOff = new TextureRegionDrawable(new TextureRegion(soundOffTexture));
         TextureRegionDrawable musicOn = new TextureRegionDrawable(new TextureRegion(musicOnTexture));
         TextureRegionDrawable musicOff = new TextureRegionDrawable(new TextureRegion(musicOffTexture));
 
-        // Khởi tạo ImageButton với cấu trúc: ImageButton(ImageUp, ImageDown, ImageChecked)
         final ImageButton masterButton = new ImageButton(soundOn, soundOn, soundOff);
         final ImageButton sfxButton = new ImageButton(soundOn, soundOn, soundOff);
         final ImageButton musicButton = new ImageButton(musicOn, musicOn, musicOff);
 
-        // --- ĐÃ KẾT NỐI: Đặt trạng thái ban đầu dựa theo biến cấu hình hệ thống lưu trong lớp Game ---
+        // Đồng bộ trạng thái lưu từ game core
         masterButton.setChecked(!game.isMasterOn);
         sfxButton.setChecked(!game.isSfxOn);
         musicButton.setChecked(!game.isMusicOn);
 
-        float bigbtn = 85f;
-        float btnSize = 60f;
-        masterButton.setSize(bigbtn, bigbtn);
-        sfxButton.setSize(btnSize, btnSize);
-        musicButton.setSize(btnSize, btnSize);
-
-        // --- ĐỊNH VỊ VỊ TRÍ THỦ CÔNG ĐỂ KHỚP VỚI HÌNH NỀN --
-
-        // 1. Định vị nút Master
-        float masterX = Gdx.graphics.getWidth() * 0.30f;
-        float masterY = Gdx.graphics.getHeight() * 0.53f;
-        masterButton.setPosition(masterX, masterY);
-
-        // 2. Định vị nút SFX
-        float sfxX = Gdx.graphics.getWidth() * 0.42f;
-        float sfxY = Gdx.graphics.getHeight() * 0.31f;
-        sfxButton.setPosition(sfxX, sfxY);
-
-        // 3. Định vị nút Music
-        float musicX = Gdx.graphics.getWidth() * 0.42f;
-        float musicY = Gdx.graphics.getHeight() * 0.10f;
-        musicButton.setPosition(musicX, musicY);
-
-        // --- GẮN SỰ KIỆN CLICK VÀ LOGIC BẬT/TẮT VẬT LÝ ---
-
+        // --- GẮN SỰ KIỆN CLICK CHUỘT LOGIC ---
         backButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                // Chỉ phát tiếng click nếu SFX và Master đang bật
-                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) {
-                    game.clickSound.play();
-                }
+                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
                 game.setScreen(new MenuScreen(game));
             }
         });
@@ -113,66 +112,75 @@ public class SettingsScreen extends ScreenAdapter {
         masterButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                // Cập nhật trạng thái vào Core Game
                 game.isMasterOn = !masterButton.isChecked();
-
-                // Thực hiện thay đổi vật lý cho Music và SFX tổng
                 game.updateMusicState();
                 game.updateSfxState();
-
-                // Chỉ phát tiếng click phản hồi nếu Master vừa được BẬT lên
-                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) {
-                    game.clickSound.play();
-                }
-                System.out.println("Trạng thái Master Audio chạy thật: " + (game.isMasterOn ? "BẬT" : "TẮT"));
+                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
             }
         });
 
         sfxButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                // Cập nhật trạng thái vào Core Game
                 game.isSfxOn = !sfxButton.isChecked();
-
-                // Áp dụng thay đổi (ví dụ dừng âm thanh loop nếu vừa tắt SFX)
                 game.updateSfxState();
-
-                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) {
-                    game.clickSound.play();
-                }
-                System.out.println("Trạng thái SFX chạy thật: " + (game.isSfxOn ? "BẬT" : "TẮT"));
+                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
             }
         });
 
         musicButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                // Cập nhật trạng thái vào Core Game
                 game.isMusicOn = !musicButton.isChecked();
-
-                // Thực hiện pause/play nhạc nền ngay lập tức
                 game.updateMusicState();
-
-                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) {
-                    game.clickSound.play();
-                }
-                System.out.println("Trạng thái Music chạy thật: " + (game.isMusicOn ? "BẬT" : "TẮT"));
+                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
             }
         });
 
-        // --- ĐƯA CÁC THÀNH PHẦN VÀO STAGE ---
+        // --- THIẾT KẾ GIAO DIỆN PHÂN CẤP THEO MẪU ---
 
-        // Thêm nút Quay lại vào góc trên bên trái thông qua Table
+        // Nút Back ở góc trên cùng bên trái
         Table topLeftTable = new Table();
         topLeftTable.setFillParent(true);
         topLeftTable.top().left();
         topLeftTable.add(backButton).size(40f, 40f).padTop(15f).padLeft(15f);
         stage.addActor(topLeftTable);
 
-        // Thêm trực tiếp 3 nút bật tắt âm thanh vào stage để kiểm soát tọa độ X, Y tuyệt đối
-        stage.addActor(masterButton);
-        stage.addActor(sfxButton);
-        stage.addActor(musicButton);
+        // Bảng chứa danh sách tùy chọn đặt lệch phải
+        Table optionsTable = new Table();
+        optionsTable.left(); // Căn lề trái tổng thể cho bảng
+
+        // Cấu hình thông số kích thước đúng như ảnh mẫu của bạn
+        float btnMasterSize = 75f;  // Nút loa tổng lớn hẳn lên
+        float btnSubSize = 50f;     // Nút SFX và Music nhỏ hơn ở dưới
+
+        // Hàng 1: Master Audio (Nút lớn + Chữ lớn nằm sát lề trái của bảng)
+        optionsTable.add(masterButton).size(btnMasterSize).padRight(15f).padBottom(15f);
+        optionsTable.add(textMaster).size(150f, 45f).padBottom(15f).left(); // Chữ Master to hơn
+        optionsTable.row();
+
+        // Hàng 2: SFX Audio (Dịch phải bằng padLeft, nút bám sát chữ)
+        optionsTable.add(sfxButton).size(btnSubSize).padLeft(45f).padRight(15f).padBottom(15f);
+        optionsTable.add(textSfx).size(80f, 32f).padBottom(15f).left();
+        optionsTable.row();
+
+        // Hàng 3: Music Audio (Dịch phải đồng bộ với hàng SFX, nút bám sát chữ)
+        optionsTable.add(musicButton).size(btnSubSize).padLeft(45f).padRight(15f);
+        optionsTable.add(textMusic).size(100f, 32f).left();
+
+        // Bảng bố cục chính tổng thể
+        Table mainTable = new Table();
+        mainTable.setFillParent(true);
+        mainTable.top();
+
+        // Đặt tiêu đề chữ "Settings" vừa vặn (ví dụ: rộng 180px, cao 45px), không lo bị tràn viền
+        mainTable.add(titleImage).size(350f, 90f).padTop(60f).padBottom(25f).center();
+        mainTable.row();
+
+        // Chèn bảng tùy chọn âm thanh vào chính giữa khung hình dưới tiêu đề
+        mainTable.add(optionsTable).center();
+
+        stage.addActor(mainTable);
     }
 
     @Override
@@ -196,11 +204,16 @@ public class SettingsScreen extends ScreenAdapter {
     public void dispose() {
         if (stage != null) stage.dispose();
         if (settingsBgTexture != null) settingsBgTexture.dispose();
+        if (titleTexture != null) titleTexture.dispose();
         if (backButtonTexture != null) backButtonTexture.dispose();
 
         if (soundOnTexture != null) soundOnTexture.dispose();
         if (soundOffTexture != null) soundOffTexture.dispose();
         if (musicOnTexture != null) musicOnTexture.dispose();
         if (musicOffTexture != null) musicOffTexture.dispose();
+
+        if (textMasterTexture != null) textMasterTexture.dispose();
+        if (textSfxTexture != null) textSfxTexture.dispose();
+        if (textMusicTexture != null) textMusicTexture.dispose();
     }
 }
