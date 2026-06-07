@@ -3,12 +3,15 @@ package com.agentdung.game.screens;
 import com.agentdung.game.core.AgentDungGame;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -17,17 +20,18 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 public class MenuScreen extends ScreenAdapter {
     private final AgentDungGame game;
-
     private Stage stage;
 
     private Texture bgTexture;
     private Texture playButtonTexture;
     private Texture customizeButtonTexture;
     private Texture titleTexture;
-
-    // Khai báo thêm Texture cho 2 nút mới
     private Texture guideButtonTexture;
     private Texture settingsButtonTexture;
+    private Texture wikiButtonTexture; // --- THÊM MỚI ---
+
+    private Texture coinTex;
+    private BitmapFont font;
 
     public MenuScreen(AgentDungGame game) {
         this.game = game;
@@ -42,49 +46,39 @@ public class MenuScreen extends ScreenAdapter {
         playButtonTexture = new Texture(Gdx.files.internal("ui/UI_button_play.png"));
         customizeButtonTexture = new Texture(Gdx.files.internal("ui/UI_button_customize.png"));
         titleTexture = new Texture(Gdx.files.internal("ui/UI_title_agentdung.png"));
-
-        // Load ảnh cho nút Hướng dẫn và Cài đặt
         guideButtonTexture = new Texture(Gdx.files.internal("ui/UI_button_guide.png"));
         settingsButtonTexture = new Texture(Gdx.files.internal("ui/UI_button_settings.png"));
+        wikiButtonTexture = new Texture(Gdx.files.internal("ui/UI_button_wiki.png")); // --- THÊM MỚI ---
 
-        // Giúp ảnh Pixel Art không bị mờ khi phóng to kích thước
+        coinTex = new Texture(Gdx.files.internal("images/coin.png"));
+        font = new BitmapFont();
+        font.getData().setScale(1.5f);
+
         guideButtonTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         settingsButtonTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        wikiButtonTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest); // --- THÊM MỚI ---
 
         Image background = new Image(bgTexture);
         background.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         stage.addActor(background);
 
         Image titleImage = new Image(titleTexture);
+        ImageButton playButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(playButtonTexture)));
+        ImageButton customizeButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(customizeButtonTexture)));
 
-        TextureRegionDrawable playDrawable = new TextureRegionDrawable(new TextureRegion(playButtonTexture));
-        ImageButton playButton = new ImageButton(playDrawable);
-
-        TextureRegionDrawable customizeDrawable = new TextureRegionDrawable(new TextureRegion(customizeButtonTexture));
-        ImageButton customizeButton = new ImageButton(customizeDrawable);
-
-        // --- ĐỊNH NGHĨA KÍCH THƯỚC FIX CỨNG CHO HÌNH ẢNH NÚT (Ví dụ: 70x70) ---
         float targetBtnWidth = 70f;
         float targetBtnHeight = 70f;
 
-        // Tạo Drawable và ImageButton cho nút Guide + Ép kích thước hình ảnh gốc
-        TextureRegionDrawable guideDrawable = new TextureRegionDrawable(new TextureRegion(guideButtonTexture));
-        guideDrawable.setMinWidth(targetBtnWidth);
-        guideDrawable.setMinHeight(targetBtnHeight);
-        ImageButton guideButton = new ImageButton(guideDrawable);
+        // Tạo các nút nhỏ
+        ImageButton wikiButton = createSmallButton(wikiButtonTexture, targetBtnWidth, targetBtnHeight);
+        ImageButton guideButton = createSmallButton(guideButtonTexture, targetBtnWidth, targetBtnHeight);
+        ImageButton settingsButton = createSmallButton(settingsButtonTexture, targetBtnWidth, targetBtnHeight);
 
-        // Tạo Drawable và ImageButton cho nút Settings + Ép kích thước hình ảnh gốc
-        TextureRegionDrawable settingsDrawable = new TextureRegionDrawable(new TextureRegion(settingsButtonTexture));
-        settingsDrawable.setMinWidth(targetBtnWidth);
-        settingsDrawable.setMinHeight(targetBtnHeight);
-        ImageButton settingsButton = new ImageButton(settingsDrawable);
-
-        // --- Gắn sự kiện click ---
+        // Gán sự kiện
         playButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 if (game.clickSound != null) game.clickSound.play();
-                // THAY ĐỔI Ở ĐÂY: Chuyển sang màn hình chọn Missions thay vì vào thẳng PlayScreen
                 game.setScreen(new MissionsScreen(game));
             }
         });
@@ -93,8 +87,15 @@ public class MenuScreen extends ScreenAdapter {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 if (game.clickSound != null) game.clickSound.play();
-                // ĐÃ CẬP NHẬT: Chuyển màn hình thực tế sang giao diện CustomizeScreen mới tạo
                 game.setScreen(new CustomizeScreen(game));
+            }
+        });
+
+        wikiButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (game.clickSound != null) game.clickSound.play();
+                game.setScreen(new WikiScreen(game));
             }
         });
 
@@ -114,30 +115,40 @@ public class MenuScreen extends ScreenAdapter {
             }
         });
 
-        // --- Bảng 1: Chứa Tiêu đề và các nút chính (Căn giữa) ---
+        // Bảng xu
+        Table coinTable = new Table();
+        coinTable.top().right();
+        coinTable.setFillParent(true);
+        coinTable.padTop(20).padRight(20);
+        coinTable.add(new Image(coinTex)).size(40, 40).padRight(10);
+        coinTable.add(new Label(String.valueOf(game.globalCoinCount), new Label.LabelStyle(font, Color.GOLD)));
+        stage.addActor(coinTable);
+
+        // Bảng nút chính
         Table table = new Table();
         table.setFillParent(true);
-        table.center();
-
         table.add(titleImage).size(400f, 100f).padBottom(30f);
         table.row();
-
         table.add(playButton).padBottom(15f);
         table.row();
-
         table.add(customizeButton);
         stage.addActor(table);
 
-        // --- Bảng 2: Chứa nút Guide và Settings (Đẩy về góc dưới bên phải) ---
+        // Bảng nút góc phải dưới (Wiki + Guide + Settings)
         Table bottomRightTable = new Table();
         bottomRightTable.setFillParent(true);
-        bottomRightTable.bottom().right(); // Đẩy toàn bộ nội dung bảng về góc phải dưới
-
-        // Thêm nút Guide và Settings cạnh nhau vào bảng (Kích thước nút đã được định nghĩa từ Drawable ở trên)
+        bottomRightTable.bottom().right();
+        bottomRightTable.add(wikiButton).padRight(5f).padBottom(14f);
         bottomRightTable.add(guideButton).padRight(5f).padBottom(14f);
         bottomRightTable.add(settingsButton).padRight(10f).padBottom(14f);
-
         stage.addActor(bottomRightTable);
+    }
+
+    private ImageButton createSmallButton(Texture tex, float w, float h) {
+        TextureRegionDrawable drawable = new TextureRegionDrawable(new TextureRegion(tex));
+        drawable.setMinWidth(w);
+        drawable.setMinHeight(h);
+        return new ImageButton(drawable);
     }
 
     @Override
@@ -164,9 +175,10 @@ public class MenuScreen extends ScreenAdapter {
         if (playButtonTexture != null) playButtonTexture.dispose();
         if (customizeButtonTexture != null) customizeButtonTexture.dispose();
         if (titleTexture != null) titleTexture.dispose();
-
-        // Giải phóng bộ nhớ cho 2 nút mới để tránh tràn RAM
         if (guideButtonTexture != null) guideButtonTexture.dispose();
         if (settingsButtonTexture != null) settingsButtonTexture.dispose();
+        if (wikiButtonTexture != null) wikiButtonTexture.dispose();
+        if (coinTex != null) coinTex.dispose();
+        if (font != null) font.dispose();
     }
 }

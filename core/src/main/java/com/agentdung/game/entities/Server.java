@@ -17,10 +17,10 @@ public class Server {
     public Server(float x, float y) {
         this.x = x;
         this.y = y;
-        this.width = 60;
-        this.height = 80;
+        // Giảm kích thước ở đây, ví dụ giảm còn 50%
+        this.width = 30;
+        this.height = 40;
 
-        // Khởi tạo Texture từ thư mục assets/images/
         serverTexture = new Texture(Gdx.files.internal("images/server.png"));
     }
 

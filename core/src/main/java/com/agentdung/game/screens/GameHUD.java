@@ -3,7 +3,9 @@ package com.agentdung.game.screens;
 import com.agentdung.game.core.AgentDungGame;
 import com.agentdung.game.skills.*;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
@@ -13,41 +15,39 @@ import java.util.Map;
 public class GameHUD {
     private final AgentDungGame game;
     private final Map<Class<? extends Skill>, Texture> manaTextures;
+    private final BitmapFont font;
 
-    // Quản lý tài nguyên và vùng va chạm của nút Pause
     private Texture btnPauseTex;
     private final Rectangle rectPauseBtn;
 
-    // --- THÊM MỚI: Quản lý tài nguyên và vùng va chạm của nút Balo (Bag) ---
     private Texture btnBagTex;
     private final Rectangle rectBagBtn;
+
+    private Texture coinTex;
 
     public GameHUD(AgentDungGame game) {
         this.game = game;
         this.manaTextures = new HashMap<>();
         this.rectPauseBtn = new Rectangle();
-        this.rectBagBtn = new Rectangle(); // <-- Khởi tạo vùng va chạm cho nút Bag
+        this.rectBagBtn = new Rectangle();
+        this.font = new BitmapFont();
+        // THIẾT LẬP FONT: Tăng size để chắc chắn nhìn thấy được
+        this.font.getData().setScale(1.5f);
     }
 
     public void loadTextures() {
         clearTextures();
 
-        // Nạp texture cho các thanh mana kỹ năng
         manaTextures.put(SpitSkill.class, new Texture("ui/UI_mana_spit.png"));
         manaTextures.put(VomitSkill.class, new Texture("ui/UI_mana_vomit.png"));
         manaTextures.put(PeeSkill.class, new Texture("ui/UI_mana_pee.png"));
         manaTextures.put(PoopSkill.class, new Texture("ui/UI_mana_poop.png"));
 
-        // Nạp texture cho nút Pause
         btnPauseTex = new Texture(Gdx.files.internal("ui/UI_button_pause.png"));
-        btnPauseTex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-
-        // --- THÊM MỚI: Nạp texture cho nút Bag từ thư mục ui ---
         btnBagTex = new Texture(Gdx.files.internal("ui/UI_button_bag.png"));
-        btnBagTex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        coinTex = new Texture(Gdx.files.internal("images/coin.png"));
     }
 
-    // Hàm render nhận đầy đủ 3 tham số: skills, hudMatrix, và hasKey để đồng bộ với PlayScreen
     public void render(Array<Skill> skills, Matrix4 hudMatrix, boolean hasKey) {
         float sw = Gdx.graphics.getWidth();
         float sh = Gdx.graphics.getHeight();
@@ -55,7 +55,7 @@ public class GameHUD {
         game.batch.setProjectionMatrix(hudMatrix);
         game.batch.begin();
 
-        // 1. Vẽ các thanh Mana của Agent Dũng ở góc trái màn hình
+        // 1. Mana bars
         float startX = 20;
         float targetWidth = 150;
         for (int i = 0; i < skills.size; i++) {
@@ -64,67 +64,54 @@ public class GameHUD {
             if (tex != null) {
                 float progress = s.getManaPercent();
                 float startY = sh - 40 - (i * 25);
-                int srcWidth = (int) (tex.getWidth() * progress);
-                float drawWidth = targetWidth * progress;
-                if (srcWidth > 0) {
-                    game.batch.draw(tex, startX, startY, drawWidth, 15, 0, 0, srcWidth, tex.getHeight(), false, false);
-                }
+                game.batch.draw(tex, startX, startY, targetWidth * progress, 15, 0, 0, (int)(tex.getWidth() * progress), tex.getHeight(), false, false);
             }
         }
 
-        // 2. Định vị và vẽ nút Pause ở góc phải trên cùng (Kích thước 40x40, cách lề 20px)
+        // 2. Vẽ nút Pause
         float btnSize = 40f;
         float pauseX = sw - btnSize - 20f;
         float pauseY = sh - btnSize - 20f;
         rectPauseBtn.set(pauseX, pauseY, btnSize, btnSize);
+        game.batch.draw(btnPauseTex, rectPauseBtn.x, rectPauseBtn.y, rectPauseBtn.width, rectPauseBtn.height);
 
-        if (btnPauseTex != null) {
-            game.batch.draw(btnPauseTex, rectPauseBtn.x, rectPauseBtn.y, rectPauseBtn.width, rectPauseBtn.height);
-        }
-
-        // --- THÊM MỚI: Định vị và vẽ nút Bag nằm dịch sang bên trái nút Pause 15px ---
+        // 3. Vẽ nút Bag
         float bagX = pauseX - btnSize - 15f;
         float bagY = pauseY;
         rectBagBtn.set(bagX, bagY, btnSize, btnSize);
+        game.batch.draw(btnBagTex, rectBagBtn.x, rectBagBtn.y, rectBagBtn.width, rectBagBtn.height);
 
-        if (btnBagTex != null) {
-            game.batch.draw(btnBagTex, rectBagBtn.x, rectBagBtn.y, rectBagBtn.width, rectBagBtn.height);
+        // 4. Vẽ Coin và số xu
+        float coinSize = 30f;
+        float coinX = bagX - coinSize - 50f;
+        float coinY = bagY + 5f; // Chỉnh lại cho đồng bộ nút Bag
+
+        if (coinTex != null) {
+            game.batch.draw(coinTex, coinX, coinY, coinSize, coinSize);
         }
+
+        // Vẽ số xu
+        font.setColor(Color.GOLD);
+        // Lưu ý: Nếu vẫn không hiện, hãy thử đổi thành Color.RED để kiểm tra
+        font.draw(game.batch, String.valueOf(game.globalCoinCount), coinX + coinSize + 10, coinY + 25);
+        font.setColor(Color.WHITE);
 
         game.batch.end();
     }
 
-    // Cung cấp Rectangle va chạm để PlayScreen kiểm tra click chuột vào nút Pause
-    public Rectangle getRectPauseBtn() {
-        return rectPauseBtn;
-    }
-
-    // --- THÊM MỚI: Cung cấp Rectangle va chạm để PlayScreen kiểm tra click chuột vào nút Bag ---
-    public Rectangle getRectBagBtn() {
-        return rectBagBtn;
-    }
-
     public void clearTextures() {
-        // Giải phóng các texture mana
-        for (Texture tex : manaTextures.values()) {
-            if (tex != null) tex.dispose();
-        }
+        for (Texture tex : manaTextures.values()) if (tex != null) tex.dispose();
         manaTextures.clear();
-
-        // Giải phóng triệt để texture nút pause
-        if (btnPauseTex != null) {
-            btnPauseTex.dispose();
-            btnPauseTex = null;
-        }
-
-        // --- THÊM MỚI: Giải phóng triệt để texture nút bag ---
-        if (btnBagTex != null) {
-            btnBagTex.dispose();
-            btnBagTex = null;
-        }
+        if (btnPauseTex != null) btnPauseTex.dispose();
+        if (btnBagTex != null) btnBagTex.dispose();
+        if (coinTex != null) coinTex.dispose();
     }
 
     public void dispose() {
         clearTextures();
+        if (font != null) font.dispose();
     }
+
+    public Rectangle getRectPauseBtn() { return rectPauseBtn; }
+    public Rectangle getRectBagBtn() { return rectBagBtn; }
 }

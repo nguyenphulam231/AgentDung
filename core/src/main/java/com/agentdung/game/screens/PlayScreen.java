@@ -50,9 +50,8 @@ public class PlayScreen extends ScreenAdapter {
     private boolean isCaptured = false;
     private boolean isPaused = false;
 
-    // --- DỮ LIỆU KHO ĐỒ & VÍ TIỀN ---
+    // --- DỮ LIỆU KHO ĐỒ (Chỉ lưu trong từng level chơi, đổi level sẽ reset) ---
     public final Map<Item.ItemType, Integer> inventory = new HashMap<>();
-    public int coinCount = 0;
 
     // Trạng thái bật/tắt UI phủ
     public boolean isInventoryOpen = false;
@@ -107,11 +106,12 @@ public class PlayScreen extends ScreenAdapter {
         clockTimer = 0f;
         lemonTimer = 0f;
         orangeTimer = 0f;
+
+        // Đồ đạc và bùa bảo hiểm dọn sạch hoàn toàn khi nạp màn chơi mới
         amuletCount = 0;
-        coinCount = 0;
         hasKey = false;
 
-        // Khởi tạo sạch balo đồ
+        // Khởi tạo sạch balo đồ (Không giữ lại bất kỳ đồ nào từ level cũ)
         inventory.clear();
         for (Item.ItemType type : Item.ItemType.values()) {
             inventory.put(type, 0);
@@ -165,14 +165,13 @@ public class PlayScreen extends ScreenAdapter {
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
 
-        // --- TÀNG HÌNH: Nhân vật mờ đi 50% ---
         if (invisibilityTimer > 0) {
             game.batch.setColor(1, 1, 1, 0.5f);
         } else {
             game.batch.setColor(1, 1, 1, 1f);
         }
         dung.draw(game.batch);
-        game.batch.setColor(1, 1, 1, 1f); // Trả lại màu gốc cho sprite khác
+        game.batch.setColor(1, 1, 1, 1f);
 
         for (com.agentdung.game.entities.Enemy e : entityManager.enemies) e.draw(game.batch);
         mapManager.renderSprites(game.batch);
@@ -181,26 +180,21 @@ public class PlayScreen extends ScreenAdapter {
         }
         entityManager.renderSprites(game.batch, skills);
 
-        // Vẽ nút gợi ý tương tác [Use] nhỏ khi đứng gần Vending Machine ngoài map thế giới
         if (activeVending != null && !isVendingOpen && !isInventoryOpen && !isPaused) {
             batchDrawPrompt();
         }
         game.batch.end();
 
-        // Render Ánh sáng và Tầm nhìn (Nếu tàng hình, không vẽ tầm nhìn quân địch rọi vào mình)
         lightRenderer.renderDarkness(game.batch, dung, camera);
         game.shapeRenderer.setProjectionMatrix(camera.combined);
         if (invisibilityTimer <= 0) {
             lightRenderer.renderEnemyVision(game.shapeRenderer, entityManager, mapManager);
         }
 
-        // --- RENDER HUD VÀ OVERLAY KHÔNG PHỤ THUỘC CAMERA ---
         Matrix4 hudMatrix = new Matrix4().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        // Vẽ HUD mana, nút Pause và nút Balo góc màn hình qua lớp GameHUD
         gameHUD.render(skills, hudMatrix, hasKey);
 
-        // Vẽ chìa khóa nếu có
         if (hasKey) {
             game.batch.setProjectionMatrix(hudMatrix);
             game.batch.begin();
@@ -208,30 +202,39 @@ public class PlayScreen extends ScreenAdapter {
             game.batch.end();
         }
 
-        // Vẽ giao diện Inventory đè lên nếu mở (Logic game lính vẫn chạy dưới nền)
         if (isInventoryOpen) {
             inventoryOverlay.render(game.batch, game.shapeRenderer, hudMatrix);
         }
 
-        // Vẽ giao diện Vending Machine đè lên
         if (isVendingOpen) {
             vendingMachineOverlay.render(game.batch, game.shapeRenderer, hudMatrix);
         }
 
-        // Nếu bị lính bắt, vẽ giao diện thua cuộc
         if (isCaptured) {
             capturedOverlay.render(game.shapeRenderer, hudMatrix);
         }
 
-        // Nếu đang Pause, vẽ giao diện Pause đè lên trên cùng
         if (isPaused) {
             pauseOverlay.render(game.shapeRenderer, hudMatrix);
         }
 
-        // Bật / tắt tạm dừng nhanh bằng phím ESCAPE
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && !isCaptured && !isInventoryOpen && !isVendingOpen) {
-            if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
-            setPaused(!isPaused);
+        // --- CẬP NHẬT: Logic phím ESC tập trung ---
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && !isCaptured) {
+            if (isInventoryOpen) {
+                isInventoryOpen = false;
+                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
+            } else if (isVendingOpen) {
+                isVendingOpen = false;
+                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
+            } else if (!isPaused) {
+                // Chỉ Pause nếu không mở Overlay nào
+                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
+                setPaused(true);
+            } else if (isPaused) {
+                // Resume game
+                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
+                setPaused(false);
+            }
         }
     }
 
@@ -294,7 +297,7 @@ public class PlayScreen extends ScreenAdapter {
                 if (isInventoryOpen) {
                     isInventoryOpen = false; // Nếu đang mở thì đóng lại
                 } else if (!isVendingOpen) {
-                    isInventoryOpen = true;  // Nếu đang đóng (và không mở máy bán hàng) thì bật lên
+                    isInventoryOpen = true;  // Nếu đang đóng (and không mở máy bán hàng) thì bật lên
                 }
                 return;
             }
@@ -349,7 +352,7 @@ public class PlayScreen extends ScreenAdapter {
             }
         }
 
-        // --- HỆ THỐNG VA CHẠM NHẶT VẬT PHẨM ĐƯA VÀO BALO/VÍ TIỀN ---
+        // --- HỆ THỐNG VA CHẠM NHẶT VẬT PHẨM ĐƯA VÀO BALO/VÍ TIỀN TOÀN CỤC ---
         for (int i = mapManager.items.size - 1; i >= 0; i--) {
             Item item = mapManager.items.get(i);
             Rectangle itemRect = new Rectangle(item.getPosition().x, item.getPosition().y, item.getSize(), item.getSize());
@@ -358,7 +361,8 @@ public class PlayScreen extends ScreenAdapter {
                 if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
 
                 if (item.type == Item.ItemType.COIN) {
-                    coinCount++;
+                    // CẬP NHẬT: Tăng số xu toàn cục của Game chính, không dùng coinCount cục bộ
+                    game.globalCoinCount++;
                 } else {
                     inventory.put(item.type, inventory.getOrDefault(item.type, 0) + 1);
                     if (item.type == Item.ItemType.AMULET) amuletCount++;
@@ -375,18 +379,15 @@ public class PlayScreen extends ScreenAdapter {
 
         InputHandler.handleSkillInput(dung, skills, entityManager, this.game);
 
-        // --- KIỂM TRA ĐIỀU KIỆN LÍNH TUẦN TRA BẮT GIỮ (ÁP DỤNG TRẠNG THÁI CLOCK VÀ INVISIBILITY) ---
-        if (invisibilityTimer <= 0) { // Nếu tàng hình, lính mù tạm thời hoàn toàn
-            // Nếu Clock hoạt động, lính đóng băng AI không cập nhật tìm đường, đứng bất động
+        // --- KIỂM TRA ĐIỀU KIỆN LÍNH TUẦN TRA BẮT GIỮ ---
+        if (invisibilityTimer <= 0) {
             float deltaLogic = (clockTimer > 0) ? 0f : delta;
 
             entityManager.update(deltaLogic, dung, mapManager, () -> {
                 if (!isCaptured) {
-                    // Cơ chế Amulet cứu hộ mạng sống một lần
                     if (amuletCount > 0) {
                         amuletCount--;
                         inventory.put(Item.ItemType.AMULET, amuletCount);
-                        // Đẩy lính ra xa hoặc cho tàng hình chớp nhoáng để thoát thân
                         invisibilityTimer = 1.5f;
                         return;
                     }
@@ -408,6 +409,10 @@ public class PlayScreen extends ScreenAdapter {
                 game.completedLevelsReal[currentWorld - 1] = currentLevel;
             }
             InputHandler.stopLoopingSounds(this.game);
+
+            // CẬP NHẬT: Tự động ghi vật lý cả tiến trình map lẫn số xu tích lũy xuống ổ cứng khi qua màn thành công
+            game.saveProgress();
+
             game.setScreen(new LevelDoneScreen(game, currentWorld, currentLevel));
         }
 
