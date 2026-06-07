@@ -5,6 +5,7 @@ import com.agentdung.game.skills.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,23 +14,39 @@ public class GameHUD {
     private final AgentDungGame game;
     private final Map<Class<? extends Skill>, Texture> manaTextures;
 
+    // Quản lý tài nguyên và vùng va chạm của nút Pause
+    private Texture btnPauseTex;
+    private final Rectangle rectPauseBtn;
+
     public GameHUD(AgentDungGame game) {
         this.game = game;
         this.manaTextures = new HashMap<>();
+        this.rectPauseBtn = new Rectangle();
     }
 
     public void loadTextures() {
         clearTextures();
+
+        // Nạp texture cho các thanh mana kỹ năng
         manaTextures.put(SpitSkill.class, new Texture("ui/UI_mana_spit.png"));
         manaTextures.put(VomitSkill.class, new Texture("ui/UI_mana_vomit.png"));
         manaTextures.put(PeeSkill.class, new Texture("ui/UI_mana_pee.png"));
         manaTextures.put(PoopSkill.class, new Texture("ui/UI_mana_poop.png"));
+
+        // Nạp texture cho nút Pause
+        btnPauseTex = new Texture(Gdx.files.internal("ui/UI_button_pause.png"));
+        btnPauseTex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
     }
 
-    public void render(Array<Skill> skills, Matrix4 hudMatrix) {
+    // Hàm render nhận đầy đủ 3 tham số: skills, hudMatrix, và hasKey để đồng bộ với PlayScreen
+    public void render(Array<Skill> skills, Matrix4 hudMatrix, boolean hasKey) {
+        float sw = Gdx.graphics.getWidth();
+        float sh = Gdx.graphics.getHeight();
+
         game.batch.setProjectionMatrix(hudMatrix);
         game.batch.begin();
 
+        // 1. Vẽ các thanh Mana của Agent Dũng ở góc trái màn hình
         float startX = 20;
         float targetWidth = 150;
         for (int i = 0; i < skills.size; i++) {
@@ -37,7 +54,7 @@ public class GameHUD {
             Texture tex = manaTextures.get(s.getClass());
             if (tex != null) {
                 float progress = s.getManaPercent();
-                float startY = Gdx.graphics.getHeight() - 40 - (i * 25);
+                float startY = sh - 40 - (i * 25);
                 int srcWidth = (int) (tex.getWidth() * progress);
                 float drawWidth = targetWidth * progress;
                 if (srcWidth > 0) {
@@ -45,14 +62,37 @@ public class GameHUD {
                 }
             }
         }
+
+        // 2. Định vị và vẽ nút Pause ở góc phải trên cùng (Kích thước 40x40, cách lề 20px)
+        float btnSize = 40f;
+        float pauseX = sw - btnSize - 20f;
+        float pauseY = sh - btnSize - 20f;
+        rectPauseBtn.set(pauseX, pauseY, btnSize, btnSize);
+
+        if (btnPauseTex != null) {
+            game.batch.draw(btnPauseTex, rectPauseBtn.x, rectPauseBtn.y, rectPauseBtn.width, rectPauseBtn.height);
+        }
+
         game.batch.end();
     }
 
+    // Cung cấp Rectangle va chạm để PlayScreen kiểm tra click chuột
+    public Rectangle getRectPauseBtn() {
+        return rectPauseBtn;
+    }
+
     public void clearTextures() {
+        // Giải phóng các texture mana
         for (Texture tex : manaTextures.values()) {
             if (tex != null) tex.dispose();
         }
         manaTextures.clear();
+
+        // Giải phóng triệt để texture nút pause
+        if (btnPauseTex != null) {
+            btnPauseTex.dispose();
+            btnPauseTex = null;
+        }
     }
 
     public void dispose() {
