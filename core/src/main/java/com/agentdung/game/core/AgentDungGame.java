@@ -34,7 +34,7 @@ public class AgentDungGame extends Game {
     public boolean isSfxOn = true;
     public boolean isMusicOn = true;
 
-    // --- THÊM MỚI: BIẾN LƯU TRỮ XU TOÀN CỤC XUYÊN SUỐT CÁC LEVEL ---
+    // ---BIẾN LƯU TRỮ XU TOÀN CỤC XUYÊN SUỐT CÁC LEVEL ---
     public int globalCoinCount = 5000;
 
     // --- QUẢN LÝ TIẾN TRÌNH CHƠI THỰC TẾ ---
@@ -85,20 +85,20 @@ public class AgentDungGame extends Game {
         setScreen(new IntroScreen(this));
     }
 
-    // --- CẬP NHẬT: TỰ ĐỘNG TẢI TIẾN TRÌNH VÀ SỐ XU TỪ Ổ CỨNG ---
+    // --- TỰ ĐỘNG TẢI TIẾN TRÌNH VÀ SỐ XU TỪ Ổ CỨNG ---
     public void loadProgress() {
         Preferences prefs = Gdx.app.getPreferences(SAVE_PREFS_NAME);
         for (int i = 0; i < completedLevelsReal.length; i++) {
             completedLevelsReal[i] = prefs.getInteger("map_" + (i + 1), 0);
         }
 
-        // Đọc số xu tích lũy từ ổ cứng, mặc định là 0 nếu chơi lần đầu
+        // Đọc số xu tích lũy từ ổ cứng
         this.globalCoinCount = prefs.getInteger("global_coin_count", 5000);
 
         Gdx.app.log("SaveSystem", "Đã tải thành công tiến trình và số xu tích lũy từ bộ nhớ thiết bị.");
     }
 
-    // --- CẬP NHẬT: CHỦ ĐỘNG GHI TIẾN TRÌNH VÀ SỐ XU XUỐNG Ổ CỨNG ---
+    // --- CHỦ ĐỘNG GHI TIẾN TRÌNH VÀ SỐ XU XUỐNG Ổ CỨNG ---
     public void saveProgress() {
         Preferences prefs = Gdx.app.getPreferences(SAVE_PREFS_NAME);
         for (int i = 0; i < completedLevelsReal.length; i++) {

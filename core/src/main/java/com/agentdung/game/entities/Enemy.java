@@ -84,7 +84,7 @@ public class Enemy extends Entity {
         float frameDuration = 0.1f;
         walkDown  = new Animation<>(frameDuration, rows[3]);
         walkRight = new Animation<>(frameDuration, rows[4]);
-        walkUp    = new Animation<>(frameDuration, rows[2]); // Tạm thời dùng hàng 2 giống Player
+        walkUp    = new Animation<>(frameDuration, rows[2]);
 
         walkDown.setPlayMode(Animation.PlayMode.LOOP);
         walkRight.setPlayMode(Animation.PlayMode.LOOP);
@@ -213,9 +213,12 @@ public class Enemy extends Entity {
     }
 
     /**
-     * Hàm vẽ Sprite nhân vật tuần tra (Thay thế cho render cũ)
+     * ĐỒNG BỘ ĐA HÌNH SONG HÀNH 2 THAM SỐ:
+     * Chuyển đổi từ hàm 'draw' cũ thành hàm 'render' chuẩn giao kèo lớp cha Entity.
+     * Nhận vào cả batch và shapeRenderer từ hệ thống quản lý truyền xuống.
      */
-    public void draw(SpriteBatch batch) {
+    @Override
+    public void render(SpriteBatch batch, ShapeRenderer shape) {
         TextureRegion currentFrame = getCurrentFrame();
         float drawX = position.x + (size / 2f) - (DRAW_W / 2f);
         float drawY = position.y;
@@ -231,7 +234,7 @@ public class Enemy extends Entity {
 
         batch.draw(currentFrame, drawX, drawY, DRAW_W, DRAW_H);
 
-        // Trả lại màu mặc định cho Batch để không lỗi màu các vật thể khác
+        // Trả lại màu mặc định cho Batch để không làm ảnh hưởng tới các Sprite vẽ phía sau
         batch.setColor(Color.WHITE);
     }
 
@@ -292,12 +295,6 @@ public class Enemy extends Entity {
             Gdx.gl.glDisable(GL20.GL_BLEND);
             shape.begin(ShapeRenderer.ShapeType.Filled);
         }
-    }
-
-    @Override
-    public void render(ShapeRenderer shape) {
-        // Đã chuyển tính năng vẽ hình ảnh sang hàm draw(SpriteBatch).
-        // Bạn có thể để trống hàm này hoặc dùng để vẽ thanh máu/hitbox phụ nếu muốn.
     }
 
     public void applySpitEffect() { this.visionRange = originalVisionRange * 0.2f; this.speed = originalSpeed * 0.5f; this.effectTimer = 3.0f; }

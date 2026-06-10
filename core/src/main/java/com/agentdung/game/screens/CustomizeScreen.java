@@ -85,7 +85,6 @@ public class CustomizeScreen extends ScreenAdapter {
         font.setUseIntegerPositions(true);
         font.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
-        // 1. Đổi sang nền UI_frame_general chuẩn theo yêu cầu của bạn
         bgTexture = new Texture(Gdx.files.internal("ui/UI_frame_general.png"));
         Image background = new Image(bgTexture);
         background.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());

@@ -32,11 +32,11 @@ public class Door {
 
     public void render(ShapeRenderer shape) {
         if (isOpen) {
-            // Nếu mở rồi, chỉ vẽ khung mờ báo hiệu lối đi
+            // Nếu mở rồi vẽ khung xanh mờ báo hiệu đã mở
             shape.setColor(0, 1, 0, 0.3f); // Màu xanh lá mờ
             shape.rect(bounds.x, bounds.y, bounds.width, bounds.height);
         } else {
-            // Nếu chưa mở, vẽ khối cửa đặc (Màu nâu gỗ hoặc xám thép)
+            // Nếu chưa mở, vẽ khối cửa đặc
             shape.setColor(new Color(0.4f, 0.2f, 0, 1));
             shape.rect(bounds.x, bounds.y, bounds.width, bounds.height);
 

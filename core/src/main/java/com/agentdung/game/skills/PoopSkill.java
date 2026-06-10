@@ -16,15 +16,15 @@ public class PoopSkill extends BaseSkill {
     private TextureRegion poopRegion;
 
     public PoopSkill() {
-        // Tên "Ị", tốn 40 mana (dạng bột phát), màu nâu
+        // poop, tốn 40 mana (dạng bột phát), màu nâu
         super("Ị", 40f, new Color(0.5f, 0.25f, 0, 1));
 
-        // Nạp file ảnh bẫy mìn phân từ assets/images/
+        // Nạp file ảnh bẫy mìn
         Texture poopTexture = new Texture(Gdx.files.internal("images/shit.png"));
         this.poopRegion = new TextureRegion(poopTexture);
     }
 
-    // THÊM HÀM NÀY: Để PlayScreen gọi lấy ảnh đi vẽ bẫy dưới sàn map
+    // Để PlayScreen gọi lấy ảnh đi vẽ bẫy dưới sàn map
     public TextureRegion getPoopRegion() {
         return this.poopRegion;
     }
@@ -34,7 +34,7 @@ public class PoopSkill extends BaseSkill {
         // Góc 180 độ so với hướng nhìn để đảm bảo bắn ra từ phía sau
         float backAngle = player.getAngle() + 180;
 
-        // BẮN RA HẠT VUÔNG NHỎ màu nâu li ti như cũ
+        // BẮN RA HẠT VUÔNG NHỎ màu nâu li ti
         projectiles.add(new StreamProjectile(
             player.getPosition().x + player.getSize()/2,
             player.getPosition().y + player.getSize()/2,

@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.agentdung.game.entities.Enemy;
 
 public class SpriteProjectile extends Projectile {
 
@@ -12,42 +13,58 @@ public class SpriteProjectile extends Projectile {
     private float height;
     private float angle;
 
+    // Constructor mặc định (giữ nguyên tương thích code cũ)
     public SpriteProjectile(float x, float y, float angle, float speed, TextureRegion textureRegion) {
-        // Đã sửa ở bước trước: Giữ Color.WHITE để PlayScreen nhận diện màu
-        super(x, y, angle, speed, Color.WHITE, 0.4f);
+        this(x, y, angle, speed, textureRegion, Color.WHITE);
+    }
+
+    // Constructor mới cho phép truyền màu/effect
+    public SpriteProjectile(float x, float y, float angle, float speed,
+                            TextureRegion textureRegion, Color color) {
+        super(x, y, angle, speed, color, 0.4f);
+
         this.textureRegion = textureRegion;
         this.angle = angle;
-
-        // 🔥 ĐÃ SỬA: Lấy trực tiếp kích thước thật (Width/Height) của file ảnh nguồn!
-        // Nếu ảnh là 1px, nó sẽ là 1f. Nếu ảnh chiêu khạc là 8px, nó sẽ là 8f.
         this.width = textureRegion.getRegionWidth();
         this.height = textureRegion.getRegionHeight();
     }
 
-    @Override
-    public void render(ShapeRenderer shape) {
-        // Để trống vì vẽ bằng SpriteBatch
+    // Constructor tùy chỉnh kích thước
+    public SpriteProjectile(float x, float y, float angle, float speed,
+                            TextureRegion textureRegion,
+                            float customWidth, float customHeight) {
+
+        super(x, y, angle, speed, Color.WHITE, 0.4f);
+
+        this.textureRegion = textureRegion;
+        this.angle = angle;
+        this.width = customWidth;
+        this.height = customHeight;
     }
 
-    public void render(SpriteBatch batch) {
+    @Override
+    public void render(SpriteBatch batch, ShapeRenderer shape) {
         batch.draw(
             textureRegion,
-            position.x - width / 2, position.y - height / 2,
-            width / 2, height / 2,
-            width, height,
-            1f, 1f,
+            position.x - width / 2f,
+            position.y - height / 2f,
+            width / 2f,
+            height / 2f,
+            width,
+            height,
+            1f,
+            1f,
             this.angle
         );
     }
+    @Override
+    public void applyEffect(Enemy enemy) {
 
-    // THÊM CONSTRUCTOR MỚI NÀY VÀO TRONG FILE SpriteProjectile.java
-    public SpriteProjectile(float x, float y, float angle, float speed, TextureRegion textureRegion, float customWidth, float customHeight) {
-        super(x, y, angle, speed, Color.WHITE, 0.4f);
-        this.textureRegion = textureRegion;
-        this.angle = angle;
-
-        // Gán kích thước tùy chỉnh do bạn truyền vào từ Skill
-        this.width = customWidth;
-        this.height = customHeight;
+        if (color.equals(Color.CYAN)) {
+            enemy.applySpitEffect();
+        }
+        else if (color.equals(Color.WHITE)) {
+            enemy.applyVomitEffect();
+        }
     }
 }

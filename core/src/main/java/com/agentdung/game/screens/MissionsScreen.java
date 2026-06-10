@@ -83,7 +83,7 @@ public class MissionsScreen extends ScreenAdapter {
             // mapIndex đại diện cho số thứ tự Map thực tế (Ví dụ: Map 1, Map 2, ...)
             final int mapIndex = i + 1;
 
-            // --- ĐẤU NỐI THỰC TẾ: Lấy dữ liệu tiến trình từ Core Game ---
+            // --- Lấy dữ liệu tiến trình từ Core Game ---
             int completed = game.completedLevelsReal[i];
             int total = game.totalLevelsReal[i];
 
@@ -107,7 +107,7 @@ public class MissionsScreen extends ScreenAdapter {
                 public void clicked(InputEvent event, float x, float y) {
                     if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
 
-                    // --- ĐÃ ĐẤU NỐI CHẠY THẬT: Thay vì vào thẳng PlayScreen, dẫn sang ProgressScreen của Map này ---
+                    // --- dẫn sang ProgressScreen của Map này ---
                     System.out.println("Chuyển hướng đến màn hình Progress: Map " + mapIndex);
                     game.setScreen(new ProgressScreen(game, mapIndex));
                 }
@@ -121,10 +121,10 @@ public class MissionsScreen extends ScreenAdapter {
             infoTable.add(titleImage).left().padLeft(30f).expandX();
 
             Table progressTextTable = new Table();
-            // Vẽ ảnh số lượng level đã qua chạy thật
+            // Vẽ ảnh số lượng level đã qua
             addNumberImagesToTable(progressTextTable, completed);
             progressTextTable.add(new Image(perTexture)).pad(0, 1, 0, 1);
-            // Vẽ ảnh tổng số level chạy thật
+            // Vẽ ảnh tổng số level
             addNumberImagesToTable(progressTextTable, total);
             infoTable.add(progressTextTable).right().padRight(30f);
 

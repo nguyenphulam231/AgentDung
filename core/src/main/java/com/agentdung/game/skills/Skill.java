@@ -35,7 +35,7 @@ public abstract class Skill {
         }
     }
 
-    // --- THÊM: Hàm cộng mana trực tiếp khi ăn vật phẩm ---
+    // --- Hàm cộng mana trực tiếp khi ăn vật phẩm ---
     public void gainMana(float amount) {
         this.mana = Math.min(this.maxMana, this.mana + amount);
     }

@@ -57,8 +57,6 @@ public class GuideScreen extends ScreenAdapter {
         topLeftTable.setFillParent(true);
         topLeftTable.top().left(); // Định vị bảng ở góc TRÊN bên TRÁI
         topLeftTable.add(backButton).size(50f, 50f).padTop(10f).padLeft(10f);
-        // Thêm nút vào bảng, đặt padTop và padLeft để nút không bị dính sát viền góc màn hình
-
 
         // Đưa bảng chứa nút vào Stage
         stage.addActor(topLeftTable);
@@ -71,8 +69,7 @@ public class GuideScreen extends ScreenAdapter {
         // Vẽ Stage (Lúc này tự động vẽ cả ảnh nền và nút back theo đúng thứ tự)
         stage.act(delta);
         stage.draw();
-
-        // ĐÃ XÓA đoạn logic kiểm tra click chuột trái toàn màn hình cũ ở đây
+        
     }
 
     @Override

@@ -2,10 +2,9 @@ package com.agentdung.game.managers;
 
 import com.agentdung.game.entities.Enemy;
 import com.agentdung.game.entities.Player;
-import com.agentdung.game.projectiles.BlobProjectile;
 import com.agentdung.game.projectiles.Projectile;
 import com.agentdung.game.projectiles.SpriteProjectile;
-import com.agentdung.game.projectiles.StreamProjectile;
+
 import com.agentdung.game.skills.PoopSkill;
 import com.agentdung.game.skills.Skill;
 import com.badlogic.gdx.graphics.Color;
@@ -13,7 +12,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 public class EntityManager {
@@ -49,17 +47,17 @@ public class EntityManager {
             if (hit) continue;
 
             for (Enemy e : enemies) {
-                if (pRect.overlaps(new Rectangle(e.getPosition().x, e.getPosition().y, e.getSize(), e.getSize()))) {
-                    if (p instanceof BlobProjectile) { e.applySpitEffect(); }
-                    else if (p instanceof SpriteProjectile) {
-                        if (p.getColor().equals(Color.WHITE)) e.applyVomitEffect();
-                        else if (p.getColor().equals(Color.CYAN)) e.applySpitEffect();
-                    } else if (p instanceof StreamProjectile) {
-                        if (p.getColor().equals(Color.YELLOW)) e.applyPeeEffect();
-                        else if (p.getColor().equals(new Color(0.5f, 0.25f, 0, 1))) e.applyPoopEffect();
-                        else if (p.getColor().equals(Color.WHITE)) e.applyVomitEffect();
-                    }
-                    projectiles.removeIndex(i); hit = true; break;
+                if (pRect.overlaps(new Rectangle(
+                    e.getPosition().x,
+                    e.getPosition().y,
+                    e.getSize(),
+                    e.getSize()))) {
+
+                    p.applyEffect(e);
+
+                    projectiles.removeIndex(i);
+                    hit = true;
+                    break;
                 }
             }
             if (hit) continue;
@@ -90,14 +88,25 @@ public class EntityManager {
         }
     }
 
-    public void renderShapes(ShapeRenderer shapeRenderer) {
+    /**
+     * CHỈ VẼ ĐẠN KHỐI (SHAPE):
+     * Cách ly hoàn toàn SpriteProjectile khỏi vùng này để tránh sập luồng vẽ của LibGDX.
+     */
+    public void renderShapes(ShapeRenderer shapeRenderer, SpriteBatch batch) {
         for (Projectile p : projectiles) {
-            if (!(p instanceof SpriteProjectile)) p.render(shapeRenderer);
+            // Nếu KHÔNG phải là loại dùng ảnh (Sprite), cho phép render an toàn trong ShapeRenderer.begin()
+            if (!(p instanceof SpriteProjectile)) {
+                p.render(batch, shapeRenderer);
+            }
         }
     }
 
-    public void renderSprites(SpriteBatch batch, Array<Skill> skills) {
-        // Vẽ bẫy phân lấy ảnh từ PoopSkill như yêu cầu cũ
+    /**
+     * CHỈ VẼ THỰC THỂ ẢNH (SPRITE):
+     * Gom bẫy phân và viên đạn ảnh bay ra vẽ an toàn khi SpriteBatch đang mở (begin).
+     */
+    public void renderSprites(SpriteBatch batch, ShapeRenderer shapeRenderer, Array<Skill> skills) {
+        // 1. Vẽ bẫy biobomb (mìn phân)
         PoopSkill poopSkillInstance = null;
         for (Skill s : skills) {
             if (s instanceof PoopSkill) { poopSkillInstance = (PoopSkill) s; break; }
@@ -109,9 +118,11 @@ public class EntityManager {
             }
         }
 
-        // Vẽ đạn có ảnh
+        // 2. Chỉ vẽ những viên đạn thuộc loại SpriteProjectile tại đây
         for (Projectile p : projectiles) {
-            if (p instanceof SpriteProjectile) ((SpriteProjectile) p).render(batch);
+            if (p instanceof SpriteProjectile) {
+                p.render(batch, shapeRenderer);
+            }
         }
     }
 

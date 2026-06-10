@@ -139,49 +139,70 @@ public class PlayScreen extends ScreenAdapter {
         update(delta);
         ScreenUtils.clear(0, 0, 0, 1);
 
+        // --- GIAI ĐOẠN 1: RENDER BẢN ĐỒ VÀ NỀN GAME ---
         mapManager.mapRenderer.setView(camera);
         mapManager.mapRenderer.render();
 
-        game.shapeRenderer.setProjectionMatrix(camera.combined);
-        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        mapManager.renderShapes(game.shapeRenderer);
-        if (mapManager.targetServer != null) {
-            mapManager.targetServer.renderHpBar(game.shapeRenderer);
-        }
-        entityManager.renderShapes(game.shapeRenderer);
-        game.shapeRenderer.end();
-
+        // --- GIAI ĐOẠN 2: MỞ BATCH HÌNH ẢNH (SPRITE/TEXTURE) ---
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
 
+        // Xử lý hiệu ứng tàng hình trực tiếp cho Player
         if (invisibilityTimer > 0) {
             game.batch.setColor(1, 1, 1, 0.5f);
         } else {
             game.batch.setColor(1, 1, 1, 1f);
         }
-        dung.draw(game.batch);
-        game.batch.setColor(1, 1, 1, 1f);
 
-        for (com.agentdung.game.entities.Enemy e : entityManager.enemies) e.draw(game.batch);
+        // Đã sửa: Truyền đúng 2 tham số song hành cho hàm render của Player
+        dung.render(game.batch, game.shapeRenderer);
+        game.batch.setColor(1, 1, 1, 1f); // Reset màu batch
+
+        // Đã sửa: Đồng bộ hóa cơ chế vẽ Enemy qua đa hình (Bỏ hàm e.draw cũ)
+        for (com.agentdung.game.entities.Enemy e : entityManager.enemies) {
+            e.render(game.batch, game.shapeRenderer);
+        }
+
+        // Render các Sprite của Map (Cây cối, chướng ngại vật...)
         mapManager.renderSprites(game.batch);
         if (mapManager.targetServer != null) {
             mapManager.targetServer.renderSprite(game.batch);
         }
-        entityManager.renderSprites(game.batch, skills);
 
+        // Đã sửa: Truyền đầy đủ 3 đối số theo cấu trúc mới của EntityManager (Xử lý dứt điểm lỗi dòng 95)
+        entityManager.renderSprites(game.batch, game.shapeRenderer, skills);
+
+        // Vẽ thông báo tương tác với máy bán hàng (Prompt)
         if (activeVending != null && !isVendingOpen && !isInventoryOpen && !isPaused) {
             batchDrawPrompt();
         }
         game.batch.end();
 
+        // --- GIAI ĐOẠN 3: MỞ HÌNH KHỐI (SHAPERENDERER ĐỂ VẼ THANH MÁU, TIA NƯỚC, DEBUG) ---
+        game.shapeRenderer.setProjectionMatrix(camera.combined);
+        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
+        // Bản đồ vẽ các vùng va chạm hình học (nếu có)
+        mapManager.renderShapes(game.shapeRenderer);
+
+        if (mapManager.targetServer != null) {
+            mapManager.targetServer.renderHpBar(game.shapeRenderer);
+        }
+
+        // Đã sửa: Truyền đầy đủ cả shapeRenderer và batch theo hàm mới của EntityManager
+        entityManager.renderShapes(game.shapeRenderer, game.batch);
+
+        game.shapeRenderer.end();
+
+        // --- GIAI ĐOẠN 4: HIỆU ỨNG ÁNH SÁNG & TẦM NHÌN LÍNH ---
         lightRenderer.renderDarkness(game.batch, dung, camera, carrotTimer > 0);
 
         game.shapeRenderer.setProjectionMatrix(camera.combined);
         // Luôn render tầm nhìn lính (để người chơi thấy vùng nguy hiểm dù đang tàng hình)
         lightRenderer.renderEnemyVision(game.shapeRenderer, entityManager, mapManager);
 
+        // --- GIAI ĐOẠN 5: RENDER GIAO DIỆN (HUD & OVERLAY) ---
         Matrix4 hudMatrix = new Matrix4().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-
         gameHUD.render(skills, hudMatrix, hasKey);
 
         if (hasKey) {
@@ -191,22 +212,13 @@ public class PlayScreen extends ScreenAdapter {
             game.batch.end();
         }
 
-        if (isInventoryOpen) {
-            inventoryOverlay.render(game.batch, game.shapeRenderer, hudMatrix);
-        }
+        // Xử lý các UI Overlay
+        if (isInventoryOpen)         inventoryOverlay.render(game.batch, game.shapeRenderer, hudMatrix);
+        if (isVendingOpen)           vendingMachineOverlay.render(game.batch, game.shapeRenderer, hudMatrix);
+        if (isCaptured)              capturedOverlay.render(game.shapeRenderer, hudMatrix);
+        if (isPaused)                pauseOverlay.render(game.shapeRenderer, hudMatrix);
 
-        if (isVendingOpen) {
-            vendingMachineOverlay.render(game.batch, game.shapeRenderer, hudMatrix);
-        }
-
-        if (isCaptured) {
-            capturedOverlay.render(game.shapeRenderer, hudMatrix);
-        }
-
-        if (isPaused) {
-            pauseOverlay.render(game.shapeRenderer, hudMatrix);
-        }
-
+        // Xử lý nút ESC thoát/tạm dừng game
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && !isCaptured) {
             if (isInventoryOpen) {
                 isInventoryOpen = false;

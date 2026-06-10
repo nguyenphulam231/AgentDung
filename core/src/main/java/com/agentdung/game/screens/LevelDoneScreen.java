@@ -48,8 +48,6 @@ public class LevelDoneScreen extends ScreenAdapter {
         titleTexture = new Texture(Gdx.files.internal("ui/UI_title_leveldone.png"));
         titleTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         Image titleImage = new Image(titleTexture);
-        // Bạn có thể chỉnh kích thước tiêu đề tại đây nếu cần thiết, ví dụ:
-        // titleImage.setSize(220f, 50f);
 
         // Nạp ảnh các nút bấm từ assets
         btnNextTexture = new Texture(Gdx.files.internal("ui/UI_button_nextlevel.png"));
@@ -62,7 +60,7 @@ public class LevelDoneScreen extends ScreenAdapter {
         btnProgressTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         btnMainTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
-        // 3. Ép size cố định cho ảnh nút từ Drawable gốc (Giữ nguyên kích thước 360x50 của bạn)
+        // 3. Ép size cố định cho ảnh nút từ Drawable gốc
         float targetBtnWidth = 360f;
         float targetBtnHeight = 50f;
 

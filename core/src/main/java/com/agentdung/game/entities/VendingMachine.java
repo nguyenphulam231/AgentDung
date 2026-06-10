@@ -1,5 +1,6 @@
 package com.agentdung.game.entities;
 
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
@@ -14,7 +15,9 @@ public class VendingMachine extends Entity {
     }
 
     @Override
-    public void render(ShapeRenderer shape) {}
+    public void render(com.badlogic.gdx.graphics.g2d.SpriteBatch batch, com.badlogic.gdx.graphics.glutils.ShapeRenderer shape) {
+
+    }
 
     @Override
     public void update(float delta, Player player, Array<Rectangle> walls) {}

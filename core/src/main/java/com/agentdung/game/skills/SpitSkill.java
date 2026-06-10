@@ -1,7 +1,7 @@
 package com.agentdung.game.skills;
 
 import com.agentdung.game.projectiles.Projectile;
-import com.agentdung.game.projectiles.SpriteProjectile; // ĐÃ ĐỔI: Dùng lớp đạn hình ảnh Sprite
+import com.agentdung.game.projectiles.SpriteProjectile;
 import com.agentdung.game.entities.Enemy;
 import com.agentdung.game.entities.Player;
 import com.badlogic.gdx.Gdx;
@@ -16,10 +16,10 @@ public class SpitSkill extends BaseSkill {
     private TextureRegion spitRegion;
 
     public SpitSkill() {
-        // Gọi constructor BaseSkill: Tên "Khạc", tốn 15 mana, màu xanh lơ (Cyan)
+        // Gọi constructor BaseSkill: spit, tốn 15 mana, màu xanh lơ (Cyan)
         super("Khạc", 15f, Color.CYAN);
 
-        // ĐÃ THÊM: Nạp file ảnh spit.png từ assets/images/
+        //  Nạp file ảnh spit.png
         Texture spitTexture = new Texture(Gdx.files.internal("images/spit.png"));
         this.spitRegion = new TextureRegion(spitTexture);
     }
@@ -30,17 +30,18 @@ public class SpitSkill extends BaseSkill {
         float spawnX = player.getPosition().x + player.getSize() / 2;
         float spawnY = player.getPosition().y + player.getSize() / 2;
 
-        // ĐÃ SỬA: Thay vì new BlobProjectile, ta tạo SpriteProjectile với hình ảnh nước bọt
+        // Thay vì new BlobProjectile, ta tạo SpriteProjectile với hình ảnh nước bọt
         projectiles.add(new SpriteProjectile(
             spawnX,
             spawnY,
-            player.getAngle(), // Giữ nguyên góc bắn thẳng theo hướng chuột của Player
-            400,               // Vận tốc bay nhanh (400)
-            spitRegion         // Truyền hình ảnh nước bọt vào
+            player.getAngle(),
+            400,
+            spitRegion,
+            Color.CYAN
         ));
     }
 
-    // ĐÃ THÊM: Giải phóng tài nguyên ảnh khi đóng màn chơi để tránh tràn RAM
+    // Giải phóng tài nguyên ảnh khi đóng màn chơi để tránh tràn RAM
     public void dispose() {
         if (spitRegion != null) {
             spitRegion.getTexture().dispose();

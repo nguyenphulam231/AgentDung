@@ -36,13 +36,13 @@ public class MapManager {
     public Server targetServer;
     public Texture keyTexture;
 
-    // --- THÊM MỚI: Texture hiển thị cho Máy bán hàng tự động ---
+    // --- Texture hiển thị cho Máy bán hàng tự động ---
     public Texture vendingMachineTexture;
 
     // Nút tương tác nhanh hiện lên khi đứng gần Vending Machine
     public Texture btnUsePromptTex;
 
-    // --- TỐI ƯU: Dùng Map quản lý toàn bộ ảnh vật phẩm tự động ---
+    // -- Dùng Map quản lý toàn bộ ảnh vật phẩm tự động ---
     private final Map<ItemTypeHolder, Texture> itemTextures = new HashMap<>();
 
     // Lớp vỏ bọc tạm thời để tránh xung đột trước khi biên dịch xong
@@ -69,7 +69,7 @@ public class MapManager {
         keyTexture = new Texture("images/key.png");
         btnUsePromptTex = new Texture("ui/UI_button_use.png");
 
-        // --- THÊM MỚI: Nạp texture cho máy bán hàng tự động (Hãy đảm bảo có file này trong assets) ---
+        // --- Nạp texture cho máy bán hàng tự động  ---
         vendingMachineTexture = new Texture("images/vending_machine.png");
         vendingMachineTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
@@ -176,13 +176,13 @@ public class MapManager {
         if (keyTexture != null) keyTexture.dispose();
         if (btnUsePromptTex != null) btnUsePromptTex.dispose();
 
-        // --- THÊM MỚI: Giải phóng vùng nhớ của ảnh Máy bán hàng ---
+        // --- Giải phóng vùng nhớ của ảnh Máy bán hàng ---
         if (vendingMachineTexture != null) {
             vendingMachineTexture.dispose();
             vendingMachineTexture = null;
         }
 
-        // Giải phóng sạch sẽ vùng nhớ tránh memory leak cho 14 Texture
+        // Giải phóng sạch sẽ vùng nhớ tránh memory leak cho các Texture
         for (Texture tex : itemTextures.values()) {
             if (tex != null) tex.dispose();
         }

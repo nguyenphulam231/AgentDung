@@ -48,8 +48,7 @@ public class ProgressScreen extends ScreenAdapter {
         titleTexture = new Texture(Gdx.files.internal("ui/UI_title_progress.png"));
         titleTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         Image titleImage = new Image(titleTexture);
-        // Bạn có thể tùy chỉnh size ảnh tiêu đề ở đây nếu muốn (Ví dụ: 200x50)
-        // titleImage.setSize(200f, 50f);
+
 
         // 2. Nút quay lại (Back Button) ở góc trái trên
         backButtonTexture = new Texture(Gdx.files.internal("ui/UI_arrow_left.png"));

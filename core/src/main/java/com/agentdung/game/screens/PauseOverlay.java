@@ -69,7 +69,7 @@ public class PauseOverlay {
         float titleY = sh * 0.68f;
         game.batch.draw(titlePausedTex, titleX, titleY, titleW, titleH);
 
-        // Kích thước nút tiêu chuẩn 360x50 đồng bộ toàn hệ thống UI của bạn
+        // Kích thước nút tiêu chuẩn 360x50
         float btnW = 360f;
         float btnH = 50f;
         float btnX = (sw - btnW) / 2f;

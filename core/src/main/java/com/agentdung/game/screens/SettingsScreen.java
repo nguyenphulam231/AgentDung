@@ -151,8 +151,8 @@ public class SettingsScreen extends ScreenAdapter {
         optionsTable.left(); // Căn lề trái tổng thể cho bảng
 
         // Cấu hình thông số kích thước đúng như ảnh mẫu của bạn
-        float btnMasterSize = 75f;  // Nút loa tổng lớn hẳn lên
-        float btnSubSize = 50f;     // Nút SFX và Music nhỏ hơn ở dưới
+        float btnMasterSize = 75f;  // Nút loa tổng lớn
+        float btnSubSize = 50f;     // Nút SFX và Music nhỏ
 
         // Hàng 1: Master Audio (Nút lớn + Chữ lớn nằm sát lề trái của bảng)
         optionsTable.add(masterButton).size(btnMasterSize).padRight(15f).padBottom(15f);
@@ -173,7 +173,7 @@ public class SettingsScreen extends ScreenAdapter {
         mainTable.setFillParent(true);
         mainTable.top();
 
-        // Đặt tiêu đề chữ "Settings" vừa vặn (ví dụ: rộng 180px, cao 45px), không lo bị tràn viền
+        // Đặt tiêu đề chữ "Settings"
         mainTable.add(titleImage).size(350f, 90f).padTop(60f).padBottom(25f).center();
         mainTable.row();
 

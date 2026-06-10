@@ -41,7 +41,7 @@ public class VomitSkill extends BaseSkill {
             float randomAngle = player.getAngle() + MathUtils.random(-18f, 18f);
             float randomSpeed = MathUtils.random(250f, 350f);
 
-            // 🔥 ĐÃ SỬA: Truyền thêm '4f, 4f' vào cuối để ép kích thước hạt nôn thành 4x4 pixel
+            // Truyền thêm '4f, 4f' vào cuối để ép kích thước hạt vomit thành 4x4 pixel
             projectiles.add(new SpriteProjectile(
                 spawnX,
                 spawnY,

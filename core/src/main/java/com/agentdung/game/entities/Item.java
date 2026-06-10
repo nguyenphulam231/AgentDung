@@ -1,5 +1,6 @@
 package com.agentdung.game.entities;
 
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
@@ -45,7 +46,10 @@ public class Item extends Entity {
     }
 
     @Override
-    public void render(ShapeRenderer shape) {}
+    public void render(SpriteBatch batch, ShapeRenderer shape) {
+        // Code vẽ hình ảnh vật phẩm (Vũ khí, máu, vật phẩm nhiệm vụ...)
+        // Ví dụ: batch.draw(itemTexture, position.x, position.y, size, size);
+    }
 
     @Override
     public void update(float delta, Player player, Array<Rectangle> walls) {}

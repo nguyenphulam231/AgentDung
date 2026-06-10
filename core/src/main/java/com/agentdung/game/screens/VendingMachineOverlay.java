@@ -165,7 +165,7 @@ public class VendingMachineOverlay {
     }
 
     public void handleInput() {
-        // Logic phím ESC đã được chuyển sang PlayScreen quản lý tập trung
+        // Logic phím ESC do PlayScreen quản lý tập trung
         if (Gdx.input.justTouched()) {
             Vector3 touch = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
             touch.x = (touch.x / (float) Gdx.graphics.getWidth()) * VIRTUAL_WIDTH;

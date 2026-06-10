@@ -34,7 +34,6 @@ public class GameHUD {
         this.rectBagBtn = new Rectangle();
         this.font = new BitmapFont();
         this.glyphLayout = new GlyphLayout();
-        // THIẾT LẬP FONT: Tăng size để chắc chắn nhìn thấy được
         this.font.getData().setScale(1.5f);
     }
 
@@ -86,7 +85,6 @@ public class GameHUD {
 
         // 4. Vẽ Coin và số xu
         float coinSize = 30f;
-        // Đẩy hình xu sát lại nút Bag hơn (cách 20px thay vì 50px) để nhường chỗ cho chữ bên trái
         float coinX = bagX - coinSize - 20f;
         float coinY = bagY + 5f;
 
