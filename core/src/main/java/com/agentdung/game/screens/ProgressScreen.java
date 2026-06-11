@@ -58,8 +58,8 @@ public class ProgressScreen extends ScreenAdapter {
         backButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) {
-                    game.clickSound.play();
+                if (game.isMasterOn && game.isSfxOn && game.assets.getClickSound() != null) {
+                    game.assets.getClickSound().play();
                 }
                 game.setScreen(new MissionsScreen(game));
             }
@@ -103,8 +103,8 @@ public class ProgressScreen extends ScreenAdapter {
             levelButton.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    if (game.isMasterOn && game.isSfxOn && game.clickSound != null) {
-                        game.clickSound.play();
+                    if (game.isMasterOn && game.isSfxOn && game.assets.getClickSound() != null) {
+                        game.assets.getClickSound().play();
                     }
                     game.setScreen(new PlayScreen(game, worldId, levelNum));
                 }
@@ -144,8 +144,8 @@ public class ProgressScreen extends ScreenAdapter {
         stage.draw();
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.BACKSPACE)) {
-            if (game.isMasterOn && game.isSfxOn && game.clickSound != null) {
-                game.clickSound.play();
+            if (game.isMasterOn && game.isSfxOn && game.assets.getClickSound() != null) {
+                game.assets.getClickSound().play();
             }
             game.setScreen(new MissionsScreen(game));
         }

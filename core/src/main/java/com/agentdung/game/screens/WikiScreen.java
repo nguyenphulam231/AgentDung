@@ -141,7 +141,7 @@ public class WikiScreen extends ScreenAdapter {
         float ty = (1f - Gdx.input.getY() / (float) Gdx.graphics.getHeight()) * VH;
 
         if (backBounds.contains(tx, ty)) {
-            if (game.clickSound != null) game.clickSound.play();
+            if (game.assets.getClickSound() != null) game.assets.getClickSound().play();
             game.setScreen(new MenuScreen(game));
             return;
         }

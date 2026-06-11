@@ -1,56 +1,33 @@
 package com.agentdung.game.core;
 
-import com.agentdung.game.assets.GameAssets; // Import package assets mới tạo
+import com.agentdung.game.assets.GameAssets;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
-import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.agentdung.game.screens.MenuScreen;
 import com.agentdung.game.screens.IntroScreen;
 
 public class AgentDungGame extends Game {
-    public Music backgroundMusic;
-    public Sound clickSound;
-    public Sound pickWaterSound;
-
-    // --- HIỆU ỨNG ÂM THANH CHO CÁC CHIÊU THỨC ---
-    public Sound spitSound;
-    public Sound poopSound;
-    public Sound peeSound;
-    public Sound vomitSound;
-
     public ShapeRenderer shapeRenderer;
     public SpriteBatch batch;
 
     // --- QUẢN LÝ TÀI NGUYÊN TOÀN CỤC ---
     public GameAssets assets;
 
-    // --- LOGIC LƯU TRỮ NHÂN VẬT ĐƯỢC CHỌN ---
+    // --- LOGIC LƯU TRỮ ---
     public int selectedCharacterId = 1;
     public int selectedVariantId = 1;
-
-    // --- BIẾN TRẠNG THÁI LƯU TRỮ CẤU HÌNH ÂM THANH TỔNG THỂ ---
     public boolean isMasterOn = true;
     public boolean isSfxOn = true;
     public boolean isMusicOn = true;
-
-    // --- BIẾN LƯU TRỮ XU TOÀN CỤC XUYÊN SUỐT CÁC LEVEL ---
     public int globalCoinCount = 5000;
-
-    // --- QUẢN LÝ TIẾN TRÌNH CHƠI THỰC TẾ ---
     public int[] completedLevelsReal = {0, 0, 0, 0, 0};
     public final int[] totalLevelsReal = {5, 3, 4, 3, 5};
 
-    // --- QUẢN LÝ BỘ NHỚ TEXTURE SỐ ---
     public Texture[] numberTextures;
-
-    // Tên file lưu trữ dữ liệu cục bộ trên ổ cứng của hệ thống Preferences
     private static final String SAVE_PREFS_NAME = "AgentDungGameProgress";
-
     private Runnable skillSoundStopper;
 
     @Override
@@ -58,85 +35,32 @@ public class AgentDungGame extends Game {
         shapeRenderer = new ShapeRenderer();
         batch = new SpriteBatch();
 
-        // 1. Khởi tạo đối tượng quản lý tài nguyên
+        // 1. Khởi tạo và nạp toàn bộ tài nguyên qua GameAssets
         assets = new GameAssets();
-
-        // 2. Tải trước ảnh nhân vật dựa trên ID mặc định ban đầu
         assets.loadPlayerTexture(selectedCharacterId, selectedVariantId);
         assets.loadEnemyTexture();
         assets.loadServerTexture();
         assets.loadMapAssets();
+        assets.loadSounds(); // Nạp âm thanh tập trung
 
-        try {
-            backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("sounds/theme_music.mp3"));
-            backgroundMusic.setLooping(true);
-            backgroundMusic.setVolume(0.5f);
-            backgroundMusic.play();
+        // 2. Phát nhạc nền
+        updateMusicState();
 
-            clickSound = Gdx.audio.newSound(Gdx.files.internal("sounds/click_sound.ogg"));
-            pickWaterSound = Gdx.audio.newSound(Gdx.files.internal("sounds/pick_water.ogg"));
-
-            // --- NẠP CÁC FILE ÂM THANH CHIÊU THỨC MỚI ---
-            spitSound = Gdx.audio.newSound(Gdx.files.internal("sounds/sfx_spit.ogg"));
-            poopSound = Gdx.audio.newSound(Gdx.files.internal("sounds/sfx_poop.ogg"));
-            peeSound = Gdx.audio.newSound(Gdx.files.internal("sounds/sfx_pee.ogg"));
-            vomitSound = Gdx.audio.newSound(Gdx.files.internal("sounds/sfx_vomit.ogg"));
-
-            updateMusicState();
-
-            // --- NẠP TRƯỚC CÁC FILE ẢNH SỐ ---
-            numberTextures = new Texture[10];
-            for (int i = 0; i < 10; i++) {
-                numberTextures[i] = new Texture(Gdx.files.internal("ui/UI_number" + i + ".png"));
-            }
-
-            // Tự động tải lại kỉ lục tiến trình cũ và số xu từ ổ cứng ngay khi bật game
-            //loadProgress();
-
-        } catch (Exception e) {
-            Gdx.app.error("AgentDungGame", "Không thể tải tài nguyên hệ thống: " + e.getMessage());
+        // 3. Nạp tài nguyên giao diện
+        numberTextures = new Texture[10];
+        for (int i = 0; i < 10; i++) {
+            numberTextures[i] = new Texture(Gdx.files.internal("ui/UI_number" + i + ".png"));
         }
 
         setScreen(new IntroScreen(this));
     }
 
-    // --- TỰ ĐỘNG TẢI TIẾN TRÌNH VÀ SỐ XU TỪ Ổ CỨNG ---
-    public void loadProgress() {
-        Preferences prefs = Gdx.app.getPreferences(SAVE_PREFS_NAME);
-        for (int i = 0; i < completedLevelsReal.length; i++) {
-            completedLevelsReal[i] = prefs.getInteger("map_" + (i + 1), 0);
-        }
-
-        // Đọc số xu tích lũy từ ổ cứng
-        this.globalCoinCount = prefs.getInteger("global_coin_count", 5000);
-
-        Gdx.app.log("SaveSystem", "Đã tải thành công tiến trình và số xu tích lũy từ bộ nhớ thiết bị.");
-    }
-
-    // --- CHỦ ĐỘNG GHI TIẾN TRÌNH VÀ SỐ XU XUỐNG Ổ CỨNG ---
-    public void saveProgress() {
-        Preferences prefs = Gdx.app.getPreferences(SAVE_PREFS_NAME);
-        for (int i = 0; i < completedLevelsReal.length; i++) {
-            prefs.putInteger("map_" + (i + 1), completedLevelsReal[i]);
-        }
-
-        // Lưu trữ vật lý số xu hiện tại vào Preferences
-        prefs.putInteger("global_coin_count", this.globalCoinCount);
-
-        prefs.flush(); // Bắt buộc thực hiện ghi vật lý xuống file
-        Gdx.app.log("SaveSystem", "Đã tự động lưu tiến trình chơi và số xu mới vào ổ cứng.");
-    }
-
     public void updateMusicState() {
-        if (backgroundMusic != null) {
+        if (assets.getBackgroundMusic() != null) {
             if (isMasterOn && isMusicOn) {
-                if (!backgroundMusic.isPlaying()) {
-                    backgroundMusic.play();
-                }
+                if (!assets.getBackgroundMusic().isPlaying()) assets.getBackgroundMusic().play();
             } else {
-                if (backgroundMusic.isPlaying()) {
-                    backgroundMusic.pause();
-                }
+                if (assets.getBackgroundMusic().isPlaying()) assets.getBackgroundMusic().pause();
             }
         }
     }
@@ -146,9 +70,7 @@ public class AgentDungGame extends Game {
     }
 
     public void stopSkillSounds() {
-        if (skillSoundStopper != null) {
-            skillSoundStopper.run();
-        }
+        if (skillSoundStopper != null) skillSoundStopper.run();
     }
 
     public void updateSfxState() {
@@ -157,35 +79,32 @@ public class AgentDungGame extends Game {
         }
     }
 
-    @Override
-    public void render() {
-        super.render();
+    public void loadProgress() {
+        Preferences prefs = Gdx.app.getPreferences(SAVE_PREFS_NAME);
+        for (int i = 0; i < completedLevelsReal.length; i++) {
+            completedLevelsReal[i] = prefs.getInteger("map_" + (i + 1), 0);
+        }
+        this.globalCoinCount = prefs.getInteger("global_coin_count", 5000);
+    }
+
+    public void saveProgress() {
+        Preferences prefs = Gdx.app.getPreferences(SAVE_PREFS_NAME);
+        for (int i = 0; i < completedLevelsReal.length; i++) {
+            prefs.putInteger("map_" + (i + 1), completedLevelsReal[i]);
+        }
+        prefs.putInteger("global_coin_count", this.globalCoinCount);
+        prefs.flush();
     }
 
     @Override
     public void dispose() {
         super.dispose();
-
-        // Giải phóng bộ nhớ GameAssets để tránh rò rỉ texture nhân vật
-        if (assets != null) {
-            assets.dispose();
-        }
-
-        if (backgroundMusic != null) backgroundMusic.dispose();
-        if (clickSound != null) clickSound.dispose();
-        if (pickWaterSound != null) pickWaterSound.dispose();
-
-        if (spitSound != null) spitSound.dispose();
-        if (poopSound != null) poopSound.dispose();
-        if (peeSound != null) peeSound.dispose();
-        if (vomitSound != null) vomitSound.dispose();
+        // Giải phóng tập trung qua GameAssets
+        if (assets != null) assets.dispose();
 
         if (numberTextures != null) {
-            for (Texture t : numberTextures) {
-                if (t != null) t.dispose();
-            }
+            for (Texture t : numberTextures) if (t != null) t.dispose();
         }
-
         if (shapeRenderer != null) shapeRenderer.dispose();
         if (batch != null) batch.dispose();
     }

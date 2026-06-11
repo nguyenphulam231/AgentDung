@@ -163,7 +163,7 @@ public class VendingMachineOverlay {
 
             for (VendingSlot slot : slots) {
                 if (slot.bounds.contains(touch.x, touch.y)) {
-                    if (screen.game.isMasterOn && screen.game.isSfxOn && screen.game.clickSound != null) screen.game.clickSound.play();
+                    if (screen.game.isMasterOn && screen.game.isSfxOn && screen.game.assets.getClickSound() != null) screen.game.assets.getClickSound().play();
                     selectedSlot = slot;
                     notEnoughCoinsTimer = 0f;
                     return;
@@ -172,7 +172,7 @@ public class VendingMachineOverlay {
 
             if (btnBuyBounds.contains(touch.x, touch.y) && selectedSlot != null) {
                 if (screen.game.globalCoinCount >= selectedSlot.type.price) {
-                    if (screen.game.isMasterOn && screen.game.isSfxOn && screen.game.clickSound != null) screen.game.clickSound.play();
+                    if (screen.game.isMasterOn && screen.game.isSfxOn && screen.game.assets.getClickSound() != null) screen.game.assets.getClickSound().play();
                     screen.game.globalCoinCount -= selectedSlot.type.price;
 
                     int curCount = screen.state.inventory.getOrDefault(selectedSlot.type, 0);
@@ -182,8 +182,8 @@ public class VendingMachineOverlay {
                     notEnoughCoinsTimer = 0f;
                 } else {
                     notEnoughCoinsTimer = 2.0f;
-                    if (screen.game.isMasterOn && screen.game.isSfxOn && screen.game.clickSound != null) {
-                        screen.game.clickSound.play();
+                    if (screen.game.isMasterOn && screen.game.isSfxOn && screen.game.assets.getClickSound() != null) {
+                        screen.game.assets.getClickSound().play();
                     }
                 }
             }

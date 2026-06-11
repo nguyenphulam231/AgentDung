@@ -47,7 +47,7 @@ public class GuideScreen extends ScreenAdapter {
         backButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (game.clickSound != null) game.clickSound.play();
+                if (game.assets.getClickSound() != null) game.assets.getClickSound().play();
                 game.setScreen(new MenuScreen(game));
             }
         });
@@ -69,7 +69,7 @@ public class GuideScreen extends ScreenAdapter {
         // Vẽ Stage (Lúc này tự động vẽ cả ảnh nền và nút back theo đúng thứ tự)
         stage.act(delta);
         stage.draw();
-        
+
     }
 
     @Override

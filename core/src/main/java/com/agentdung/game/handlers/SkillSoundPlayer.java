@@ -38,7 +38,7 @@ public class SkillSoundPlayer {
     }
 
     public void stopAll(AgentDungGame game) {
-        stopLoop(game, game.peeSound);
+        stopLoop(game, game.assets.getPeeSound());
         vomitSoundPlayed = false;
     }
 

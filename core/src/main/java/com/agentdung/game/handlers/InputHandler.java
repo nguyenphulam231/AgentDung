@@ -35,14 +35,14 @@ public class InputHandler {
         bindings.add(SkillInputBinding.tap(
             Input.Keys.Q, 0,
             SkillInputBinding.SoundMode.ONE_SHOT,
-            game.spitSound,
+            game.assets.getSpitSound(),
             null
         ));
 
         bindings.add(SkillInputBinding.tap(
             Input.Keys.E, 1,
             SkillInputBinding.SoundMode.ONE_SHOT,
-            game.poopSound,
+            game.assets.getPoopSound(),
             ctx -> ctx.entityManager.poopTraps.add(new Rectangle(
                 ctx.player.getPosition().x + 5,
                 ctx.player.getPosition().y + 5,
@@ -53,14 +53,14 @@ public class InputHandler {
         bindings.add(SkillInputBinding.hold(
             Input.Keys.C, 2,
             SkillInputBinding.SoundMode.LOOP_WHILE_ACTIVE,
-            game.peeSound,
+            game.assets.getPeeSound(),
             null
         ));
 
         bindings.add(SkillInputBinding.hold(
             Input.Keys.V, 3,
             SkillInputBinding.SoundMode.ONCE_PER_HOLD,
-            game.vomitSound,
+            game.assets.getVomitSound(),
             null
         ));
 

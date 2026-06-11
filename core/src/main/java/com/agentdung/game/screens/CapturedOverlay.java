@@ -131,8 +131,8 @@ public class CapturedOverlay {
     }
 
     private void playClickSound() {
-        if (game.isMasterOn && game.isSfxOn && game.clickSound != null) {
-            game.clickSound.play();
+        if (game.isMasterOn && game.isSfxOn && game.assets.getClickSound() != null) {
+            game.assets.getClickSound().play();
         }
     }
 

@@ -111,7 +111,7 @@ public class CustomizeScreen extends ScreenAdapter {
         backButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
+                if (game.isMasterOn && game.isSfxOn && game.assets.getClickSound() != null) game.assets.getClickSound().play();
                 game.setScreen(new MenuScreen(game));
             }
         });
@@ -164,7 +164,7 @@ public class CustomizeScreen extends ScreenAdapter {
                     variantBtn.addListener(new ClickListener() {
                         @Override
                         public void clicked(InputEvent event, float x, float y) {
-                            if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
+                            if (game.isMasterOn && game.isSfxOn && game.assets.getClickSound() != null) game.assets.getClickSound().play();
 
                             game.selectedCharacterId = charId;
                             game.selectedVariantId = variantId;

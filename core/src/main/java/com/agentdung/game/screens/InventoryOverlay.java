@@ -188,8 +188,8 @@ public class InventoryOverlay {
     }
 
     private void playClickSound() {
-        if (screen.game.isMasterOn && screen.game.isSfxOn && screen.game.clickSound != null) {
-            screen.game.clickSound.play();
+        if (screen.game.isMasterOn && screen.game.isSfxOn && screen.game.assets.getClickSound() != null) {
+            screen.game.assets.getClickSound().play();
         }
     }
 

@@ -104,7 +104,7 @@ public class SettingsScreen extends ScreenAdapter {
         backButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
+                if (game.isMasterOn && game.isSfxOn && game.assets.getClickSound() != null) game.assets.getClickSound().play();
                 game.setScreen(new MenuScreen(game));
             }
         });
@@ -115,7 +115,7 @@ public class SettingsScreen extends ScreenAdapter {
                 game.isMasterOn = !masterButton.isChecked();
                 game.updateMusicState();
                 game.updateSfxState();
-                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
+                if (game.isMasterOn && game.isSfxOn && game.assets.getClickSound() != null) game.assets.getClickSound().play();
             }
         });
 
@@ -124,7 +124,7 @@ public class SettingsScreen extends ScreenAdapter {
             public void clicked(InputEvent event, float x, float y) {
                 game.isSfxOn = !sfxButton.isChecked();
                 game.updateSfxState();
-                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
+                if (game.isMasterOn && game.isSfxOn && game.assets.getClickSound() != null) game.assets.getClickSound().play();
             }
         });
 
@@ -133,7 +133,7 @@ public class SettingsScreen extends ScreenAdapter {
             public void clicked(InputEvent event, float x, float y) {
                 game.isMusicOn = !musicButton.isChecked();
                 game.updateMusicState();
-                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
+                if (game.isMasterOn && game.isSfxOn && game.assets.getClickSound() != null) game.assets.getClickSound().play();
             }
         });
 

@@ -62,7 +62,7 @@ public class MissionsScreen extends ScreenAdapter {
         backButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
+                if (game.isMasterOn && game.isSfxOn && game.assets.getClickSound() != null) game.assets.getClickSound().play();
                 game.setScreen(new MenuScreen(game));
             }
         });
@@ -105,7 +105,7 @@ public class MissionsScreen extends ScreenAdapter {
             mapTagButton.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
+                    if (game.isMasterOn && game.isSfxOn && game.assets.getClickSound() != null) game.assets.getClickSound().play();
 
                     // --- dẫn sang ProgressScreen của Map này ---
                     System.out.println("Chuyển hướng đến màn hình Progress: Map " + mapIndex);

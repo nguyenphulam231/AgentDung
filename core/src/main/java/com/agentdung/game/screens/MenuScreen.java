@@ -78,7 +78,7 @@ public class MenuScreen extends ScreenAdapter {
         playButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (game.clickSound != null) game.clickSound.play();
+                if (game.assets.getClickSound() != null) game.assets.getClickSound().play();
                 game.setScreen(new MissionsScreen(game));
             }
         });
@@ -86,7 +86,7 @@ public class MenuScreen extends ScreenAdapter {
         customizeButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (game.clickSound != null) game.clickSound.play();
+                if (game.assets.getClickSound() != null) game.assets.getClickSound().play();
                 game.setScreen(new CustomizeScreen(game));
             }
         });
@@ -94,7 +94,7 @@ public class MenuScreen extends ScreenAdapter {
         wikiButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (game.clickSound != null) game.clickSound.play();
+                if (game.assets.getClickSound() != null) game.assets.getClickSound().play();
                 game.setScreen(new WikiScreen(game));
             }
         });
@@ -102,7 +102,7 @@ public class MenuScreen extends ScreenAdapter {
         guideButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (game.clickSound != null) game.clickSound.play();
+                if (game.assets.getClickSound() != null) game.assets.getClickSound().play();
                 game.setScreen(new GuideScreen(game));
             }
         });
@@ -110,7 +110,7 @@ public class MenuScreen extends ScreenAdapter {
         settingsButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (game.clickSound != null) game.clickSound.play();
+                if (game.assets.getClickSound() != null) game.assets.getClickSound().play();
                 game.setScreen(new SettingsScreen(game));
             }
         });

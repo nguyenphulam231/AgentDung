@@ -83,7 +83,7 @@ public class LevelDoneScreen extends ScreenAdapter {
         nextButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
+                if (game.isMasterOn && game.isSfxOn && game.assets.getClickSound() != null) game.assets.getClickSound().play();
                 if (completedLevel < game.totalLevelsReal[completedWorld - 1]) {
                     game.setScreen(new PlayScreen(game, completedWorld, completedLevel + 1));
                 } else {
@@ -95,7 +95,7 @@ public class LevelDoneScreen extends ScreenAdapter {
         progressButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
+                if (game.isMasterOn && game.isSfxOn && game.assets.getClickSound() != null) game.assets.getClickSound().play();
                 game.setScreen(new ProgressScreen(game, completedWorld));
             }
         });
@@ -103,7 +103,7 @@ public class LevelDoneScreen extends ScreenAdapter {
         mainButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (game.isMasterOn && game.isSfxOn && game.clickSound != null) game.clickSound.play();
+                if (game.isMasterOn && game.isSfxOn && game.assets.getClickSound()!= null) game.assets.getClickSound().play();
                 game.setScreen(new MenuScreen(game));
             }
         });
