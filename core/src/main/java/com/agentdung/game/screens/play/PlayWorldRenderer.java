@@ -95,7 +95,7 @@ public class PlayWorldRenderer {
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        mapManager.renderShapes(shapeRenderer);
+        mapManager.renderShapes(batch, shapeRenderer);
 
         if (mapManager.targetServer != null) {
             mapManager.targetServer.renderHpBar(shapeRenderer);

@@ -134,8 +134,10 @@ public class MapManager {
         return (assets != null) ? assets.getItemTexture(type) : null;
     }
 
-    public void renderShapes(ShapeRenderer shapeRenderer) {
-        for (Door door : doors) door.render(shapeRenderer);
+    public void renderShapes(SpriteBatch batch, ShapeRenderer shapeRenderer) {
+        for (Door door : doors) {
+            door.render(batch, shapeRenderer); // Truyền cả batch và shape
+        }
     }
 
     public void renderSprites(SpriteBatch batch) {

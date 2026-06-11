@@ -56,7 +56,6 @@ public class Server {
     }
 
     public void dispose() {
-        // Đã xóa hoàn toàn serverTexture.dispose()
-        // Vòng đời của texture này hiện tại do GameAssets quản lý toàn cục.
+
     }
 }

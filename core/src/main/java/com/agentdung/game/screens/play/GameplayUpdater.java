@@ -135,7 +135,10 @@ public class GameplayUpdater {
                 door.bounds.x,
                 door.bounds.y
             );
-            door.update(delta, dist < DOOR_INTERACT_DISTANCE, state.hasKey);
+            // Cập nhật trạng thái trước rồi mới gọi update()
+            door.isNear = (dist < DOOR_INTERACT_DISTANCE);
+            door.hasKey = state.hasKey;
+            door.update(delta); // Chỉ truyền delta
         }
     }
 

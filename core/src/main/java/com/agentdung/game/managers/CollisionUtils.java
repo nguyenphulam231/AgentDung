@@ -24,7 +24,9 @@ public class CollisionUtils {
 
     private static boolean isCollidingWithMap(Rectangle rect, MapManager mapManager) {
         for (var w : mapManager.walls) if (Intersector.overlaps(rect, w.bounds)) return true;
-        for (var d : mapManager.doors) if (!d.isOpen && Intersector.overlaps(rect, d.bounds)) return true;
+        for (var d : mapManager.doors) {
+            if (!d.isOpen && Intersector.overlaps(rect, d.getBounds())) return true;
+        }
         return false;
     }
 }
