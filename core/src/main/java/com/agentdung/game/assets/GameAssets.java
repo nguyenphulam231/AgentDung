@@ -35,6 +35,16 @@ public class GameAssets {
     private Texture missionBgTex, mapTagTex, progressTex, perTex, titleMissionTex;
     private Texture[] mapTitleTexs = new Texture[5];
     private Texture[] numberTexs = new Texture[10];
+    private Texture pausedTitleTex, resumeBtnTex, restartBtnTex, mainMenuBtnTex;
+    private Texture progressBgTex;
+    private Texture progressTitleTex;
+    private final Map<String, Texture> levelButtonTextures = new HashMap<>();
+    private Texture settingsBgTex, settingsTitleTex;
+    private Texture soundOnTex, soundOffTex, musicOnTex, musicOffTex;
+    private Texture textMasterTex, textSfxTex, textMusicTex;
+    private Texture vendingTitleTex, vendingBigFrameTex, vendingSmallFrameTex, btnBuyTex;
+    private Texture wikiTitleTex;
+
 
     public void loadPlayerTexture(int characterId, int variantId) {
         if (playerTexture != null) playerTexture.dispose();
@@ -73,6 +83,10 @@ public class GameAssets {
                 itemTextures.put(type, tex);
             }
         }
+        if (vendingTitleTex == null) vendingTitleTex = new Texture("ui/UI_title_vendingmachine.png");
+        if (vendingBigFrameTex == null) vendingBigFrameTex = new Texture("ui/bigframe.png");
+        if (vendingSmallFrameTex == null) vendingSmallFrameTex = new Texture("ui/smallframe.png");
+        if (btnBuyTex == null) btnBuyTex = new Texture("ui/UI_button_buy.png");
     }
 
     public void loadSounds() {
@@ -98,6 +112,7 @@ public class GameAssets {
         btnSettings = new Texture("ui/UI_button_settings.png");
         btnWiki = new Texture("ui/UI_button_wiki.png");
         coinTex = new Texture("images/coin.png");
+        if (wikiTitleTex == null) wikiTitleTex = new Texture("ui/UI_title_wiki.png");
     }
 
     public void loadGuideAssets() {
@@ -234,6 +249,78 @@ public class GameAssets {
         }
     }
 
+    public void loadPauseAssets() {
+        if (pausedTitleTex == null) pausedTitleTex = new Texture("ui/UI_title_paused.png");
+        if (resumeBtnTex == null) resumeBtnTex = new Texture("ui/UI_button_resume_lite.png");
+        if (restartBtnTex == null) restartBtnTex = new Texture("ui/UI_button_restart_lite.png");
+        if (mainMenuBtnTex == null) mainMenuBtnTex = new Texture("ui/UI_button_mainmenu_lite.png");
+    }
+    public void loadProgressAssets(int worldId, int totalLevels, int completedLevels) {
+        if (progressBgTex == null)
+            progressBgTex = new Texture("ui/UI_frame_general.png");
+        if (progressTitleTex == null) {
+            progressTitleTex = new Texture("ui/UI_title_progress.png");
+            progressTitleTex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        }
+        if (backBtnTex == null)
+            backBtnTex = new Texture("ui/UI_arrow_left.png");
+
+        for (int i = 1; i <= totalLevels; i++) {
+            String path = (i <= completedLevels)
+                ? "ui/UI_level_" + i + "_done.png"
+                : "ui/UI_level_" + i + "_notdone.png";
+            if (!levelButtonTextures.containsKey(path)) {
+                Texture tex = new Texture(Gdx.files.internal(path));
+                tex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+                levelButtonTextures.put(path, tex);
+            }
+        }
+    }
+    public void loadSettingsAssets() {
+        if (settingsBgTex == null) {
+            settingsBgTex = new Texture("ui/UI_frame_general.png");
+            settingsBgTex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        }
+        if (settingsTitleTex == null) {
+            settingsTitleTex = new Texture("ui/UI_title_settings.png");
+            settingsTitleTex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        }
+        if (backBtnTex == null) {
+            backBtnTex = new Texture("ui/UI_arrow_left.png");
+            backBtnTex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        }
+        if (soundOnTex == null) {
+            soundOnTex = new Texture("ui/UI_soundon.png");
+            soundOnTex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        }
+        if (soundOffTex == null) {
+            soundOffTex = new Texture("ui/UI_soundoff.png");
+            soundOffTex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        }
+        if (musicOnTex == null) {
+            musicOnTex = new Texture("ui/UI_musicon.png");
+            musicOnTex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        }
+        if (musicOffTex == null) {
+            musicOffTex = new Texture("ui/UI_musicoff.png");
+            musicOffTex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        }
+        if (textMasterTex == null) {
+            textMasterTex = new Texture("ui/UI_text_master.png");
+            textMasterTex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        }
+        if (textSfxTex == null) {
+            textSfxTex = new Texture("ui/UI_text_sfx.png");
+            textSfxTex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        }
+        if (textMusicTex == null) {
+            textMusicTex = new Texture("ui/UI_text_music.png");
+            textMusicTex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        }
+    }
+
+
+
 
 
     public Texture getPlayerTexture() { return playerTexture; }
@@ -293,6 +380,34 @@ public class GameAssets {
         }
         return null; // Hoặc trả về một texture mặc định nếu cần
     }
+    public Texture getPausedTitleTex() { return pausedTitleTex; }
+    public Texture getResumeBtnTex() {return resumeBtnTex;}
+    public Texture getRestartBtnTex() {return restartBtnTex;}
+    public Texture getMainMenuBtnTex() {return mainMenuBtnTex;}
+    public Texture getProgressBgTex() { return progressBgTex; }
+    public Texture getProgressTitleTex() { return progressTitleTex; }
+    public Texture getLevelButtonTex(int levelNum, boolean done) {
+        String path = done
+            ? "ui/UI_level_" + levelNum + "_done.png"
+            : "ui/UI_level_" + levelNum + "_notdone.png";
+        return levelButtonTextures.get(path);
+    }
+    public Texture getSoundOnTex() { return soundOnTex; }
+    public Texture getSoundOffTex() { return soundOffTex; }
+    public Texture getMusicOnTex() { return musicOnTex; }
+    public Texture getMusicOffTex() { return musicOffTex; }
+    public Texture getTextMasterTex() { return textMasterTex; }
+    public Texture getTextSfxTex() { return textSfxTex; }
+    public Texture getTextMusicTex() { return textMusicTex; }
+    public Texture getSettingsBgTex() { return settingsBgTex; }
+    public Texture getSettingsTitleTex() { return settingsTitleTex; }
+    public Texture getVendingTitleTex() { return vendingTitleTex; }
+    public Texture getVendingBigFrameTex() { return vendingBigFrameTex; }
+    public Texture getVendingSmallFrameTex() { return vendingSmallFrameTex; }
+    public Texture getBtnBuyTex() { return btnBuyTex; }
+    public Texture getWikiTitleTex() { return wikiTitleTex; }
+
+
 
 
     public void dispose() {
@@ -328,7 +443,6 @@ public class GameAssets {
         if (capturedSound != null) capturedSound.dispose();
         if (btnPauseTex != null) btnPauseTex.dispose();
         if (btnBagTex != null) btnBagTex.dispose();
-        if (coinTex != null) coinTex.dispose();
         if (guideFrameTex != null) guideFrameTex.dispose();
         if (invTitleTex != null) invTitleTex.dispose();
         if (invBigFrameTex != null) invBigFrameTex.dispose();
@@ -345,6 +459,26 @@ public class GameAssets {
         if (progressTex != null) progressTex.dispose();
         if (perTex != null) perTex.dispose();
         if (titleMissionTex != null) titleMissionTex.dispose();
+        if (pausedTitleTex != null) pausedTitleTex.dispose();
+        if (resumeBtnTex != null) resumeBtnTex.dispose();
+        if (restartBtnTex != null) restartBtnTex.dispose();
+        if (mainMenuBtnTex != null) mainMenuBtnTex.dispose();
+        if (progressBgTex != null) progressBgTex.dispose();
+        if (progressTitleTex != null) progressTitleTex.dispose();
+        if (settingsBgTex != null) settingsBgTex.dispose();
+        if (settingsTitleTex != null) settingsTitleTex.dispose();
+        if (soundOnTex != null) soundOnTex.dispose();
+        if (soundOffTex != null) soundOffTex.dispose();
+        if (musicOnTex != null) musicOnTex.dispose();
+        if (musicOffTex != null) musicOffTex.dispose();
+        if (textMasterTex != null) textMasterTex.dispose();
+        if (textSfxTex != null) textSfxTex.dispose();
+        if (textMusicTex != null) textMusicTex.dispose();
+        if (vendingTitleTex != null) vendingTitleTex.dispose();
+        if (vendingBigFrameTex != null) vendingBigFrameTex.dispose();
+        if (vendingSmallFrameTex != null) vendingSmallFrameTex.dispose();
+        if (btnBuyTex != null) btnBuyTex.dispose();
+        if (wikiTitleTex != null) wikiTitleTex.dispose();
 
 
         for (Texture tex : itemTextures.values()) {
@@ -358,5 +492,7 @@ public class GameAssets {
         for (Texture t : numberTexs) {
             if (t != null) t.dispose();
         }
+        for (Texture tex : levelButtonTextures.values()) if (tex != null) tex.dispose();
+        levelButtonTextures.clear();
     }
 }

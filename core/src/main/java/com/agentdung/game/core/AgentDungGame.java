@@ -50,6 +50,8 @@ public class AgentDungGame extends Game {
         assets.loadInventoryAssets();
         assets.loadLevelDoneAssets();
         assets.loadMissionsAssets();
+        assets.loadPauseAssets();
+        assets.loadSettingsAssets();
 
 
 

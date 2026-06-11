@@ -10,24 +10,19 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class WikiScreen extends ScreenAdapter {
     private final AgentDungGame game;
-    private Stage stage;
     private BitmapFont font;
-    private Texture bgTexture, titleWikiTexture, bigFrameTex, smallFrameTex, backBtnTex;
     private ShapeRenderer shape;
+
+    // Xóa hết 5 biến Texture và iconTextures — GameAssets quản lý rồi
 
     private static final float VW = 800f;
     private static final float VH = 600f;
-
     private static final float BIG_X        = VW * 0.08f;
     private static final float BIG_Y        = VH * 0.18f;
     private static final float BIG_W        = VW * 0.38f;
@@ -37,14 +32,13 @@ public class WikiScreen extends ScreenAdapter {
     private static final float SLOT_SIZE    = 54f;
     private static final float GAP          = 15f;
     private static final int   GRID_COLS    = 4;
+    private boolean inputConsumed = false;
+    private float inputDelay = 0f;
+    private static final float INPUT_DELAY = 0.1f;
 
-    // Nút Back
     private final Rectangle backBounds = new Rectangle(20, VH - 60, 45, 45);
-
     private final Array<Item.ItemType> wikiItems  = new Array<>();
     private final Array<Rectangle>     slotBounds = new Array<>();
-    private final Map<Item.ItemType, Texture> iconTextures = new HashMap<>();
-
     private Item.ItemType selectedItem = null;
 
     public WikiScreen(AgentDungGame game) {
@@ -64,39 +58,41 @@ public class WikiScreen extends ScreenAdapter {
 
     @Override
     public void show() {
-        stage            = new Stage(new ScreenViewport());
-        bgTexture        = new Texture(Gdx.files.internal("ui/UI_frame_general.png"));
-        titleWikiTexture = new Texture(Gdx.files.internal("ui/UI_title_wiki.png"));
-        bigFrameTex      = new Texture(Gdx.files.internal("ui/bigframe.png"));
-        smallFrameTex    = new Texture(Gdx.files.internal("ui/smallframe.png"));
-        backBtnTex       = new Texture(Gdx.files.internal("ui/UI_arrow_left.png"));
-
-        for (Item.ItemType type : wikiItems) {
-            iconTextures.put(type, new Texture(Gdx.files.internal(type.texturePath)));
-        }
+        // Đảm bảo assets cần thiết đã được load
+        game.assets.loadMenuAssets();   // wikiTitleTex, bgTexture
+        game.assets.loadMapAssets();    // itemTextures, bigFrame, smallFrame
+        game.assets.loadGuideAssets();  // backBtnTex
+        inputConsumed = true;
+        inputDelay = INPUT_DELAY;
     }
 
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0, 1);
-        handleInput();
+
+        if (inputDelay > 0) {
+            inputDelay -= delta;
+        } else {
+            handleInput();
+        }
 
         Matrix4 overlayMatrix = new Matrix4().setToOrtho2D(0, 0, VW, VH);
         game.batch.setProjectionMatrix(overlayMatrix);
         game.batch.begin();
 
-        game.batch.draw(bgTexture, 0, 0, VW, VH);
-        game.batch.draw(backBtnTex, backBounds.x, backBounds.y, backBounds.width, backBounds.height);
+        game.batch.draw(game.assets.getSettingsBgTex(), 0, 0, VW, VH);
+        game.batch.draw(game.assets.getBackBtnTex(), backBounds.x, backBounds.y, backBounds.width, backBounds.height);
 
-        float titleX = VW / 2f - titleWikiTexture.getWidth() / 2f;
-        float titleY = VH - titleWikiTexture.getHeight() - 30f;
-        game.batch.draw(titleWikiTexture, titleX, titleY);
+        Texture titleWiki = game.assets.getWikiTitleTex();
+        float titleX = VW / 2f - titleWiki.getWidth() / 2f;
+        float titleY = VH - titleWiki.getHeight() - 30f;
+        game.batch.draw(titleWiki, titleX, titleY);
 
-        game.batch.draw(bigFrameTex, BIG_X, BIG_Y, BIG_W, BIG_H);
+        game.batch.draw(game.assets.getVendingBigFrameTex(), BIG_X, BIG_Y, BIG_W, BIG_H);
 
         float textX = BIG_X + 25f;
         if (selectedItem != null) {
-            Texture icon = iconTextures.get(selectedItem);
+            Texture icon = game.assets.getItemTexture(selectedItem);
             if (icon != null) {
                 float iconSize = 64f;
                 game.batch.draw(icon, BIG_X + BIG_W / 2f - iconSize / 2f, BIG_Y + BIG_H - 120f, iconSize, iconSize);
@@ -118,8 +114,8 @@ public class WikiScreen extends ScreenAdapter {
             float sx = GRID_START_X + col * (SLOT_SIZE + GAP);
             float sy = GRID_START_Y - row * (SLOT_SIZE + GAP);
             slotBounds.get(i).set(sx, sy, SLOT_SIZE, SLOT_SIZE);
-            game.batch.draw(smallFrameTex, sx, sy, SLOT_SIZE, SLOT_SIZE);
-            Texture icon = iconTextures.get(wikiItems.get(i));
+            game.batch.draw(game.assets.getVendingSmallFrameTex(), sx, sy, SLOT_SIZE, SLOT_SIZE);
+            Texture icon = game.assets.getItemTexture(wikiItems.get(i));
             if (icon != null) game.batch.draw(icon, sx + 8, sy + 8, SLOT_SIZE - 16, SLOT_SIZE - 16);
         }
         game.batch.end();
@@ -136,6 +132,11 @@ public class WikiScreen extends ScreenAdapter {
     }
 
     private void handleInput() {
+        if (inputConsumed) {
+            inputConsumed = false;
+            return;
+        }
+        if (!Gdx.input.justTouched()) return;
         if (!Gdx.input.justTouched()) return;
         float tx = (Gdx.input.getX() / (float) Gdx.graphics.getWidth()) * VW;
         float ty = (1f - Gdx.input.getY() / (float) Gdx.graphics.getHeight()) * VH;
@@ -156,14 +157,8 @@ public class WikiScreen extends ScreenAdapter {
 
     @Override
     public void dispose() {
-        if (stage != null) stage.dispose();
-        bgTexture.dispose();
-        titleWikiTexture.dispose();
-        bigFrameTex.dispose();
-        smallFrameTex.dispose();
-        backBtnTex.dispose();
-        font.dispose();
-        shape.dispose();
-        for (Texture t : iconTextures.values()) t.dispose();
+        // Texture do GameAssets quản lý, không dispose ở đây
+        if (font != null) font.dispose();
+        if (shape != null) shape.dispose();
     }
 }

@@ -10,13 +10,14 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector3;
+
 public class VendingMachineOverlay {
     private final PlayScreen screen;
     private final BitmapFont font;
 
-    private Texture titleTex, bigFrameTex, smallFrameTex, btnBuyTex;
+    // Xóa 4 biến Texture — GameAssets quản lý rồi
+
     private final Array<VendingSlot> slots = new Array<>();
     private VendingSlot selectedSlot = null;
     private Rectangle btnBuyBounds;
@@ -33,10 +34,7 @@ public class VendingMachineOverlay {
         this.font.setColor(Color.WHITE);
         this.font.getData().setScale(1.2f);
 
-        titleTex = new Texture("ui/UI_title_vendingmachine.png");
-        bigFrameTex = new Texture("ui/bigframe.png");
-        smallFrameTex = new Texture("ui/smallframe.png");
-        btnBuyTex = new Texture("ui/UI_button_buy.png");
+        // Xóa 4 dòng new Texture(...) — GameAssets lo rồi
 
         btnBuyBounds = new Rectangle();
         setupVendingProducts();
@@ -67,6 +65,8 @@ public class VendingMachineOverlay {
         batch.setProjectionMatrix(overlayMatrix);
         batch.begin();
 
+        // Dùng getter thay vì biến local
+        Texture titleTex = screen.game.assets.getVendingTitleTex();
         float titleX = VIRTUAL_WIDTH / 2f - titleTex.getWidth() / 2f;
         float titleY = VIRTUAL_HEIGHT - titleTex.getHeight() - 30;
         batch.draw(titleTex, titleX, titleY);
@@ -75,7 +75,7 @@ public class VendingMachineOverlay {
         float bigY = VIRTUAL_HEIGHT * 0.18f;
         float bigW = VIRTUAL_WIDTH * 0.38f;
         float bigH = VIRTUAL_HEIGHT * 0.55f;
-        batch.draw(bigFrameTex, bigX, bigY, bigW, bigH);
+        batch.draw(screen.game.assets.getVendingBigFrameTex(), bigX, bigY, bigW, bigH);
 
         float startSmallX = VIRTUAL_WIDTH * 0.52f;
         float smallY = VIRTUAL_HEIGHT * 0.62f;
@@ -91,11 +91,12 @@ public class VendingMachineOverlay {
             VendingSlot slot = slots.get(i);
             slot.bounds.set(x, y, slotSize, slotSize);
 
-            batch.draw(smallFrameTex, x, y, slotSize, slotSize);
+            batch.draw(screen.game.assets.getVendingSmallFrameTex(), x, y, slotSize, slotSize);
 
-            Texture texIcon = screen.mapManager.getItemTexture(slot.type);
+            // Dùng GameAssets thay vì mapManager
+            Texture texIcon = screen.game.assets.getItemTexture(slot.type);
             if (texIcon == null) {
-                texIcon = screen.mapManager.vendingMachineTexture;
+                texIcon = screen.game.assets.getVendingMachineTexture();
             }
 
             if (texIcon != null) {
@@ -114,7 +115,6 @@ public class VendingMachineOverlay {
             }
         }
 
-        // --- SỐ XU HIỂN THỊ DƯỚI CÁC Ô VẬT PHẨM ---
         int maxRows = (int) Math.ceil(slots.size / 4.0);
         float coinDisplayY = smallY - (maxRows * (slotSize + gap)) + 10;
         font.setColor(Color.GOLD);
@@ -141,7 +141,7 @@ public class VendingMachineOverlay {
         float btnX = VIRTUAL_WIDTH * 0.90f - btnW;
         float btnY = bigY;
         btnBuyBounds.set(btnX, btnY, btnW, btnH);
-        batch.draw(btnBuyTex, btnX, btnY, btnW, btnH);
+        batch.draw(screen.game.assets.getBtnBuyTex(), btnX, btnY, btnW, btnH);
 
         if (notEnoughCoinsTimer > 0) {
             font.setColor(Color.RED);
@@ -155,7 +155,6 @@ public class VendingMachineOverlay {
     }
 
     public void handleInput() {
-        // Logic phím ESC do PlayScreen quản lý tập trung
         if (Gdx.input.justTouched()) {
             Vector3 touch = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
             touch.x = (touch.x / (float) Gdx.graphics.getWidth()) * VIRTUAL_WIDTH;
@@ -163,7 +162,8 @@ public class VendingMachineOverlay {
 
             for (VendingSlot slot : slots) {
                 if (slot.bounds.contains(touch.x, touch.y)) {
-                    if (screen.game.isMasterOn && screen.game.isSfxOn && screen.game.assets.getClickSound() != null) screen.game.assets.getClickSound().play();
+                    if (screen.game.isMasterOn && screen.game.isSfxOn && screen.game.assets.getClickSound() != null)
+                        screen.game.assets.getClickSound().play();
                     selectedSlot = slot;
                     notEnoughCoinsTimer = 0f;
                     return;
@@ -172,7 +172,8 @@ public class VendingMachineOverlay {
 
             if (btnBuyBounds.contains(touch.x, touch.y) && selectedSlot != null) {
                 if (screen.game.globalCoinCount >= selectedSlot.type.price) {
-                    if (screen.game.isMasterOn && screen.game.isSfxOn && screen.game.assets.getClickSound() != null) screen.game.assets.getClickSound().play();
+                    if (screen.game.isMasterOn && screen.game.isSfxOn && screen.game.assets.getClickSound() != null)
+                        screen.game.assets.getClickSound().play();
                     screen.game.globalCoinCount -= selectedSlot.type.price;
 
                     int curCount = screen.state.inventory.getOrDefault(selectedSlot.type, 0);
@@ -182,19 +183,15 @@ public class VendingMachineOverlay {
                     notEnoughCoinsTimer = 0f;
                 } else {
                     notEnoughCoinsTimer = 2.0f;
-                    if (screen.game.isMasterOn && screen.game.isSfxOn && screen.game.assets.getClickSound() != null) {
+                    if (screen.game.isMasterOn && screen.game.isSfxOn && screen.game.assets.getClickSound() != null)
                         screen.game.assets.getClickSound().play();
-                    }
                 }
             }
         }
     }
 
     public void dispose() {
-        if (titleTex != null) titleTex.dispose();
-        if (bigFrameTex != null) bigFrameTex.dispose();
-        if (smallFrameTex != null) smallFrameTex.dispose();
-        if (btnBuyTex != null) btnBuyTex.dispose();
+        // Texture do GameAssets quản lý, không dispose ở đây
         if (font != null) font.dispose();
     }
 

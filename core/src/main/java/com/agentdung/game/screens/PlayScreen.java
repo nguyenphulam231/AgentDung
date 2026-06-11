@@ -130,7 +130,6 @@ public class PlayScreen extends ScreenAdapter {
         inputHandler.stopLoopingSounds();
         if (gameHUD != null) gameHUD.dispose();
 
-        if (pauseOverlay != null) pauseOverlay.dispose();
         if (inventoryOverlay != null) inventoryOverlay.dispose();
         if (vendingMachineOverlay != null) vendingMachineOverlay.dispose();
 
@@ -138,5 +137,9 @@ public class PlayScreen extends ScreenAdapter {
         entityManager.dispose();
         lightRenderer.dispose();
         SkillResourceHelper.disposeAll(skills);
+    }
+
+    public OrthographicCamera getCamera() {
+        return this.camera;
     }
 }
