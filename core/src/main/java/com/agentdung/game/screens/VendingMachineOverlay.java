@@ -140,7 +140,7 @@ public class VendingMachineOverlay {
             font.draw(batch, selectedSlot.type.description, textX, textY - 40);
             font.draw(batch, "PRICE: " + selectedSlot.type.price + " Coins", bigX + 25, bigY + 80);
 
-            int inBag = screen.inventory.getOrDefault(selectedSlot.type, 0);
+            int inBag = screen.state.inventory.getOrDefault(selectedSlot.type, 0);
             font.draw(batch, "In Inventory: " + inBag, bigX + 25, bigY + 45);
         } else {
             font.draw(batch, "Select an item to purchase", bigX + 25, bigY + bigH - 40);
@@ -185,10 +185,10 @@ public class VendingMachineOverlay {
                     if (screen.game.isMasterOn && screen.game.isSfxOn && screen.game.clickSound != null) screen.game.clickSound.play();
                     screen.game.globalCoinCount -= selectedSlot.type.price;
 
-                    int curCount = screen.inventory.getOrDefault(selectedSlot.type, 0);
-                    screen.inventory.put(selectedSlot.type, curCount + 1);
+                    int curCount = screen.state.inventory.getOrDefault(selectedSlot.type, 0);
+                    screen.state.inventory.put(selectedSlot.type, curCount + 1);
 
-                    if (selectedSlot.type == Item.ItemType.AMULET) screen.amuletCount++;
+                    if (selectedSlot.type == Item.ItemType.AMULET) screen.state.amuletCount++;
                     notEnoughCoinsTimer = 0f;
                 } else {
                     notEnoughCoinsTimer = 2.0f;

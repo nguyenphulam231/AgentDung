@@ -72,13 +72,13 @@ public class InventoryOverlay {
         Array<Item.ItemType> activeItems = new Array<>();
         for (Item.ItemType type : Item.ItemType.values()) {
             if (type == Item.ItemType.COIN) continue;
-            int count = screen.inventory.getOrDefault(type, 0);
+            int count = screen.state.inventory.getOrDefault(type, 0);
             if (count > 0) {
                 activeItems.add(type);
             }
         }
 
-        if (selectedType != null && screen.inventory.getOrDefault(selectedType, 0) <= 0) {
+        if (selectedType != null && screen.state.inventory.getOrDefault(selectedType, 0) <= 0) {
             selectedType = null;
         }
 
@@ -120,7 +120,7 @@ public class InventoryOverlay {
                     batch.draw(texIcon, x + 7, y + 7, slotSize - 14, slotSize - 14);
                 }
 
-                int count = screen.inventory.get(currentType);
+                int count = screen.state.inventory.get(currentType);
                 font.draw(batch, "x" + count, x + slotSize - 25, y + 18);
 
                 if (selectedType == currentType) {
@@ -149,7 +149,7 @@ public class InventoryOverlay {
             font.setColor(Color.WHITE);
             font.draw(batch, selectedType.description, textX, textY - 40);
 
-            int ownCount = screen.inventory.get(selectedType);
+            int ownCount = screen.state.inventory.get(selectedType);
             font.draw(batch, "You own: " + ownCount, bigX + 25, bigY + 45);
         } else {
             font.draw(batch, "Select an item to view info", bigX + 25, bigY + bigH - 40);
@@ -182,14 +182,14 @@ public class InventoryOverlay {
             }
 
             if (btnUseBounds.contains(touch.x, touch.y) && selectedType != null) {
-                int count = screen.inventory.getOrDefault(selectedType, 0);
+                int count = screen.state.inventory.getOrDefault(selectedType, 0);
                 if (count > 0) {
                     if (screen.game.isMasterOn && screen.game.isSfxOn && screen.game.clickSound != null) screen.game.clickSound.play();
 
-                    screen.inventory.put(selectedType, count - 1);
+                    screen.state.inventory.put(selectedType, count - 1);
                     applyItemEffect(selectedType);
 
-                    if (selectedType == Item.ItemType.AMULET) screen.amuletCount--;
+                    if (selectedType == Item.ItemType.AMULET) screen.state.amuletCount--;
                 }
             }
         }
@@ -204,22 +204,22 @@ public class InventoryOverlay {
                 }
                 break;
             case AMULET:
-                screen.amuletCount++;
+                screen.state.amuletCount++;
                 break;
             case CARROT:
-                screen.carrotTimer = 10.0f; // Kích hoạt hiệu ứng nhìn xa 10 giây
+                screen.state.carrotTimer = 10.0f;
                 break;
             case CLOCK:
-                screen.clockTimer = 2.0f;
+                screen.state.clockTimer = 2.0f;
                 break;
             case INVISIBILITY:
-                screen.invisibilityTimer = 2.0f;
+                screen.state.invisibilityTimer = 2.0f;
                 break;
             case LEMON:
-                screen.lemonTimer = 10.0f;
+                screen.state.lemonTimer = 10.0f;
                 break;
             case ORANGE:
-                screen.orangeTimer = 10.0f;
+                screen.state.orangeTimer = 10.0f;
                 for (Skill s : screen.skills) {
                     if (s instanceof PeeSkill) s.gainMana(10f);
                 }
@@ -236,7 +236,7 @@ public class InventoryOverlay {
                 }
                 break;
             case SHOES:
-                screen.shoesTimer = 5.0f;
+                screen.state.shoesTimer = 5.0f;
                 break;
             case WATER:
                 for (Skill s : screen.skills) {
