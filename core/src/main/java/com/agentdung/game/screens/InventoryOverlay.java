@@ -17,11 +17,9 @@ import com.badlogic.gdx.utils.Array;
 public class InventoryOverlay {
     private final PlayScreen screen;
     private final BitmapFont font;
-
-    private Texture titleTex, bigFrameTex, smallFrameTex, btnUseTex;
     private final Array<ItemSlot> slots = new Array<>();
     private Item.ItemType selectedType = null;
-    private Rectangle btnUseBounds;
+    private final Rectangle btnUseBounds;
 
     private final float VIRTUAL_WIDTH = 800f;
     private final float VIRTUAL_HEIGHT = 600f;
@@ -29,17 +27,10 @@ public class InventoryOverlay {
 
     public InventoryOverlay(PlayScreen screen) {
         this.screen = screen;
-
         this.font = new BitmapFont();
         this.font.setColor(Color.WHITE);
         this.font.getData().setScale(1.2f);
-
-        titleTex = new Texture("UI/UI_title_inventory.png");
-        bigFrameTex = new Texture("UI/bigframe.png");
-        smallFrameTex = new Texture("UI/smallframe.png");
-        btnUseTex = new Texture("UI/UI_button_use.png");
-
-        btnUseBounds = new Rectangle();
+        this.btnUseBounds = new Rectangle();
 
         for (int i = 0; i < MAX_SLOTS; i++) {
             slots.add(new ItemSlot());
@@ -59,6 +50,12 @@ public class InventoryOverlay {
         batch.setProjectionMatrix(overlayMatrix);
         batch.begin();
 
+        // Sử dụng các Texture từ GameAssets
+        Texture titleTex = screen.game.assets.getInvTitleTex();
+        Texture bigFrameTex = screen.game.assets.getInvBigFrameTex();
+        Texture smallFrameTex = screen.game.assets.getInvSmallFrameTex();
+        Texture btnUseTex = screen.game.assets.getInvBtnUseTex();
+
         float titleX = VIRTUAL_WIDTH / 2f - titleTex.getWidth() / 2f;
         float titleY = VIRTUAL_HEIGHT - titleTex.getHeight() - 30;
         batch.draw(titleTex, titleX, titleY);
@@ -73,9 +70,7 @@ public class InventoryOverlay {
         for (Item.ItemType type : Item.ItemType.values()) {
             if (type == Item.ItemType.COIN) continue;
             int count = screen.state.inventory.getOrDefault(type, 0);
-            if (count > 0) {
-                activeItems.add(type);
-            }
+            if (count > 0) activeItems.add(type);
         }
 
         if (selectedType != null && screen.state.inventory.getOrDefault(selectedType, 0) <= 0) {
@@ -194,10 +189,7 @@ public class InventoryOverlay {
     }
 
     public void dispose() {
-        if (titleTex != null) titleTex.dispose();
-        if (bigFrameTex != null) bigFrameTex.dispose();
-        if (smallFrameTex != null) smallFrameTex.dispose();
-        if (btnUseTex != null) btnUseTex.dispose();
+        // Chỉ giải phóng font, texture đã do GameAssets quản lý
         if (font != null) font.dispose();
     }
 

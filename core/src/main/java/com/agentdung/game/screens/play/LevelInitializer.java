@@ -42,7 +42,6 @@ public class LevelInitializer {
 
         entityManager.enemyManager.init(mapManager, player, game.assets);
         entityManager.clearAll();
-        gameHUD.loadTextures();
 
         Array<Skill> skills = SkillResourceHelper.createDefaultLoadout();
         return new LevelSetupResult(player, skills);

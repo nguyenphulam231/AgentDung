@@ -2,6 +2,7 @@ package com.agentdung.game.assets;
 
 import com.agentdung.game.entities.Item;
 import com.agentdung.game.screens.CustomizeScreen;
+import com.agentdung.game.skills.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
@@ -20,11 +21,20 @@ public class GameAssets {
     private Texture menuBg, btnPlay, btnCustomize, btnTitle, btnGuide, btnSettings, btnWiki, coinTex;
     private Texture customizeBg, slotBg, backBtn, titleCustomize;
     private Map<String, Texture> thumbnails = new HashMap<>();
-    // --- THÊM TÀI NGUYÊN CHO MAP ---
+    private Texture titleCapturedTex, btnRestartTex, btnProgressMenuTex, btnMainMenuTex;
+    private Sound capturedSound;
     private Texture keyTexture;
     private Texture btnUsePromptTex;
     private Texture vendingMachineTexture;
     private final Map<Item.ItemType, Texture> itemTextures = new HashMap<>();
+    private Map<Class<? extends Skill>, Texture> manaTextures = new HashMap<>();
+    private Texture btnPauseTex, btnBagTex;
+    private Texture guideFrameTex, backBtnTex;
+    private Texture invTitleTex, invBigFrameTex, invSmallFrameTex, invBtnUseTex;
+    private Texture levelDoneBgTex, titleLevelDoneTex, btnNextTex, btnProgressTex, btnMainTex;
+    private Texture missionBgTex, mapTagTex, progressTex, perTex, titleMissionTex;
+    private Texture[] mapTitleTexs = new Texture[5];
+    private Texture[] numberTexs = new Texture[10];
 
     public void loadPlayerTexture(int characterId, int variantId) {
         if (playerTexture != null) playerTexture.dispose();
@@ -47,9 +57,6 @@ public class GameAssets {
         }
     }
 
-    /**
-     * Nạp toàn bộ tài nguyên tĩnh dùng chung cho các Bản đồ
-     */
     public void loadMapAssets() {
         if (keyTexture == null) keyTexture = new Texture("images/key.png");
         if (btnUsePromptTex == null) btnUsePromptTex = new Texture("ui/UI_button_use.png");
@@ -93,10 +100,14 @@ public class GameAssets {
         coinTex = new Texture("images/coin.png");
     }
 
-    /**
-     * Overload không tham số — tự khởi tạo danh sách nhân vật.
-     * Gọi từ AgentDungGame để load trước khi vào màn hình Customize.
-     */
+    public void loadGuideAssets() {
+        guideFrameTex = new Texture("ui/UI_frame_guide.png");
+        // Nếu bạn đã có backBtn trong hàm loadCustomizeAssets,
+        // hãy đảm bảo dùng chung biến đó hoặc nạp tại đây
+        if (backBtnTex == null) backBtnTex = new Texture("ui/UI_arrow_left.png");
+    }
+
+
     public void loadCustomizeAssets() {
         Array<CustomizeScreen.CharacterData> characterList = new Array<>();
         characterList.add(new CustomizeScreen.CharacterData("Agent Dung", 1,
@@ -114,12 +125,7 @@ public class GameAssets {
         loadCustomizeAssets(characterList);
     }
 
-    /**
-     * Nạp toàn bộ tài nguyên cho màn hình Customize.
-     * Truyền vào danh sách nhân vật để biết cần load thumbnail nào.
-     *
-     * @param characterList danh sách CharacterData từ CustomizeScreen
-     */
+
     public void loadCustomizeAssets(Array<CustomizeScreen.CharacterData> characterList) {
         if (customizeBg == null) {
             customizeBg = new Texture("ui/UI_frame_general.png");
@@ -166,6 +172,70 @@ public class GameAssets {
         return tex;
     }
 
+    public void loadCapturedAssets() {
+        titleCapturedTex = new Texture("ui/UI_title_captured.png");
+        btnRestartTex = new Texture("ui/UI_button_restart_red.png");
+        btnProgressMenuTex = new Texture("ui/UI_button_progressmenu_red.png");
+        btnMainMenuTex = new Texture("ui/UI_button_mainmenu_red.png");
+        capturedSound = Gdx.audio.newSound(Gdx.files.internal("sounds/captured.ogg"));
+
+    }
+
+    public void loadHUDAssets() {
+        // Chỉ nạp nếu chưa nạp (kiểm tra null để tránh load trùng)
+        if (btnPauseTex == null) {
+            manaTextures.put(SpitSkill.class, new Texture("ui/UI_mana_spit.png"));
+            manaTextures.put(VomitSkill.class, new Texture("ui/UI_mana_vomit.png"));
+            manaTextures.put(PeeSkill.class, new Texture("ui/UI_mana_pee.png"));
+            manaTextures.put(PoopSkill.class, new Texture("ui/UI_mana_poop.png"));
+
+            btnPauseTex = new Texture("ui/UI_button_pause.png");
+            btnBagTex = new Texture("ui/UI_button_bag.png");
+            coinTex = new Texture("images/coin.png");
+        }
+    }
+
+    public void loadInventoryAssets() {
+        invTitleTex = new Texture("UI/UI_title_inventory.png");
+        invBigFrameTex = new Texture("UI/bigframe.png");
+        invSmallFrameTex = new Texture("UI/smallframe.png");
+        invBtnUseTex = new Texture("UI/UI_button_use.png");
+    }
+
+    public void loadLevelDoneAssets() {
+        levelDoneBgTex = new Texture("ui/UI_frame_general.png");
+        titleLevelDoneTex = new Texture("ui/UI_title_leveldone.png");
+        btnNextTex = new Texture("ui/UI_button_nextlevel.png");
+        btnProgressTex = new Texture("ui/UI_button_progressmenu.png");
+        btnMainTex = new Texture("ui/UI_button_mainmenu.png");
+
+        // Apply Filter cho Pixel Art
+        levelDoneBgTex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        titleLevelDoneTex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        btnNextTex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        btnProgressTex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        btnMainTex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+    }
+
+    public void loadMissionsAssets() {
+        missionBgTex = new Texture("ui/UI_background.png");
+        backBtnTex = new Texture("ui/UI_arrow_left.png");
+        mapTagTex = new Texture("ui/UI_maptag.png");
+        progressTex = new Texture("ui/UI_progress.png");
+        perTex = new Texture("ui/UI_per.png");
+        titleMissionTex = new Texture("ui/UI_title_mission.png");
+
+        String[] mapNames = {"UI_Ronin", "UI_Nostra", "UI_Sinal", "UI_Gumi", "UI_Cartel"};
+        for (int i = 0; i < 5; i++) {
+            mapTitleTexs[i] = new Texture("ui/" + mapNames[i] + ".png");
+        }
+        for (int i = 0; i < 10; i++) {
+            numberTexs[i] = new Texture("ui/UI_number" + i + ".png");
+        }
+    }
+
+
+
     public Texture getPlayerTexture() { return playerTexture; }
     public Texture getEnemyTexture() { return enemyTexture; }
     public Texture getServerTexture() { return serverTexture; }
@@ -192,6 +262,37 @@ public class GameAssets {
     public Texture getSlotBg() { return slotBg; }
     public Texture getBackBtn() { return backBtn; }
     public Texture getTitleCustomize() { return titleCustomize; }
+    public Texture getTitleCapturedTex() { return titleCapturedTex; }
+    public Texture getBtnRestartTex() { return btnRestartTex; }
+    public Texture getBtnProgressMenuTex() { return btnProgressMenuTex; }
+    public Texture getBtnMainMenuTex() { return btnMainMenuTex; }
+    public Sound getCapturedSound() { return capturedSound; }
+    public Texture getManaTexture(Class<? extends Skill> skillClass) { return manaTextures.get(skillClass); }
+    public Texture getBtnPauseTex() { return btnPauseTex; }
+    public Texture getBtnBagTex() { return btnBagTex; }
+    public Texture getGuideFrameTex() { return guideFrameTex; }
+    public Texture getBackBtnTex() { return backBtnTex; }
+    public Texture getInvTitleTex() { return invTitleTex; }
+    public Texture getInvBigFrameTex() { return invBigFrameTex; }
+    public Texture getInvSmallFrameTex() { return invSmallFrameTex; }
+    public Texture getInvBtnUseTex() { return invBtnUseTex; }
+    public Texture getLevelDoneBgTex() { return levelDoneBgTex; }
+    public Texture getTitleLevelDoneTex() { return titleLevelDoneTex; }
+    public Texture getBtnNextTex() { return btnNextTex; }
+    public Texture getBtnProgressTex() { return btnProgressTex; }
+    public Texture getBtnMainTex() { return btnMainTex; }
+    public Texture getMissionBgTex() { return missionBgTex; }
+    public Texture getMapTagTex() { return mapTagTex; }
+    public Texture getProgressTex() { return progressTex; }
+    public Texture getPerTex() { return perTex; }
+    public Texture getTitleMissionTex() { return titleMissionTex; }
+    public Texture getMapTitleTex(int index) { return mapTitleTexs[index]; }
+    public Texture getNumberTex(int index) {
+        if (index >= 0 && index < numberTexs.length) {
+            return numberTexs[index];
+        }
+        return null; // Hoặc trả về một texture mặc định nếu cần
+    }
 
 
     public void dispose() {
@@ -220,6 +321,30 @@ public class GameAssets {
         if (slotBg != null) slotBg.dispose();
         if (backBtn != null) backBtn.dispose();
         if (titleCustomize != null) titleCustomize.dispose();
+        if (titleCapturedTex != null) titleCapturedTex.dispose();
+        if (btnRestartTex != null) btnRestartTex.dispose();
+        if (btnProgressMenuTex != null) btnProgressMenuTex.dispose();
+        if (btnMainMenuTex != null) btnMainMenuTex.dispose();
+        if (capturedSound != null) capturedSound.dispose();
+        if (btnPauseTex != null) btnPauseTex.dispose();
+        if (btnBagTex != null) btnBagTex.dispose();
+        if (coinTex != null) coinTex.dispose();
+        if (guideFrameTex != null) guideFrameTex.dispose();
+        if (invTitleTex != null) invTitleTex.dispose();
+        if (invBigFrameTex != null) invBigFrameTex.dispose();
+        if (invSmallFrameTex != null) invSmallFrameTex.dispose();
+        if (invBtnUseTex != null) invBtnUseTex.dispose();
+        if (levelDoneBgTex != null) levelDoneBgTex.dispose();
+        if (titleLevelDoneTex != null) titleLevelDoneTex.dispose();
+        if (btnNextTex != null) btnNextTex.dispose();
+        if (btnProgressTex != null) btnProgressTex.dispose();
+        if (btnMainTex != null) btnMainTex.dispose();
+        if (missionBgTex != null) missionBgTex.dispose();
+        if (backBtnTex != null) backBtnTex.dispose();
+        if (mapTagTex != null) mapTagTex.dispose();
+        if (progressTex != null) progressTex.dispose();
+        if (perTex != null) perTex.dispose();
+        if (titleMissionTex != null) titleMissionTex.dispose();
 
         for (Texture tex : itemTextures.values()) {
             if (tex != null) tex.dispose();
@@ -227,5 +352,10 @@ public class GameAssets {
         itemTextures.clear();
         for (Texture tex : thumbnails.values()) tex.dispose();
         thumbnails.clear();
+        for (Texture tex : manaTextures.values()) tex.dispose();
+        for (Texture t : mapTitleTexs) if (t != null) t.dispose();
+        for (Texture t : numberTexs) {
+            if (t != null) t.dispose();
+        }
     }
 }

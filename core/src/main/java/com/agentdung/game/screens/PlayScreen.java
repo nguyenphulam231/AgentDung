@@ -129,7 +129,7 @@ public class PlayScreen extends ScreenAdapter {
         game.setSkillSoundStopper(null);
         inputHandler.stopLoopingSounds();
         if (gameHUD != null) gameHUD.dispose();
-        if (capturedOverlay != null) capturedOverlay.dispose();
+
         if (pauseOverlay != null) pauseOverlay.dispose();
         if (inventoryOverlay != null) inventoryOverlay.dispose();
         if (vendingMachineOverlay != null) vendingMachineOverlay.dispose();

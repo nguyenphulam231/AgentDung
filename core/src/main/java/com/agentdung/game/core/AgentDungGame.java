@@ -44,6 +44,12 @@ public class AgentDungGame extends Game {
         assets.loadSounds();
         assets.loadMenuAssets();
         assets.loadCustomizeAssets();
+        assets.loadCapturedAssets();
+        assets.loadHUDAssets();
+        assets.loadGuideAssets();
+        assets.loadInventoryAssets();
+        assets.loadLevelDoneAssets();
+        assets.loadMissionsAssets();
 
 
         // 2. Phát nhạc nền
