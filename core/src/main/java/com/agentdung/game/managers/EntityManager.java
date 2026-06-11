@@ -3,7 +3,6 @@ package com.agentdung.game.managers;
 import com.agentdung.game.entities.Enemy;
 import com.agentdung.game.entities.Player;
 import com.agentdung.game.projectiles.Projectile;
-import com.agentdung.game.projectiles.SpriteProjectile;
 
 import com.agentdung.game.skills.PoopSkill;
 import com.agentdung.game.skills.Skill;
@@ -20,7 +19,6 @@ public class EntityManager {
     public Array<Projectile> projectiles = new Array<>();
     public Array<Rectangle> poopTraps = new Array<>();
 
-    // Cập nhật hàm khởi tạo: Truyền thêm Player dung vào để gán đích ngắm AI cho Enemy
     public void initEnemies(MapManager mapManager, Player dung) {
         enemies.clear();
         for (Integer guardId : mapManager.enemyStarts.keySet()) {
@@ -34,7 +32,6 @@ public class EntityManager {
     }
 
     public void update(float delta, Player dung, MapManager mapManager, Runnable onPlayerDetected) {
-        // ---- 1. CẬP NHẬT ĐẠN (GIỮ NGUYÊN LOGIC GỐC) ----
         for (int i = projectiles.size - 1; i >= 0; i--) {
             Projectile p = projectiles.get(i);
             p.update(delta);
@@ -73,21 +70,15 @@ public class EntityManager {
             }
         }
 
-        // ---- 2. CẬP NHẬT QUÁI & XỬ LÝ VA CHẠM TẬP TRUNG ----
         for (Enemy e : enemies) {
-            // Bước A: Quái tự chạy update logic AI không tham số thừa
             e.update(delta);
-
-            // Bước B: Gọi hàm va chạm trung tâm, quét dựa trên dữ liệu MapManager
             moveEntityWithWallCollision(e, delta, mapManager);
 
-            // Bước C: Quái tự kiểm tra tầm nhìn quét người chơi
             if (e.detects(mapManager.wallRects)) {
                 onPlayerDetected.run();
                 return;
             }
 
-            // Bước D: Kiểm tra giẫm bẫy mìn phân
             Rectangle guardRect = new Rectangle(e.getPosition().x, e.getPosition().y, e.getSize(), e.getSize());
             for (int i = poopTraps.size - 1; i >= 0; i--) {
                 if (guardRect.overlaps(poopTraps.get(i))) {
@@ -98,16 +89,9 @@ public class EntityManager {
         }
     }
 
-    /**
-     * HÀM VẬT LÝ DÙNG CHUNG (TÁI SỬ DỤNG MÃ NGUỒN) - CHUẨN OOP:
-     * ĐÃ SỬA: Loại bỏ hoàn toàn phép nhân 'currentSpeed' dư thừa.
-     * Vì cả Player (từ InputHandler) lẫn Enemy (từ AI nội bộ) đều đã tự nhân speed vào vector vận tốc gốc.
-     * Hàm này giờ chỉ làm đúng trách nhiệm cộng di chuyển vật lý 'velocity * delta' và xử lý trượt tường.
-     */
     public void moveEntityWithWallCollision(com.agentdung.game.entities.Entity entity, float delta, MapManager mapManager) {
         if (entity.getVelocity().len() <= 0.1f) return;
 
-        // --- XỬ LÝ KIỂM TRA DI CHUYỂN THEO TRỤC X ---
         float oldX = entity.getPosition().x;
         entity.getPosition().x += entity.getVelocity().x * delta;
         Rectangle rectX = new Rectangle(entity.getPosition().x, entity.getPosition().y, entity.getSize(), entity.getSize());
@@ -120,10 +104,9 @@ public class EntityManager {
             if (!d.isOpen && Intersector.overlaps(rectX, d.bounds)) { collideX = true; break; }
         }
         if (collideX) {
-            entity.getPosition().x = oldX; // Trả về vị trí cũ nếu va chạm
+            entity.getPosition().x = oldX;
         }
 
-        // --- XỬ LÝ KIỂM TRA DI CHUYỂN THEO TRỤC Y ---
         float oldY = entity.getPosition().y;
         entity.getPosition().y += entity.getVelocity().y * delta;
         Rectangle rectY = new Rectangle(entity.getPosition().x, entity.getPosition().y, entity.getSize(), entity.getSize());
@@ -136,13 +119,13 @@ public class EntityManager {
             if (!d.isOpen && Intersector.overlaps(rectY, d.bounds)) { collideY = true; break; }
         }
         if (collideY) {
-            entity.getPosition().y = oldY; // Trả về vị trí cũ nếu va chạm
+            entity.getPosition().y = oldY;
         }
     }
 
     public void renderShapes(ShapeRenderer shapeRenderer, SpriteBatch batch) {
         for (Projectile p : projectiles) {
-            if (!(p instanceof SpriteProjectile)) {
+            if (!p.isSpriteBased()) {
                 p.render(batch, shapeRenderer);
             }
         }
@@ -161,7 +144,7 @@ public class EntityManager {
         }
 
         for (Projectile p : projectiles) {
-            if (p instanceof SpriteProjectile) {
+            if (p.isSpriteBased()) {
                 p.render(batch, shapeRenderer);
             }
         }

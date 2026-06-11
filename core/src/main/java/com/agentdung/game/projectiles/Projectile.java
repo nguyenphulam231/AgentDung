@@ -1,8 +1,8 @@
 package com.agentdung.game.projectiles;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch; // Thêm import Batch hình ảnh
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer; // Giữ lại Batch hình khối
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.agentdung.game.entities.Enemy;
@@ -27,12 +27,15 @@ public abstract class Projectile {
         if (lifeTime <= 0) active = false;
     }
 
-    /**
-     * Hàm render đa hình nâng cấp: Nhận cả hai công cụ vẽ.
-     * Giúp hệ thống quản lý vẽ đồng bộ mọi loại đạn cùng lúc.
-     */
     public abstract void render(SpriteBatch batch, ShapeRenderer shape);
     public abstract void applyEffect(Enemy enemy);
+
+    /**
+     * TRUONG TUONG HOA KIEU RENDER:
+     * Giup EntityManager phan loai dan de toi uu hoa viec ve ma khong can dung instanceof.
+     */
+    public abstract boolean isSpriteBased();
+
     public boolean isActive() { return active; }
     public Vector2 getPosition() { return position; }
     public Color getColor() { return color; }

@@ -10,8 +10,8 @@ import com.badlogic.gdx.utils.Array;
 public class PeeSkill extends BaseSkill {
 
     public PeeSkill() {
-        // Gọi constructor của BaseSkill: pee, Cost 0.5 (cho mỗi frame xịt), màu vàng
-        super("Đái", 0.5f, Color.YELLOW);
+        // D??ng Unicode escape cho "????i"
+        super("\u0110\u00e1i", 0.5f, Color.YELLOW);
     }
 
     @Override

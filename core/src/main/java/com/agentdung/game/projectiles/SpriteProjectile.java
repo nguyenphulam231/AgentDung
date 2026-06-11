@@ -13,12 +13,10 @@ public class SpriteProjectile extends Projectile {
     private float height;
     private float angle;
 
-    // Constructor mặc định (giữ nguyên tương thích code cũ)
     public SpriteProjectile(float x, float y, float angle, float speed, TextureRegion textureRegion) {
         this(x, y, angle, speed, textureRegion, Color.WHITE);
     }
 
-    // Constructor mới cho phép truyền màu/effect
     public SpriteProjectile(float x, float y, float angle, float speed,
                             TextureRegion textureRegion, Color color) {
         super(x, y, angle, speed, color, 0.4f);
@@ -29,7 +27,6 @@ public class SpriteProjectile extends Projectile {
         this.height = textureRegion.getRegionHeight();
     }
 
-    // Constructor tùy chỉnh kích thước
     public SpriteProjectile(float x, float y, float angle, float speed,
                             TextureRegion textureRegion,
                             float customWidth, float customHeight) {
@@ -57,9 +54,14 @@ public class SpriteProjectile extends Projectile {
             this.angle
         );
     }
+
+    @Override
+    public boolean isSpriteBased() {
+        return true;
+    }
+
     @Override
     public void applyEffect(Enemy enemy) {
-
         if (color.equals(Color.CYAN)) {
             enemy.applySpitEffect();
         }

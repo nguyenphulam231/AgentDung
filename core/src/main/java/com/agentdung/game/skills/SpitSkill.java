@@ -12,25 +12,22 @@ import com.badlogic.gdx.utils.Array;
 
 public class SpitSkill extends BaseSkill {
 
-    // ĐÃ THÊM: Biến lưu trữ hình ảnh của bãi nước bọt khạc ra
     private TextureRegion spitRegion;
 
     public SpitSkill() {
-        // Gọi constructor BaseSkill: spit, tốn 15 mana, màu xanh lơ (Cyan)
-        super("Khạc", 15f, Color.CYAN);
+        // Kh???c (Hydro-shot) t???n 15 mana, m??u cyan, v?? C?? t??? ?????ng h???i (true)
+        // D??ng Unicode escape cho "Kh???c"
+        super("Kh\u1EA1c", 15f, Color.CYAN, true);
 
-        //  Nạp file ảnh spit.png
         Texture spitTexture = new Texture(Gdx.files.internal("images/spit.png"));
         this.spitRegion = new TextureRegion(spitTexture);
     }
 
     @Override
     protected void handleEffect(Player player, Enemy target, Array<Projectile> projectiles) {
-        // Tính toán vị trí xuất phát từ tâm của Player
         float spawnX = player.getPosition().x + player.getSize() / 2;
         float spawnY = player.getPosition().y + player.getSize() / 2;
 
-        // Thay vì new BlobProjectile, ta tạo SpriteProjectile với hình ảnh nước bọt
         projectiles.add(new SpriteProjectile(
             spawnX,
             spawnY,
@@ -41,7 +38,6 @@ public class SpitSkill extends BaseSkill {
         ));
     }
 
-    // Giải phóng tài nguyên ảnh khi đóng màn chơi để tránh tràn RAM
     public void dispose() {
         if (spitRegion != null) {
             spitRegion.getTexture().dispose();

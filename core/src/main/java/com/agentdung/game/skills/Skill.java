@@ -11,9 +11,15 @@ public abstract class Skill {
     public float maxMana = 100f;
     public float cost;
     public float regenSpeed = 5f;
+    protected boolean canRegen = false; // M???c ?????nh kh??ng t??? h???i mana
 
     public Skill(float cost) {
         this.cost = cost;
+    }
+
+    public Skill(float cost, boolean canRegen) {
+        this.cost = cost;
+        this.canRegen = canRegen;
     }
 
     public boolean activate(Player player, Enemy target, Array<Projectile> projectiles) {
@@ -27,15 +33,15 @@ public abstract class Skill {
 
     protected abstract void handleEffect(Player player, Enemy target, Array<Projectile> projectiles);
 
-    // Logic hồi mana mặc định theo thời gian
+    // Logic h???i mana: Ch??? ch???y n???u canRegen = true
     public void update(float delta) {
-        if (mana < maxMana) {
+        if (canRegen && mana < maxMana) {
             mana += regenSpeed * delta;
             if (mana > maxMana) mana = maxMana;
         }
     }
 
-    // --- Hàm cộng mana trực tiếp khi ăn vật phẩm ---
+    // --- H??m c???ng mana tr???c ti???p khi ??n v???t ph???m ---
     public void gainMana(float amount) {
         this.mana = Math.min(this.maxMana, this.mana + amount);
     }
