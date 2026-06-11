@@ -346,6 +346,7 @@ public class GameAssets {
         if (perTex != null) perTex.dispose();
         if (titleMissionTex != null) titleMissionTex.dispose();
 
+
         for (Texture tex : itemTextures.values()) {
             if (tex != null) tex.dispose();
         }
