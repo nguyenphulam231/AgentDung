@@ -14,16 +14,24 @@ public class LevelInitializer {
     private final MapManager mapManager;
     private final EntityManager entityManager;
     private final GameHUD gameHUD;
+    private final InputHandler inputHandler;
 
-    public LevelInitializer(AgentDungGame game, MapManager mapManager, EntityManager entityManager, GameHUD gameHUD) {
+    public LevelInitializer(
+        AgentDungGame game,
+        MapManager mapManager,
+        EntityManager entityManager,
+        GameHUD gameHUD,
+        InputHandler inputHandler
+    ) {
         this.game = game;
         this.mapManager = mapManager;
         this.entityManager = entityManager;
         this.gameHUD = gameHUD;
+        this.inputHandler = inputHandler;
     }
 
     public LevelSetupResult setup(int world, int level, PlaySessionState state, Array<Skill> existingSkills) {
-        InputHandler.stopLoopingSounds(game);
+        inputHandler.stopLoopingSounds();
         state.reset();
         SkillResourceHelper.disposeAll(existingSkills);
 

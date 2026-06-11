@@ -52,4 +52,5 @@ public abstract class Skill {
 
     public abstract Color getManaColor();
     public abstract String getName();
+    public abstract SkillKind getKind();
 }

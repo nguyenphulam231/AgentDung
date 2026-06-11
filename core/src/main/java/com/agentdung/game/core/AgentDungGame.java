@@ -47,6 +47,8 @@ public class AgentDungGame extends Game {
     // Tên file lưu trữ dữ liệu cục bộ trên ổ cứng của hệ thống Preferences
     private static final String SAVE_PREFS_NAME = "AgentDungGameProgress";
 
+    private Runnable skillSoundStopper;
+
     @Override
     public void create() {
         shapeRenderer = new ShapeRenderer();
@@ -126,9 +128,19 @@ public class AgentDungGame extends Game {
         }
     }
 
+    public void setSkillSoundStopper(Runnable stopper) {
+        this.skillSoundStopper = stopper;
+    }
+
+    public void stopSkillSounds() {
+        if (skillSoundStopper != null) {
+            skillSoundStopper.run();
+        }
+    }
+
     public void updateSfxState() {
         if (!isMasterOn || !isSfxOn) {
-            com.agentdung.game.handlers.InputHandler.stopLoopingSounds(this);
+            stopSkillSounds();
         }
     }
 

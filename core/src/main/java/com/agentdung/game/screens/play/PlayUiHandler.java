@@ -14,17 +14,20 @@ public class PlayUiHandler {
     private final GameHUD gameHUD;
     private final InventoryOverlay inventoryOverlay;
     private final VendingMachineOverlay vendingMachineOverlay;
+    private final InputHandler inputHandler;
 
     public PlayUiHandler(
         AgentDungGame game,
         GameHUD gameHUD,
         InventoryOverlay inventoryOverlay,
-        VendingMachineOverlay vendingMachineOverlay
+        VendingMachineOverlay vendingMachineOverlay,
+        InputHandler inputHandler
     ) {
         this.game = game;
         this.gameHUD = gameHUD;
         this.inventoryOverlay = inventoryOverlay;
         this.vendingMachineOverlay = vendingMachineOverlay;
+        this.inputHandler = inputHandler;
     }
 
     public boolean update(float delta, PlaySessionState state, Runnable onPauseChanged) {
@@ -100,7 +103,7 @@ public class PlayUiHandler {
     public void setPaused(PlaySessionState state, boolean paused, Runnable onPauseChanged) {
         state.isPaused = paused;
         if (paused) {
-            InputHandler.stopLoopingSounds(game);
+            inputHandler.stopLoopingSounds();
         }
         if (onPauseChanged != null) {
             onPauseChanged.run();

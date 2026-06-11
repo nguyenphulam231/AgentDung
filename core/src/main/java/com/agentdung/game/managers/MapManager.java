@@ -42,13 +42,7 @@ public class MapManager {
     // Nút tương tác nhanh hiện lên khi đứng gần Vending Machine
     public Texture btnUsePromptTex;
 
-    // -- Dùng Map quản lý toàn bộ ảnh vật phẩm tự động ---
-    private final Map<ItemTypeHolder, Texture> itemTextures = new HashMap<>();
-
-    // Lớp vỏ bọc tạm thời để tránh xung đột trước khi biên dịch xong
-    private enum ItemTypeHolder {
-        BEER, AMULET, CARROT, CLOCK, COIN, INVISIBILITY, KEY, LEMON, ORANGE, ROTTEN_EGG, ROTTEN_MEAT, SHOES, WATER, WHISKEY
-    }
+    private final Map<Item.ItemType, Texture> itemTextures = new HashMap<>();
 
     public float mapWidth, mapHeight;
     public Vector2 playerSpawn = new Vector2();
@@ -78,7 +72,7 @@ public class MapManager {
             Texture tex = new Texture(type.texturePath);
             tex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
             // Ánh xạ gián tiếp để đảm bảo tính an toàn dữ liệu
-            itemTextures.put(ItemTypeHolder.valueOf(type.name()), tex);
+            itemTextures.put(type, tex);
         }
 
         // Đọc va chạm tường
@@ -144,6 +138,10 @@ public class MapManager {
         }
     }
 
+    public Texture getItemTexture(Item.ItemType type) {
+        return itemTextures.get(type);
+    }
+
     public void renderShapes(ShapeRenderer shapeRenderer) {
         for (Door door : doors) door.render(shapeRenderer);
     }
@@ -163,7 +161,7 @@ public class MapManager {
 
         // 3. Vẽ tự động toàn bộ danh sách item rơi trên mặt đất bằng bộ Texture Map tập trung
         for (Item item : items) {
-            Texture tex = itemTextures.get(ItemTypeHolder.valueOf(item.type.name()));
+            Texture tex = itemTextures.get(item.type);
             if (tex != null) {
                 batch.draw(tex, item.getPosition().x, item.getPosition().y, item.getSize(), item.getSize());
             }

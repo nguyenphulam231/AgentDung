@@ -17,7 +17,7 @@ public class VomitSkill extends BaseSkill {
     private final int TOTAL_TYPES = 7;
 
     public VomitSkill() {
-        super("Nôn", 0.8f, Color.WHITE);
+        super("Nôn", 0.8f, Color.WHITE, SkillKind.VOMIT);
 
         vomitTypes = new TextureRegion[TOTAL_TYPES];
 

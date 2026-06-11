@@ -17,7 +17,7 @@ public class SpitSkill extends BaseSkill {
     public SpitSkill() {
         // Kh???c (Hydro-shot) t???n 15 mana, m??u cyan, v?? C?? t??? ?????ng h???i (true)
         // D??ng Unicode escape cho "Kh???c"
-        super("Kh\u1EA1c", 15f, Color.CYAN, true);
+        super("Kh\u1EA1c", 15f, Color.CYAN, true, SkillKind.SPIT);
 
         Texture spitTexture = new Texture(Gdx.files.internal("images/spit.png"));
         this.spitRegion = new TextureRegion(spitTexture);

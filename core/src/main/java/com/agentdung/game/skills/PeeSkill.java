@@ -11,7 +11,7 @@ public class PeeSkill extends BaseSkill {
 
     public PeeSkill() {
         // D??ng Unicode escape cho "????i"
-        super("\u0110\u00e1i", 0.5f, Color.YELLOW);
+        super("\u0110\u00e1i", 0.5f, Color.YELLOW, SkillKind.PEE);
     }
 
     @Override

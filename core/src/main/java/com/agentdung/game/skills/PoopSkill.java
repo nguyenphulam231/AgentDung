@@ -17,7 +17,7 @@ public class PoopSkill extends BaseSkill {
 
     public PoopSkill() {
         // poop, tốn 40 mana (dạng bột phát), màu nâu
-        super("Ị", 40f, new Color(0.5f, 0.25f, 0, 1));
+        super("Ị", 40f, new Color(0.5f, 0.25f, 0, 1), SkillKind.POOP);
 
         // Nạp file ảnh bẫy mìn
         Texture poopTexture = new Texture(Gdx.files.internal("images/shit.png"));

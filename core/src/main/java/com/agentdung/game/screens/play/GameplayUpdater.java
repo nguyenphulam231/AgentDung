@@ -26,17 +26,20 @@ public class GameplayUpdater {
     private final MapManager mapManager;
     private final EntityManager entityManager;
     private final CapturedOverlay capturedOverlay;
+    private final InputHandler inputHandler;
 
     public GameplayUpdater(
         AgentDungGame game,
         MapManager mapManager,
         EntityManager entityManager,
-        CapturedOverlay capturedOverlay
+        CapturedOverlay capturedOverlay,
+        InputHandler inputHandler
     ) {
         this.game = game;
         this.mapManager = mapManager;
         this.entityManager = entityManager;
         this.capturedOverlay = capturedOverlay;
+        this.inputHandler = inputHandler;
     }
 
     public void update(
@@ -51,7 +54,7 @@ public class GameplayUpdater {
         applyMovementBuff(player, state);
         player.update(delta);
 
-        InputHandler.handleTankMovement(delta, player, camera, mapManager);
+        inputHandler.handleTankMovement(delta, player, camera, mapManager);
         entityManager.moveEntityWithWallCollision(player, delta, mapManager);
 
         Rectangle playerRect = new Rectangle(
@@ -66,12 +69,12 @@ public class GameplayUpdater {
         updateDoors(delta, player, state);
         updateNearbyVending(player, state);
 
-        InputHandler.handleSkillInput(player, skills, entityManager, game);
+        inputHandler.handleSkillInput(player, skills, entityManager);
 
         float deltaLogic = state.getLogicDelta(delta);
         entityManager.update(deltaLogic, player, mapManager, () -> {
             if (!state.isCaptured && state.handleDetection()) {
-                InputHandler.stopLoopingSounds(game);
+                inputHandler.stopLoopingSounds();
                 capturedOverlay.playSound();
             }
         });
@@ -171,7 +174,7 @@ public class GameplayUpdater {
         if (currentLevel > game.completedLevelsReal[currentWorld - 1]) {
             game.completedLevelsReal[currentWorld - 1] = currentLevel;
         }
-        InputHandler.stopLoopingSounds(game);
+        inputHandler.stopLoopingSounds();
         game.saveProgress();
         game.setScreen(new LevelDoneScreen(game, currentWorld, currentLevel));
     }

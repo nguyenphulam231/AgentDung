@@ -12,8 +12,6 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector3;
-import java.util.Map;
-
 public class VendingMachineOverlay {
     private final PlayScreen screen;
     private final BitmapFont font;
@@ -95,18 +93,10 @@ public class VendingMachineOverlay {
 
             batch.draw(smallFrameTex, x, y, slotSize, slotSize);
 
-            Texture texIcon = screen.mapManager.vendingMachineTexture;
-            try {
-                java.lang.reflect.Field field = screen.mapManager.getClass().getDeclaredField("itemTextures");
-                field.setAccessible(true);
-                Map<?, Texture> mapTex = (Map<?, Texture>) field.get(screen.mapManager);
-                for (Object holder : mapTex.keySet()) {
-                    if (holder.toString().equals(slot.type.name())) {
-                        texIcon = mapTex.get(holder);
-                        break;
-                    }
-                }
-            } catch (Exception e) {}
+            Texture texIcon = screen.mapManager.getItemTexture(slot.type);
+            if (texIcon == null) {
+                texIcon = screen.mapManager.vendingMachineTexture;
+            }
 
             if (texIcon != null) {
                 batch.draw(texIcon, x + 7, y + 7, slotSize - 14, slotSize - 14);

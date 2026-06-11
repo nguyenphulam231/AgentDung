@@ -1,7 +1,8 @@
 package com.agentdung.game.screens;
 
 import com.agentdung.game.entities.Item;
-import com.agentdung.game.skills.*;
+import com.agentdung.game.items.ItemEffectContext;
+import com.agentdung.game.items.ItemEffectRegistry;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -10,9 +11,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.math.Vector3;
-import java.util.Map;
+import com.badlogic.gdx.utils.Array;
 
 public class InventoryOverlay {
     private final PlayScreen screen;
@@ -103,19 +103,7 @@ public class InventoryOverlay {
                 Item.ItemType currentType = activeItems.get(i);
                 slot.assignedType = currentType;
 
-                Texture texIcon = null;
-                try {
-                    java.lang.reflect.Field field = screen.mapManager.getClass().getDeclaredField("itemTextures");
-                    field.setAccessible(true);
-                    Map<?, Texture> mapTex = (Map<?, Texture>) field.get(screen.mapManager);
-                    for (Object holder : mapTex.keySet()) {
-                        if (holder.toString().equals(currentType.name())) {
-                            texIcon = mapTex.get(holder);
-                            break;
-                        }
-                    }
-                } catch (Exception e) {}
-
+                Texture texIcon = screen.mapManager.getItemTexture(currentType);
                 if (texIcon != null) {
                     batch.draw(texIcon, x + 7, y + 7, slotSize - 14, slotSize - 14);
                 }
@@ -174,7 +162,7 @@ public class InventoryOverlay {
             for (ItemSlot slot : slots) {
                 if (slot.bounds.contains(touch.x, touch.y)) {
                     if (slot.assignedType != null) {
-                        if (screen.game.isMasterOn && screen.game.isSfxOn && screen.game.clickSound != null) screen.game.clickSound.play();
+                        playClickSound();
                         selectedType = slot.assignedType;
                     }
                     return;
@@ -182,72 +170,26 @@ public class InventoryOverlay {
             }
 
             if (btnUseBounds.contains(touch.x, touch.y) && selectedType != null) {
-                int count = screen.state.inventory.getOrDefault(selectedType, 0);
-                if (count > 0) {
-                    if (screen.game.isMasterOn && screen.game.isSfxOn && screen.game.clickSound != null) screen.game.clickSound.play();
-
-                    screen.state.inventory.put(selectedType, count - 1);
-                    applyItemEffect(selectedType);
-
-                    if (selectedType == Item.ItemType.AMULET) screen.state.amuletCount--;
-                }
+                useSelectedItem();
             }
         }
     }
 
-    private void applyItemEffect(Item.ItemType type) {
-        switch (type) {
-            case BEER:
-                for (Skill s : screen.skills) {
-                    if (s instanceof VomitSkill) s.gainMana(10f);
-                    if (s instanceof PeeSkill) s.gainMana(30f);
-                }
-                break;
-            case AMULET:
-                screen.state.amuletCount++;
-                break;
-            case CARROT:
-                screen.state.carrotTimer = 10.0f;
-                break;
-            case CLOCK:
-                screen.state.clockTimer = 2.0f;
-                break;
-            case INVISIBILITY:
-                screen.state.invisibilityTimer = 2.0f;
-                break;
-            case LEMON:
-                screen.state.lemonTimer = 10.0f;
-                break;
-            case ORANGE:
-                screen.state.orangeTimer = 10.0f;
-                for (Skill s : screen.skills) {
-                    if (s instanceof PeeSkill) s.gainMana(10f);
-                }
-                break;
-            case ROTTEN_EGG:
-                for (Skill s : screen.skills) {
-                    if (s instanceof VomitSkill) s.gainMana(20f);
-                }
-                break;
-            case ROTTEN_MEAT:
-                for (Skill s : screen.skills) {
-                    if (s instanceof VomitSkill) s.gainMana(10f);
-                    if (s instanceof PoopSkill) s.gainMana(20f);
-                }
-                break;
-            case SHOES:
-                screen.state.shoesTimer = 5.0f;
-                break;
-            case WATER:
-                for (Skill s : screen.skills) {
-                    if (s instanceof PeeSkill) s.gainMana(40f);
-                }
-                break;
-            case WHISKEY:
-                for (Skill s : screen.skills) {
-                    if (s instanceof VomitSkill) s.gainMana(20f);
-                }
-                break;
+    private void useSelectedItem() {
+        int count = screen.state.inventory.getOrDefault(selectedType, 0);
+        if (count <= 0) return;
+
+        playClickSound();
+        screen.state.inventory.put(selectedType, count - 1);
+
+        ItemEffectContext context = new ItemEffectContext(screen.state, screen.skills);
+        ItemEffectRegistry.apply(selectedType, context);
+        ItemEffectRegistry.onConsumed(selectedType, context);
+    }
+
+    private void playClickSound() {
+        if (screen.game.isMasterOn && screen.game.isSfxOn && screen.game.clickSound != null) {
+            screen.game.clickSound.play();
         }
     }
 

@@ -3,6 +3,7 @@ package com.agentdung.game.screens;
 import com.agentdung.game.core.AgentDungGame;
 import com.agentdung.game.entities.Player;
 import com.agentdung.game.handlers.InputHandler;
+import com.agentdung.game.handlers.SkillSoundPlayer;
 import com.agentdung.game.managers.EntityManager;
 import com.agentdung.game.managers.MapManager;
 import com.agentdung.game.renderers.LightRenderer;
@@ -41,6 +42,9 @@ public class PlayScreen extends ScreenAdapter {
     private InventoryOverlay inventoryOverlay;
     private VendingMachineOverlay vendingMachineOverlay;
 
+    private final SkillSoundPlayer skillSoundPlayer;
+    private final InputHandler inputHandler;
+
     private LevelInitializer levelInitializer;
     private PlayWorldRenderer worldRenderer;
     private GameplayUpdater gameplayUpdater;
@@ -64,13 +68,19 @@ public class PlayScreen extends ScreenAdapter {
         this.inventoryOverlay = new InventoryOverlay(this);
         this.vendingMachineOverlay = new VendingMachineOverlay(this);
 
-        this.levelInitializer = new LevelInitializer(game, mapManager, entityManager, gameHUD);
+        this.skillSoundPlayer = new SkillSoundPlayer();
+        this.inputHandler = new InputHandler(game, skillSoundPlayer);
+        game.setSkillSoundStopper(() -> skillSoundPlayer.stopAll(game));
+
+        this.levelInitializer = new LevelInitializer(game, mapManager, entityManager, gameHUD, inputHandler);
         this.worldRenderer = new PlayWorldRenderer(
             game, mapManager, entityManager, lightRenderer, gameHUD,
             inventoryOverlay, vendingMachineOverlay, capturedOverlay, pauseOverlay
         );
-        this.gameplayUpdater = new GameplayUpdater(game, mapManager, entityManager, capturedOverlay);
-        this.uiHandler = new PlayUiHandler(game, gameHUD, inventoryOverlay, vendingMachineOverlay);
+        this.gameplayUpdater = new GameplayUpdater(
+            game, mapManager, entityManager, capturedOverlay, inputHandler
+        );
+        this.uiHandler = new PlayUiHandler(game, gameHUD, inventoryOverlay, vendingMachineOverlay, inputHandler);
 
         initLevel(currentLevel);
     }
@@ -116,7 +126,8 @@ public class PlayScreen extends ScreenAdapter {
 
     @Override
     public void dispose() {
-        InputHandler.stopLoopingSounds(game);
+        game.setSkillSoundStopper(null);
+        inputHandler.stopLoopingSounds();
         if (gameHUD != null) gameHUD.dispose();
         if (capturedOverlay != null) capturedOverlay.dispose();
         if (pauseOverlay != null) pauseOverlay.dispose();
