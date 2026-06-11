@@ -1,5 +1,6 @@
 package com.agentdung.game.managers;
 
+import com.agentdung.game.assets.GameAssets; // Import GameAssets dùng chung
 import com.agentdung.game.entities.Door;
 import com.agentdung.game.entities.Item;
 import com.agentdung.game.entities.Server;
@@ -34,23 +35,23 @@ public class MapManager {
     public Array<VendingMachine> vendingMachines = new Array<>();
 
     public Server targetServer;
+
+    // Chỉ giữ biến tham chiếu Texture từ GameAssets, KHÔNG tự khởi tạo bằng từ khóa 'new'
     public Texture keyTexture;
-
-    // --- Texture hiển thị cho Máy bán hàng tự động ---
     public Texture vendingMachineTexture;
-
-    // Nút tương tác nhanh hiện lên khi đứng gần Vending Machine
     public Texture btnUsePromptTex;
-
-    private final Map<Item.ItemType, Texture> itemTextures = new HashMap<>();
+    private GameAssets assets; // Giữ tham chiếu assets tạm thời để lấy texture nhanh
 
     public float mapWidth, mapHeight;
     public Vector2 playerSpawn = new Vector2();
     public Map<Integer, Vector2> enemyStarts = new HashMap<>();
     public Map<Integer, Vector2> enemyEnds = new HashMap<>();
 
-    public void loadLevel(int world, int level) {
+    // Thêm tham số GameAssets assets vào hàm loadLevel
+    public void loadLevel(int world, int level, GameAssets assets) {
         dispose();
+        this.assets = assets; // Lưu tham chiếu assets
+
         String mapPath = "maps/map" + world + "_" + level + ".tmx";
         TmxMapLoader mapLoader = new TmxMapLoader();
         map = mapLoader.load(mapPath);
@@ -60,20 +61,10 @@ public class MapManager {
         mapWidth  = map.getProperties().get("width", Integer.class) * tileWidth;
         mapHeight = map.getProperties().get("height", Integer.class) * map.getProperties().get("height", Integer.class);
 
-        keyTexture = new Texture("images/key.png");
-        btnUsePromptTex = new Texture("ui/UI_button_use.png");
-
-        // --- Nạp texture cho máy bán hàng tự động  ---
-        vendingMachineTexture = new Texture("images/vending_machine.png");
-        vendingMachineTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-
-        // Nạp tự động toàn bộ Texture ảnh từ thư mục assets/images/ theo danh sách Enum
-        for (Item.ItemType type : Item.ItemType.values()) {
-            Texture tex = new Texture(type.texturePath);
-            tex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-            // Ánh xạ gián tiếp để đảm bảo tính an toàn dữ liệu
-            itemTextures.put(type, tex);
-        }
+        // Lấy Texture trực tiếp từ bộ nhớ dùng chung GameAssets
+        keyTexture = assets.getKeyTexture();
+        btnUsePromptTex = assets.getBtnUsePromptTex();
+        vendingMachineTexture = assets.getVendingMachineTexture();
 
         // Đọc va chạm tường
         MapObjects wallObjects = map.getLayers().get("collisions").getObjects();
@@ -92,7 +83,8 @@ public class MapManager {
             if ("player_spawn".equals(name)) {
                 playerSpawn.set(rect.x, rect.y);
             } else if ("server".equals(name)) {
-                targetServer = new Server(rect.x, rect.y);
+                // ĐÃ SỬA LỖI: Truyền tham số assets một cách hợp lệ
+                targetServer = new Server(rect.x, rect.y, assets);
             } else if ("key".equals(name)) {
                 keys.add(new Rectangle(rect.x, rect.y, 16, 16));
             } else if ("server_door".equals(name)) {
@@ -102,7 +94,7 @@ public class MapManager {
             else if ("vending_machine".equals(name)) {
                 vendingMachines.add(new VendingMachine(rect.x, rect.y, rect.width, rect.height));
             }
-            // --- Đọc các vật phẩm rơi tự do ngoài Map (Đã mở rộng đầy đủ loại item) ---
+            // --- Đọc các vật phẩm rơi tự do ngoài Map ---
             else if ("item_meat".equals(name) || "item_rotten_meat".equals(name)) {
                 items.add(new Item(rect.x, rect.y, Item.ItemType.ROTTEN_MEAT));
             } else if ("item_water".equals(name)) {
@@ -139,7 +131,7 @@ public class MapManager {
     }
 
     public Texture getItemTexture(Item.ItemType type) {
-        return itemTextures.get(type);
+        return (assets != null) ? assets.getItemTexture(type) : null;
     }
 
     public void renderShapes(ShapeRenderer shapeRenderer) {
@@ -159,11 +151,13 @@ public class MapManager {
             batch.draw(keyTexture, key.x, key.y, key.width, key.height);
         }
 
-        // 3. Vẽ tự động toàn bộ danh sách item rơi trên mặt đất bằng bộ Texture Map tập trung
+        // 3. Vẽ tự động toàn bộ danh sách item rơi trên mặt đất bằng bộ Texture từ GameAssets
         for (Item item : items) {
-            Texture tex = itemTextures.get(item.type);
-            if (tex != null) {
-                batch.draw(tex, item.getPosition().x, item.getPosition().y, item.getSize(), item.getSize());
+            if (assets != null) {
+                Texture tex = assets.getItemTexture(item.type);
+                if (tex != null) {
+                    batch.draw(tex, item.getPosition().x, item.getPosition().y, item.getSize(), item.getSize());
+                }
             }
         }
     }
@@ -171,24 +165,15 @@ public class MapManager {
     public void dispose() {
         if (map != null) map.dispose();
         if (mapRenderer != null) mapRenderer.dispose();
-        if (keyTexture != null) keyTexture.dispose();
-        if (btnUsePromptTex != null) btnUsePromptTex.dispose();
 
-        // --- Giải phóng vùng nhớ của ảnh Máy bán hàng ---
-        if (vendingMachineTexture != null) {
-            vendingMachineTexture.dispose();
-            vendingMachineTexture = null;
-        }
+        // Đã xóa bỏ toàn bộ lệnh gọi .dispose() thủ công cho các Texture (keyTexture, itemTextures, vendingMachineTexture, v.v...)
+        // Tránh tình trạng lỗi treo bộ nhớ vì vòng đời các texture này đã do GameAssets lo.
 
-        // Giải phóng sạch sẽ vùng nhớ tránh memory leak cho các Texture
-        for (Texture tex : itemTextures.values()) {
-            if (tex != null) tex.dispose();
-        }
-        itemTextures.clear();
-
-        if (targetServer != null) {
-            targetServer.dispose();
-        }
+        keyTexture = null;
+        btnUsePromptTex = null;
+        vendingMachineTexture = null;
+        targetServer = null;
+        assets = null;
 
         walls.clear();
         wallRects.clear();

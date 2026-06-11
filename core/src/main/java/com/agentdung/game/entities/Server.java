@@ -1,5 +1,6 @@
 package com.agentdung.game.entities;
 
+import com.agentdung.game.assets.GameAssets; // Import GameAssets vào đây
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -11,16 +12,18 @@ public class Server {
     public float hp = 20f;
     public boolean isDestroyed = false;
 
-    // Nạp kết cấu hình ảnh cho Server
+    // Chỉ giữ biến Texture làm tham chiếu, không tự nạp
     private Texture serverTexture;
 
-    public Server(float x, float y) {
+    // Cập nhật Constructor nhận thêm GameAssets
+    public Server(float x, float y, GameAssets assets) {
         this.x = x;
         this.y = y;
         this.width = 30;
         this.height = 40;
 
-        serverTexture = new Texture(Gdx.files.internal("images/server.png"));
+        // Lấy Texture dùng chung từ GameAssets
+        this.serverTexture = assets.getServerTexture();
     }
 
     public void takeDamage(float damage) {
@@ -52,10 +55,8 @@ public class Server {
         }
     }
 
-    // Giải phóng tài nguyên hệ thống tránh tràn bộ nhớ RAM
     public void dispose() {
-        if (serverTexture != null) {
-            serverTexture.dispose();
-        }
+        // Đã xóa hoàn toàn serverTexture.dispose()
+        // Vòng đời của texture này hiện tại do GameAssets quản lý toàn cục.
     }
 }

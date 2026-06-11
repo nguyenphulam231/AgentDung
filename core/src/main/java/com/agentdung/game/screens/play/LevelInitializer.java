@@ -35,7 +35,7 @@ public class LevelInitializer {
         state.reset();
         SkillResourceHelper.disposeAll(existingSkills);
 
-        mapManager.loadLevel(world, level);
+        mapManager.loadLevel(world, level, game.assets);
 
         Player player = new Player(mapManager.playerSpawn.x, mapManager.playerSpawn.y, game);
         player.setSize(26);

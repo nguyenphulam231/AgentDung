@@ -64,6 +64,8 @@ public class AgentDungGame extends Game {
         // 2. Tải trước ảnh nhân vật dựa trên ID mặc định ban đầu
         assets.loadPlayerTexture(selectedCharacterId, selectedVariantId);
         assets.loadEnemyTexture();
+        assets.loadServerTexture();
+        assets.loadMapAssets();
 
         try {
             backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("sounds/theme_music.mp3"));
