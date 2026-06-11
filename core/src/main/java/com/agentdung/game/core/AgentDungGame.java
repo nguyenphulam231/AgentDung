@@ -1,5 +1,6 @@
 package com.agentdung.game.core;
 
+import com.agentdung.game.assets.GameAssets; // Import package assets mới tạo
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
@@ -25,6 +26,9 @@ public class AgentDungGame extends Game {
     public ShapeRenderer shapeRenderer;
     public SpriteBatch batch;
 
+    // --- QUẢN LÝ TÀI NGUYÊN TOÀN CỤC ---
+    public GameAssets assets;
+
     // --- LOGIC LƯU TRỮ NHÂN VẬT ĐƯỢC CHỌN ---
     public int selectedCharacterId = 1;
     public int selectedVariantId = 1;
@@ -34,7 +38,7 @@ public class AgentDungGame extends Game {
     public boolean isSfxOn = true;
     public boolean isMusicOn = true;
 
-    // ---BIẾN LƯU TRỮ XU TOÀN CỤC XUYÊN SUỐT CÁC LEVEL ---
+    // --- BIẾN LƯU TRỮ XU TOÀN CỤC XUYÊN SUỐT CÁC LEVEL ---
     public int globalCoinCount = 5000;
 
     // --- QUẢN LÝ TIẾN TRÌNH CHƠI THỰC TẾ ---
@@ -53,6 +57,13 @@ public class AgentDungGame extends Game {
     public void create() {
         shapeRenderer = new ShapeRenderer();
         batch = new SpriteBatch();
+
+        // 1. Khởi tạo đối tượng quản lý tài nguyên
+        assets = new GameAssets();
+
+        // 2. Tải trước ảnh nhân vật dựa trên ID mặc định ban đầu
+        assets.loadPlayerTexture(selectedCharacterId, selectedVariantId);
+        assets.loadEnemyTexture();
 
         try {
             backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("sounds/theme_music.mp3"));
@@ -152,6 +163,12 @@ public class AgentDungGame extends Game {
     @Override
     public void dispose() {
         super.dispose();
+
+        // Giải phóng bộ nhớ GameAssets để tránh rò rỉ texture nhân vật
+        if (assets != null) {
+            assets.dispose();
+        }
+
         if (backgroundMusic != null) backgroundMusic.dispose();
         if (clickSound != null) clickSound.dispose();
         if (pickWaterSound != null) pickWaterSound.dispose();

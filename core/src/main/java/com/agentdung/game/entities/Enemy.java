@@ -1,5 +1,6 @@
 package com.agentdung.game.entities;
 
+import com.agentdung.game.assets.GameAssets; // Import GameAssets vào hệ thống entity
 import com.agentdung.game.enemy.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -15,14 +16,17 @@ public class Enemy extends Entity {
 
     private Player targetPlayer;
 
-    public Enemy(float x, float y, Player targetPlayer) {
+    // Cập nhật Constructor để nhận thêm GameAssets từ màn hình chơi (Screen)
+    public Enemy(float x, float y, Player targetPlayer, GameAssets assets) {
         super(x, y, 100, 16);
         this.targetPlayer = targetPlayer;
 
         this.state = new EnemyState(60f); // originalSpeed
         this.vision = new VisionComponent(100f, 60f); // visionRange, visionAngle
         this.patrol = new PatrolComponent(x, y);
-        this.animation = new EnemyAnimation();
+
+        // Truyền assets vào EnemyAnimation để lấy texture dùng chung
+        this.animation = new EnemyAnimation(assets);
         this.ai = new EnemyAI();
 
         this.speed = state.getSpeed();
@@ -93,8 +97,5 @@ public class Enemy extends Entity {
     }
 
     public void dispose() {
-        if (animation != null) {
-            animation.dispose();
-        }
     }
 }

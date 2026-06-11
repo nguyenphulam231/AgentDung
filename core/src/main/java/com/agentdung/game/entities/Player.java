@@ -20,7 +20,7 @@ public class Player extends Entity {
 
         // Khởi tạo các Component
         this.manaComponent = new ManaComponent(100f, 15f); // maxMana: 100, regenRate: 15
-        this.animationComponent = new PlayerAnimation(game);
+        this.animationComponent = new PlayerAnimation(game.assets);
         this.inventoryComponent = new InventoryComponent(20); // Sức chứa 20 slot
     }
 
@@ -85,8 +85,5 @@ public class Player extends Entity {
     }
 
     public void dispose() {
-        if (animationComponent != null) {
-            animationComponent.dispose();
-        }
     }
 }

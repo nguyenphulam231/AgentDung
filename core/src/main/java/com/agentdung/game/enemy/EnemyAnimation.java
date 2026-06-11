@@ -1,6 +1,6 @@
 package com.agentdung.game.enemy;
 
-import com.badlogic.gdx.Gdx;
+import com.agentdung.game.assets.GameAssets; // Import GameAssets vào đây
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
 public class EnemyAnimation {
-    private Texture spriteSheet;
     private Animation<TextureRegion> walkDown, walkUp, walkRight, walkLeft;
     private TextureRegion idleDown, idleUp, idleRight, idleLeft;
     private float stateTime = 0;
@@ -22,9 +21,10 @@ public class EnemyAnimation {
     private static final float DRAW_W = 32f;
     private static final float DRAW_H = 33f;
 
-    public EnemyAnimation() {
-        spriteSheet = new Texture(Gdx.files.internal("images/Patroler.png"));
-        spriteSheet.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+    // Thay đổi Constructor nhận vào GameAssets
+    public EnemyAnimation(GameAssets assets) {
+        // Lấy Texture dùng chung từ GameAssets thay vì tự tạo mới
+        Texture spriteSheet = assets.getEnemyTexture();
 
         TextureRegion[][] rows = new TextureRegion[5][FRAME_COLS];
         for (int r = 0; r < 5; r++) {
@@ -102,9 +102,5 @@ public class EnemyAnimation {
         batch.setColor(Color.WHITE);
     }
 
-    public void dispose() {
-        if (spriteSheet != null) {
-            spriteSheet.dispose();
-        }
-    }
+    // Đã xóa hàm dispose() vì GameAssets sẽ chịu trách nhiệm dọn dẹp ảnh này.
 }
