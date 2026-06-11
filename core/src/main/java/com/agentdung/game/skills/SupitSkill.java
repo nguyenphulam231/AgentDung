@@ -10,13 +10,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
-public class SpitSkill extends BaseSkill {
+public class SupitSkill extends BaseSkill {
 
     private TextureRegion spitRegion;
 
-    public SpitSkill() {
-        // Kh???c (Hydro-shot) t???n 15 mana, m??u cyan, v?? C?? t??? ?????ng h???i (true)
-        // D??ng Unicode escape cho "Kh???c"
+    public SupitSkill() {
+
         super("Kh\u1EA1c", 15f, Color.CYAN, true, SkillKind.SPIT);
 
         Texture spitTexture = new Texture(Gdx.files.internal("images/spit.png"));

@@ -10,12 +10,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
-public class PoopSkill extends BaseSkill {
+public class PuupSkill extends BaseSkill {
 
     // Giữ lại biến ảnh này để PlayScreen mượn vẽ bẫy mìn
     private TextureRegion poopRegion;
 
-    public PoopSkill() {
+    public PuupSkill() {
         // poop, tốn 40 mana (dạng bột phát), màu nâu
         super("Ị", 40f, new Color(0.5f, 0.25f, 0, 1), SkillKind.POOP);
 

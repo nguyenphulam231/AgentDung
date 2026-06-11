@@ -11,13 +11,13 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 
-public class VomitSkill extends BaseSkill {
+public class VomicSkill extends BaseSkill {
 
     private TextureRegion[] vomitTypes;
     private final int TOTAL_TYPES = 7;
 
-    public VomitSkill() {
-        super("Nôn", 0.8f, Color.WHITE, SkillKind.VOMIT);
+    public VomicSkill() {
+        super("VM", 0.8f, Color.WHITE, SkillKind.VOMIT);
 
         vomitTypes = new TextureRegion[TOTAL_TYPES];
 

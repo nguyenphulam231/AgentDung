@@ -3,7 +3,7 @@ package com.agentdung.game.managers;
 import com.agentdung.game.entities.Enemy;
 import com.agentdung.game.entities.Player;
 import com.agentdung.game.projectiles.Projectile;
-import com.agentdung.game.skills.PoopSkill;
+import com.agentdung.game.skills.PuupSkill;
 import com.agentdung.game.skills.Skill;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -49,9 +49,9 @@ public class EntityManager {
     public void renderSprites(SpriteBatch batch, ShapeRenderer sr, Array<Skill> skills) {
         // Render Bẫy
         for (Skill s : skills) {
-            if (s instanceof PoopSkill) {
+            if (s instanceof PuupSkill) {
                 for (Rectangle trap : poopTraps) {
-                    batch.draw(((PoopSkill) s).getPoopRegion(), trap.x, trap.y, trap.width, trap.height);
+                    batch.draw(((PuupSkill) s).getPoopRegion(), trap.x, trap.y, trap.width, trap.height);
                 }
                 break;
             }

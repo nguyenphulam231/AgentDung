@@ -7,9 +7,9 @@ import com.agentdung.game.entities.Player;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Array;
 
-public class PeeSkill extends BaseSkill {
+public class PiiSkill extends BaseSkill {
 
-    public PeeSkill() {
+    public PiiSkill() {
         // D??ng Unicode escape cho "????i"
         super("\u0110\u00e1i", 0.5f, Color.YELLOW, SkillKind.PEE);
     }

@@ -199,10 +199,10 @@ public class GameAssets {
     public void loadHUDAssets() {
         // Chỉ nạp nếu chưa nạp (kiểm tra null để tránh load trùng)
         if (btnPauseTex == null) {
-            manaTextures.put(SpitSkill.class, new Texture("ui/UI_mana_spit.png"));
-            manaTextures.put(VomitSkill.class, new Texture("ui/UI_mana_vomit.png"));
-            manaTextures.put(PeeSkill.class, new Texture("ui/UI_mana_pee.png"));
-            manaTextures.put(PoopSkill.class, new Texture("ui/UI_mana_poop.png"));
+            manaTextures.put(SupitSkill.class, new Texture("ui/UI_mana_spit.png"));
+            manaTextures.put(VomicSkill.class, new Texture("ui/UI_mana_vomit.png"));
+            manaTextures.put(PiiSkill.class, new Texture("ui/UI_mana_pee.png"));
+            manaTextures.put(PuupSkill.class, new Texture("ui/UI_mana_poop.png"));
 
             btnPauseTex = new Texture("ui/UI_button_pause.png");
             btnBagTex = new Texture("ui/UI_button_bag.png");
