@@ -23,13 +23,8 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 public class CustomizeScreen extends ScreenAdapter {
     private final AgentDungGame game;
     private Stage stage;
-    private Texture bgTexture;
-    private Texture slotBgTexture;
-    private Texture backButtonTexture;
-    private Texture titleTexture; // Thêm biến lưu Texture tiêu đề chữ Customize
-
-    private Label selectionLabel;
     private BitmapFont font;
+    private Label selectionLabel;
 
     public static class CharacterData {
         public String name;
@@ -44,12 +39,11 @@ public class CustomizeScreen extends ScreenAdapter {
     }
 
     private Array<CharacterData> characterList;
-    private Array<Texture> loadedTextures;
 
     public CustomizeScreen(AgentDungGame game) {
         this.game = game;
-        this.loadedTextures = new Array<>();
         initCharacterData();
+        // Assets đã được load từ AgentDungGame, không cần load lại
     }
 
     private void initCharacterData() {
@@ -85,25 +79,16 @@ public class CustomizeScreen extends ScreenAdapter {
         font.setUseIntegerPositions(true);
         font.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
-        bgTexture = new Texture(Gdx.files.internal("ui/UI_frame_general.png"));
-        Image background = new Image(bgTexture);
+        // --- BACKGROUND ---
+        Image background = new Image(game.assets.getCustomizeBg());
         background.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         stage.addActor(background);
 
-        slotBgTexture = new Texture(Gdx.files.internal("ui/UI_slot_background.png"));
-        slotBgTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-
-        // --- NẠP ẢNH TIÊU ĐỀ "CUSTOMIZE" ---
-        titleTexture = new Texture(Gdx.files.internal("ui/UI_title_customize.png"));
-        titleTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-        Image titleImage = new Image(titleTexture);
-
+        // --- TIÊU ĐỀ ---
+        Image titleImage = new Image(game.assets.getTitleCustomize());
 
         // --- NÚT QUAY LẠI ---
-        backButtonTexture = new Texture(Gdx.files.internal("ui/UI_arrow_left.png"));
-        backButtonTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-
-        TextureRegionDrawable backDrawable = new TextureRegionDrawable(new TextureRegion(backButtonTexture));
+        TextureRegionDrawable backDrawable = new TextureRegionDrawable(new TextureRegion(game.assets.getBackBtn()));
         backDrawable.setMinWidth(50f);
         backDrawable.setMinHeight(50f);
 
@@ -122,7 +107,7 @@ public class CustomizeScreen extends ScreenAdapter {
         topLeftTable.add(backButton).padTop(15f).padLeft(15f);
         stage.addActor(topLeftTable);
 
-        // 2. Tạo Table chứa danh sách cuộn nhân vật
+        // --- BẢNG DANH SÁCH NHÂN VẬT ---
         Table scrollTable = new Table();
         scrollTable.top().left();
 
@@ -136,80 +121,66 @@ public class CustomizeScreen extends ScreenAdapter {
                 final int variantId = i + 1;
                 final String variantName = character.variants[i];
 
-                String fileName = "thumbnails/thumbnail_player_" + character.id + "_" + variantId + ".png";
+                Texture slotTex = game.assets.getThumbnail(character.id, variantId);
 
-                try {
-                    Texture slotTex = new Texture(Gdx.files.internal(fileName));
-                    slotTex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-                    loadedTextures.add(slotTex);
+                TextureRegionDrawable baseStyle = new TextureRegionDrawable(new TextureRegion(game.assets.getSlotBg()));
+                baseStyle.setMinWidth(slotSize);
+                baseStyle.setMinHeight(slotSize);
 
-                    TextureRegionDrawable baseStyle = new TextureRegionDrawable(new TextureRegion(slotBgTexture));
-                    baseStyle.setMinWidth(slotSize);
-                    baseStyle.setMinHeight(slotSize);
+                TextureRegionDrawable characterIcon = new TextureRegionDrawable(new TextureRegion(slotTex));
+                float targetCharSize = 60f;
+                characterIcon.setMinWidth(targetCharSize);
+                characterIcon.setMinHeight(targetCharSize);
 
-                    TextureRegionDrawable characterIcon = new TextureRegionDrawable(new TextureRegion(slotTex));
-                    float targetCharSize = 60f;
-                    characterIcon.setMinWidth(targetCharSize);
-                    characterIcon.setMinHeight(targetCharSize);
+                ImageButton.ImageButtonStyle buttonStyle = new ImageButton.ImageButtonStyle();
+                buttonStyle.up = baseStyle;
+                buttonStyle.imageUp = characterIcon;
 
-                    ImageButton.ImageButtonStyle buttonStyle = new ImageButton.ImageButtonStyle();
-                    buttonStyle.up = baseStyle;
-                    buttonStyle.imageUp = characterIcon;
+                ImageButton variantBtn = new ImageButton(buttonStyle);
 
-                    ImageButton variantBtn = new ImageButton(buttonStyle);
+                final String charName = character.name;
+                final int charId = character.id;
 
-                    final String charName = character.name;
-                    final int charId = character.id;
+                variantBtn.addListener(new ClickListener() {
+                    @Override
+                    public void clicked(InputEvent event, float x, float y) {
+                        if (game.isMasterOn && game.isSfxOn && game.assets.getClickSound() != null) game.assets.getClickSound().play();
 
-                    variantBtn.addListener(new ClickListener() {
-                        @Override
-                        public void clicked(InputEvent event, float x, float y) {
-                            if (game.isMasterOn && game.isSfxOn && game.assets.getClickSound() != null) game.assets.getClickSound().play();
+                        game.selectedCharacterId = charId;
+                        game.selectedVariantId = variantId;
 
-                            game.selectedCharacterId = charId;
-                            game.selectedVariantId = variantId;
+                        selectionLabel.setText(charName + " - " + variantName);
 
-                            selectionLabel.setText(charName + " - " + variantName);
+                        System.out.println("Character: " + charName + " - Variant: " + variantName);
+                    }
+                });
 
-                            System.out.println("Character: " + charName + " - Variant: " + variantName);
-                        }
-                    });
-
-                    rowTable.add(variantBtn).size(slotSize).padRight(15f);
-
-                } catch (Exception e) {
-                    Gdx.app.error("CustomizeScreen", "Cannot find png file: " + fileName);
-                }
+                rowTable.add(variantBtn).size(slotSize).padRight(15f);
             }
 
             scrollTable.add(rowTable).padBottom(20f).left();
             scrollTable.row();
         }
 
-        // 3. Bọc bảng vào vùng cuộn
+        // --- VÙNG CUỘN ---
         ScrollPane scrollPane = new ScrollPane(scrollTable);
         scrollPane.setScrollingDisabled(true, false);
         scrollPane.setFadeScrollBars(false);
 
-        // 4. Khởi tạo Label hiển thị thông tin chữ (Xanh lá)
+        // --- LABEL HIỂN THỊ NHÂN VẬT ĐANG CHỌN ---
         Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.GREEN);
         selectionLabel = new Label(characterList.get(0).name + " - " + characterList.get(0).variants[0], labelStyle);
         selectionLabel.setAlignment(com.badlogic.gdx.utils.Align.center);
 
-        // 5. Cấu trúc lại Table chính để xếp từ trên xuống: Tiêu đề -> Vùng cuộn -> Chữ thông tin nhân vật
+        // --- LAYOUT CHÍNH ---
         Table mainTable = new Table();
         mainTable.setFillParent(true);
         mainTable.top();
 
-        // Thêm ảnh chữ tiêu đề lên trên cùng, bạn có thể chỉnh padTop/padBottom để đẩy tiêu đề lên xuống cho vừa vặn
         mainTable.add(titleImage).size(420f, 90f).padTop(60f).padBottom(15f).center();
         mainTable.row();
-
-        // Đưa vùng cuộn ScrollPane xuống ngay dưới ảnh tiêu đề (hạ padTop xuống để không bị đẩy quá sâu)
         mainTable.add(scrollPane).size(450f, 260f).center();
         mainTable.row();
-
-        // Đặt Label hiển thị tên nhân vật dưới cùng
         mainTable.add(selectionLabel).padTop(25f).center();
 
         stage.addActor(mainTable);
@@ -234,15 +205,9 @@ public class CustomizeScreen extends ScreenAdapter {
 
     @Override
     public void dispose() {
+        // Không dispose texture ở đây vì tất cả đã được GameAssets quản lý
+        // Chỉ dispose những gì CustomizeScreen tự tạo ra
         if (stage != null) stage.dispose();
-        if (bgTexture != null) bgTexture.dispose();
-        if (slotBgTexture != null) slotBgTexture.dispose();
-        if (backButtonTexture != null) backButtonTexture.dispose();
-        if (titleTexture != null) titleTexture.dispose(); // Giải phóng bộ nhớ của ảnh tiêu đề
         if (font != null) font.dispose();
-
-        for (Texture tex : loadedTextures) {
-            if (tex != null) tex.dispose();
-        }
     }
 }
