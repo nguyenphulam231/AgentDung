@@ -121,7 +121,7 @@ public class InputHandler {
             player, target, entityManager, game, skills, binding.getSkillIndex()
         );
 
-        if (skill.activate(player, target, entityManager.projectiles)) {
+        if (skill.activate(player, target, entityManager.getProjectiles())) {
             if (binding.getOnSuccess() != null) {
                 binding.getOnSuccess().accept(context);
             }
@@ -172,7 +172,7 @@ public class InputHandler {
     private Enemy findNearestEnemy(Player player, EntityManager entityManager) {
         Enemy target = null;
         float minDistance = TARGET_RANGE;
-        for (Enemy enemy : entityManager.enemies) {
+        for (Enemy enemy : entityManager.getEnemies()) {
             float distance = Vector2.dst(
                 player.getPosition().x, player.getPosition().y,
                 enemy.getPosition().x, enemy.getPosition().y

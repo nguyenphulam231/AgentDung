@@ -76,7 +76,7 @@ public class PlayWorldRenderer {
         player.render(batch, shapeRenderer);
         batch.setColor(1, 1, 1, 1f);
 
-        for (Enemy enemy : entityManager.enemies) {
+        for (Enemy enemy : entityManager.getEnemies()){
             enemy.render(batch, shapeRenderer);
         }
 

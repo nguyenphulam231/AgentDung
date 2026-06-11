@@ -77,7 +77,7 @@ public class LightRenderer {
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        for (Enemy e : entityManager.enemies) {
+        for (Enemy e : entityManager.getEnemies()) {
             e.drawVision(shapeRenderer, mapManager.wallRects);
         }
         shapeRenderer.end();

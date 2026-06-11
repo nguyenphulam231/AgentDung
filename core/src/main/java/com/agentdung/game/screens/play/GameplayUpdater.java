@@ -6,6 +6,7 @@ import com.agentdung.game.entities.Item;
 import com.agentdung.game.entities.Player;
 import com.agentdung.game.entities.VendingMachine;
 import com.agentdung.game.handlers.InputHandler;
+import com.agentdung.game.managers.CollisionUtils;
 import com.agentdung.game.managers.EntityManager;
 import com.agentdung.game.managers.MapManager;
 import com.agentdung.game.screens.CapturedOverlay;
@@ -55,7 +56,7 @@ public class GameplayUpdater {
         player.update(delta);
 
         inputHandler.handleTankMovement(delta, player, camera, mapManager);
-        entityManager.moveEntityWithWallCollision(player, delta, mapManager);
+        CollisionUtils.moveWithCollision(player, delta, mapManager);
 
         Rectangle playerRect = new Rectangle(
             player.getPosition().x,

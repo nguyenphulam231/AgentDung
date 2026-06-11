@@ -40,7 +40,7 @@ public class LevelInitializer {
         Player player = new Player(mapManager.playerSpawn.x, mapManager.playerSpawn.y, game);
         player.setSize(26);
 
-        entityManager.initEnemies(mapManager, player);
+        entityManager.enemyManager.init(mapManager, player);
         entityManager.clearAll();
         gameHUD.loadTextures();
 
