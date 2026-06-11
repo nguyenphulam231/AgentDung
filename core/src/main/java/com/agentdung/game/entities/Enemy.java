@@ -1,293 +1,100 @@
 package com.agentdung.game.entities;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
+import com.agentdung.game.enemy.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 public class Enemy extends Entity {
-    private float visionRange;
-    private float visionAngle;
+    private EnemyState state;
+    private VisionComponent vision;
+    private PatrolComponent patrol;
+    private EnemyAnimation animation;
+    private EnemyAI ai;
 
-    private float effectTimer = 0;
-    private float stunTimer = 0;
-    private float originalSpeed = 60;
-    private float originalVisionRange = 100;
-    private boolean isFleeing = false;
-    private float visionRecoverySpeed = 25f;
-
-    private Vector2 startPoint;
-    private Vector2 endPoint;
-    private boolean movingToEnd = true;
-    private float currentAngle;
-    private float rotationSpeed = 180f;
-
-    // Lưu trữ tham chiếu tới Player để phục vụ AI đuổi/chạy mà không cần truyền qua hàm update
     private Player targetPlayer;
 
-    // --- SPRITE SYSTEM CHO ENEMY ---
-    private Texture spriteSheet;
-    private Animation<TextureRegion> walkDown, walkUp, walkRight, walkLeft;
-    private TextureRegion idleDown, idleUp, idleRight, idleLeft;
-    private float stateTime = 0;
-
-    private static final int FRAME_COLS = 6;
-    private static final int TILE_W     = 32;
-
-    private static final int[] ROW_Y = { 0,  29,  59,  92, 125, 155 };
-    private static final int[] ROW_H = { 29,  30,  33,  33,  30, 165 };
-
-    private static final float DRAW_W = 32f;
-    private static final float DRAW_H = 33f;
-
-    // Constructor mới: Nhận thêm tham chiếu Player từ ngoài map truyền vào
     public Enemy(float x, float y, Player targetPlayer) {
         super(x, y, 100, 16);
         this.targetPlayer = targetPlayer;
-        this.currentAngle = 0;
-        this.visionRange = 100;
-        this.visionAngle = 60;
-        this.originalVisionRange = visionRange;
-        this.speed = originalSpeed;
-        this.startPoint = new Vector2(x, y);
-        this.endPoint = new Vector2(x, y);
 
-        // ---- KHỞI TẠO VÀ CẮT SPRITE CHO ENEMY ----
-        spriteSheet = new Texture(Gdx.files.internal("images/Patroler.png"));
-        spriteSheet.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        this.state = new EnemyState(60f); // originalSpeed
+        this.vision = new VisionComponent(100f, 60f); // visionRange, visionAngle
+        this.patrol = new PatrolComponent(x, y);
+        this.animation = new EnemyAnimation();
+        this.ai = new EnemyAI();
 
-        TextureRegion[][] rows = new TextureRegion[5][FRAME_COLS];
-        for (int r = 0; r < 5; r++) {
-            for (int c = 0; c < FRAME_COLS; c++) {
-                rows[r][c] = new TextureRegion(
-                    spriteSheet,
-                    c * TILE_W,
-                    ROW_Y[r],
-                    TILE_W,
-                    ROW_H[r]
-                );
-            }
-        }
-
-        // Idle Frames
-        idleDown  = rows[0][0];
-        idleRight = rows[1][0];
-        idleUp    = rows[2][0];
-        idleLeft  = new TextureRegion(idleRight);
-        idleLeft.flip(true, false);
-
-        // Walk Animations
-        float frameDuration = 0.1f;
-        walkDown  = new Animation<>(frameDuration, rows[3]);
-        walkRight = new Animation<>(frameDuration, rows[4]);
-        walkUp    = new Animation<>(frameDuration, rows[2]);
-
-        walkDown.setPlayMode(Animation.PlayMode.LOOP);
-        walkRight.setPlayMode(Animation.PlayMode.LOOP);
-        walkUp.setPlayMode(Animation.PlayMode.LOOP);
-
-        // Lật góc chạy bên trái từ bên phải
-        TextureRegion[] leftFrames = new TextureRegion[FRAME_COLS];
-        for (int i = 0; i < FRAME_COLS; i++) {
-            leftFrames[i] = new TextureRegion(rows[4][i]);
-            leftFrames[i].flip(true, false);
-        }
-        walkLeft = new Animation<>(frameDuration, leftFrames);
-        walkLeft.setPlayMode(Animation.PlayMode.LOOP);
+        this.speed = state.getSpeed();
     }
 
     public void setViewDistance(float distance) {
-        this.visionRange = distance;
-        this.originalVisionRange = distance;
+        vision.setViewDistance(distance);
     }
 
     public void setViewAngle(float angle) {
-        this.visionAngle = angle;
+        vision.setViewAngle(angle);
     }
 
     public void setPatrolRoute(float startX, float startY, float endX, float endY) {
-        this.startPoint.set(startX, startY);
-        this.endPoint.set(endX, endY);
+        patrol.setRoute(startX, startY, endX, endY);
     }
 
-    /**
-     * HÀM UPDATE CHUẨN ĐA HÌNH OOP:
-     * Chỉ xử lý tính toán AI nội bộ và cập nhật vector vận tốc (velocity).
-     * Tuyệt đối không can thiệp cộng tọa độ và kiểm tra va chạm vật lý với tường tại đây.
-     */
     @Override
     public void update(float delta) {
-        if (this.visionRange < originalVisionRange) {
-            this.visionRange = Math.min(originalVisionRange, visionRange + visionRecoverySpeed * delta);
-        }
+        state.update(delta);
+        vision.update(delta);
 
-        if (stunTimer > 0) {
-            stunTimer -= delta;
-            velocity.set(0, 0); // Bị choáng thì triệt tiêu vận tốc di chuyển
-            return;
-        }
+        // Đọc giá trị protected từ targetPlayer tại đây và truyền vào AI dưới dạng tham số
+        float playerSize = (targetPlayer != null) ? targetPlayer.size : 0f;
+        ai.updateMovement(delta, position, velocity, size, playerSize, patrol, state, targetPlayer);
+        this.angle = ai.getCurrentAngle();
 
-        if (effectTimer > 0) {
-            effectTimer -= delta;
-        } else {
-            this.speed = originalSpeed;
-            this.isFleeing = false;
-        }
-
-        Vector2 target = movingToEnd ? endPoint : startPoint;
-        float dx = target.x - position.x;
-        float dy = target.y - position.y;
-        float dist = Vector2.dst(position.x, position.y, target.x, target.y);
-
-        float targetAngle;
-        if (isFleeing && targetPlayer != null) {
-            float fdx = (position.x + size/2) - (targetPlayer.getPosition().x + targetPlayer.size/2);
-            float fdy = (position.y + size/2) - (targetPlayer.getPosition().y + targetPlayer.size/2);
-            targetAngle = MathUtils.atan2(fdy, fdx) * MathUtils.radiansToDegrees;
-        } else {
-            targetAngle = MathUtils.atan2(dy, dx) * MathUtils.radiansToDegrees;
-        }
-
-        float angleDiff = (targetAngle - currentAngle + 360 + 180) % 360 - 180;
-        float rotationStep = rotationSpeed * delta;
-
-        if (Math.abs(angleDiff) <= rotationStep) {
-            currentAngle = targetAngle;
-        } else {
-            currentAngle += Math.signum(angleDiff) * rotationStep;
-        }
-        this.angle = currentAngle;
-
-        if (dist < 2 && !isFleeing) {
-            movingToEnd = !movingToEnd;
-        }
-
-        // Đặt vector vận tốc dựa trên góc quay thay vì tự cộng trực tiếp vào thuộc tính position
-        if (isFleeing || Math.abs(angleDiff) < 20) {
-            velocity.set(MathUtils.cosDeg(currentAngle) * speed, MathUtils.sinDeg(currentAngle) * speed);
-        } else {
-            velocity.set(0, 0);
-        }
-
-        // Tăng thời gian hoạt ảnh nếu thực sự có vận tốc di chuyển
-        if (velocity.len() > 0.1f) {
-            stateTime += delta;
-        }
-    }
-
-    private TextureRegion getCurrentFrame() {
-        float a = ((currentAngle % 360) + 360) % 360;
-
-        if (stunTimer > 0) {
-            if      (a < 45 || a >= 315) return idleRight;
-            else if (a < 135)            return idleUp;
-            else if (a < 225)            return idleLeft;
-            else                         return idleDown;
-        }
-
-        if      (a < 45 || a >= 315) return walkRight.getKeyFrame(stateTime);
-        else if (a < 135)            return walkUp.getKeyFrame(stateTime);
-        else if (a < 225)            return walkLeft.getKeyFrame(stateTime);
-        else                         return walkDown.getKeyFrame(stateTime);
+        animation.update(delta, velocity);
     }
 
     @Override
     public void render(SpriteBatch batch, ShapeRenderer shape) {
-        TextureRegion currentFrame = getCurrentFrame();
-        float drawX = position.x + (size / 2f) - (DRAW_W / 2f);
-        float drawY = position.y;
-
-        if (stunTimer > 0) {
-            batch.setColor(Color.PURPLE);
-        } else if (isFleeing) {
-            batch.setColor(Color.BLUE);
-        } else {
-            batch.setColor(Color.WHITE);
-        }
-
-        batch.draw(currentFrame, drawX, drawY, DRAW_W, DRAW_H);
-        batch.setColor(Color.WHITE);
+        animation.render(batch, position, size, ai.getCurrentAngle(), state.isStunned(), state.isFleeing());
     }
 
-    /**
-     * Hàm quét kiểm tra tầm nhìn phát hiện người chơi.
-     * Loại bỏ tham số Player cũ, sử dụng luôn biến targetPlayer đã lưu trong cấu trúc lớp.
-     */
     public boolean detects(Array<Rectangle> walls) {
-        if (stunTimer > 0 || targetPlayer == null) return false;
-        float pX = targetPlayer.getPosition().x + targetPlayer.size/2;
-        float pY = targetPlayer.getPosition().y + targetPlayer.size/2;
-        float eX = this.position.x + this.size/2;
-        float eY = this.position.y + this.size/2;
-        float dist = Vector2.dst(eX, eY, pX, pY);
-
-        if (dist < visionRange) {
-            float angleToPlayer = MathUtils.atan2(pY - eY, pX - eX) * MathUtils.radiansToDegrees;
-            float relativeAngle = ((angleToPlayer - currentAngle) + 360 + 180) % 360 - 180;
-
-            if (Math.abs(relativeAngle) <= visionAngle / 2) {
-                Vector2 hitPoint = getRaycastHit(eX, eY, angleToPlayer, dist, walls);
-                return Vector2.dst(eX, eY, hitPoint.x, hitPoint.y) >= dist - 2;
-            }
-        }
-        return false;
-    }
-
-    private Vector2 getRaycastHit(float startX, float startY, float angle, float range, Array<Rectangle> walls) {
-        float endX = startX + MathUtils.cosDeg(angle) * range;
-        float endY = startY + MathUtils.sinDeg(angle) * range;
-        int steps = (int)(range / 4);
-        for (int i = 1; i <= steps; i++) {
-            float checkX = startX + (endX - startX) * ((float)i/steps);
-            float checkY = startY + (endY - startY) * ((float)i/steps);
-            for (Rectangle wall : walls) {
-                if (wall.contains(checkX, checkY)) return new Vector2(checkX, checkY);
-            }
-        }
-        return new Vector2(endX, endY);
+        float playerSize = (targetPlayer != null) ? targetPlayer.size : 0f;
+        return vision.detects(position, size, playerSize, ai.getCurrentAngle(), targetPlayer, walls, state.isStunned());
     }
 
     public void drawVision(ShapeRenderer shape, Array<Rectangle> walls) {
-        if (stunTimer <= 0) {
-            Gdx.gl.glEnable(GL20.GL_BLEND);
-            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-
-            shape.setColor(1f, 0.85f, 0.2f, 0.4f);
-
-            float eX = position.x + size/2;
-            float eY = position.y + size/2;
-            int segments = 20;
-            float startAngle = currentAngle - visionAngle/2;
-            for (int i = 0; i < segments; i++) {
-                float a1 = startAngle + (visionAngle / segments) * i;
-                float a2 = startAngle + (visionAngle / segments) * (i + 1);
-                Vector2 p1 = getRaycastHit(eX, eY, a1, visionRange, walls);
-                Vector2 p2 = getRaycastHit(eX, eY, a2, visionRange, walls);
-                shape.triangle(eX, eY, p1.x, p1.y, p2.x, p2.y);
-            }
-
-            shape.end();
-            Gdx.gl.glDisable(GL20.GL_BLEND);
-            shape.begin(ShapeRenderer.ShapeType.Filled);
-        }
+        vision.drawVision(shape, position, size, ai.getCurrentAngle(), walls, state.isStunned());
     }
 
-    public void applySpitEffect() { this.visionRange = originalVisionRange * 0.2f; this.speed = originalSpeed * 0.5f; this.effectTimer = 3.0f; }
-    public void applyVomitEffect() { this.visionRange = 5; this.stunTimer = 2.0f; this.speed = originalSpeed * 0.3f; this.effectTimer = 5.0f; }
-    public void applyPeeEffect() { this.isFleeing = true; this.effectTimer = 2.0f; this.speed = originalSpeed * 1.8f; }
-    public void applyPoopEffect() { this.stunTimer = 4.0f; this.speed = originalSpeed * 0.2f; this.effectTimer = 7.0f; }
+    public void applySpitEffect() {
+        vision.setVisionRange(vision.getOriginalVisionRange() * 0.2f);
+        state.setSpeed(state.getOriginalSpeed() * 0.5f);
+        state.setEffectTimer(3.0f);
+    }
+
+    public void applyVomitEffect() {
+        vision.setVisionRange(5f);
+        state.setStunTimer(2.0f);
+        state.setSpeed(state.getOriginalSpeed() * 0.3f);
+        state.setEffectTimer(5.0f);
+    }
+
+    public void applyPeeEffect() {
+        state.setFleeing(true);
+        state.setEffectTimer(2.0f);
+        state.setSpeed(state.getOriginalSpeed() * 1.8f);
+    }
+
+    public void applyPoopEffect() {
+        state.setStunTimer(4.0f);
+        state.setSpeed(state.getOriginalSpeed() * 0.2f);
+        state.setEffectTimer(7.0f);
+    }
 
     public void dispose() {
-        if (spriteSheet != null) {
-            spriteSheet.dispose();
+        if (animation != null) {
+            animation.dispose();
         }
     }
 }
