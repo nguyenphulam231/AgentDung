@@ -15,10 +15,16 @@ public class VendingMachine extends Entity {
     }
 
     @Override
-    public void render(com.badlogic.gdx.graphics.g2d.SpriteBatch batch, com.badlogic.gdx.graphics.glutils.ShapeRenderer shape) {
-
+    public void render(SpriteBatch batch, ShapeRenderer shape) {
+        // Thân hàm vẽ máy bán hàng nếu bạn muốn tự xử lý bằng code (hiện tại map đang vẽ qua TiledMap)
     }
 
+    /**
+     * ĐÃ SỬA: Đồng bộ hóa cấu trúc Đa hình theo giao kèo mới của lớp cha Entity.
+     * Máy bán hàng đứng im nên thân hàm được để trống một cách an toàn.
+     */
     @Override
-    public void update(float delta, Player player, Array<Rectangle> walls) {}
+    public void update(float delta) {
+        // Không cần xử lý logic chuyển động nội bộ theo từng frame
+    }
 }

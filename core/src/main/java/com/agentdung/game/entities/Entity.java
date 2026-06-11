@@ -1,16 +1,15 @@
 package com.agentdung.game.entities;
 
-import com.badlogic.gdx.graphics.g2d.SpriteBatch; // Dùng cho đồ họa Sprite
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer; // Nếu vẫn cần vẽ hitbox/thanh máu thủ công
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.Array;
 
 public abstract class Entity {
-    protected Vector2 position; // Tọa độ x, y
+    // Để protected để lớp con lấy dữ liệu nhanh, hoặc dùng getter công khai
+    protected Vector2 position;
     protected Vector2 velocity;
     protected float speed;
-    protected float size;
+    public float size; // Để public hoặc getter để EntityManager check va chạm dễ dàng
     protected float angle;
 
     public Entity(float x, float y, float speed, float size) {
@@ -21,25 +20,24 @@ public abstract class Entity {
         this.angle = 0;
     }
 
-    // --- CÁC HÀM GETTER / SETTER
     public Vector2 getPosition() { return position; }
     public Vector2 getVelocity() { return velocity; }
+
+    /**
+     * ĐÃ THÊM: Phương thức Getter công khai cho thuộc tính tốc độ (speed).
+     * Giúp EntityManager lấy thông tin để nhân vào toán tử vận tốc,
+     * giải quyết dứt điểm lỗi nhân vật bị đứng im tại chỗ khi bấm phím di chuyển.
+     */
+    public float getSpeed() { return speed; }
+
     public float getSize() { return size; }
-    public void setSize(float size) { this.size = size; }
     public float getAngle() { return angle; }
     public void setAngle(float angle) { this.angle = angle; }
+    public void setSize(float size) {
+        this.size = size;
+    }
 
-    /**
-     * Hàm render mới nhận vào SpriteBatch để vẽ hình ảnh (Sprite/Texture)
-     * Đảm bảo tính đa hình cho toàn bộ hệ thống đồ họa mới.
-     */
+    // Hợp đồng đa hình bắt buộc
+    public abstract void update(float delta);
     public abstract void render(SpriteBatch batch, ShapeRenderer shape);
-
-    /**
-     * (Tùy chọn) Nếu bạn vẫn cần vẽ các ô màu debug, thanh máu (HP bar) hoặc hiệu ứng ánh sáng cũ,
-     * bạn có thể giữ hàm này hoặc viết đè (overload) nó. Nếu không dùng nữa, hãy XÓA HẲN để sạch code.
-     */
-    // public abstract void renderDebug(ShapeRenderer shape);
-
-    public abstract void update(float delta, Player player, Array<Rectangle> walls);
 }

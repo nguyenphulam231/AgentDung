@@ -30,6 +30,9 @@ public class Enemy extends Entity {
     private float currentAngle;
     private float rotationSpeed = 180f;
 
+    // Lưu trữ tham chiếu tới Player để phục vụ AI đuổi/chạy mà không cần truyền qua hàm update
+    private Player targetPlayer;
+
     // --- SPRITE SYSTEM CHO ENEMY ---
     private Texture spriteSheet;
     private Animation<TextureRegion> walkDown, walkUp, walkRight, walkLeft;
@@ -39,15 +42,16 @@ public class Enemy extends Entity {
     private static final int FRAME_COLS = 6;
     private static final int TILE_W     = 32;
 
-    // Áp dụng chung quy luật boundary từ Player1 sang Patroler
     private static final int[] ROW_Y = { 0,  29,  59,  92, 125, 155 };
     private static final int[] ROW_H = { 29,  30,  33,  33,  30, 165 };
 
     private static final float DRAW_W = 32f;
     private static final float DRAW_H = 33f;
 
-    public Enemy(float x, float y) {
+    // Constructor mới: Nhận thêm tham chiếu Player từ ngoài map truyền vào
+    public Enemy(float x, float y, Player targetPlayer) {
         super(x, y, 100, 16);
+        this.targetPlayer = targetPlayer;
         this.currentAngle = 0;
         this.visionRange = 100;
         this.visionAngle = 60;
@@ -114,15 +118,21 @@ public class Enemy extends Entity {
         this.endPoint.set(endX, endY);
     }
 
+    /**
+     * HÀM UPDATE CHUẨN ĐA HÌNH OOP:
+     * Chỉ xử lý tính toán AI nội bộ và cập nhật vector vận tốc (velocity).
+     * Tuyệt đối không can thiệp cộng tọa độ và kiểm tra va chạm vật lý với tường tại đây.
+     */
     @Override
-    public void update(float delta, Player player, Array<Rectangle> walls) {
+    public void update(float delta) {
         if (this.visionRange < originalVisionRange) {
             this.visionRange = Math.min(originalVisionRange, visionRange + visionRecoverySpeed * delta);
         }
 
         if (stunTimer > 0) {
             stunTimer -= delta;
-            return; // Khi bị stun thì không di chuyển và không chạy animation
+            velocity.set(0, 0); // Bị choáng thì triệt tiêu vận tốc di chuyển
+            return;
         }
 
         if (effectTimer > 0) {
@@ -138,9 +148,9 @@ public class Enemy extends Entity {
         float dist = Vector2.dst(position.x, position.y, target.x, target.y);
 
         float targetAngle;
-        if (isFleeing) {
-            float fdx = (position.x + size/2) - (player.getPosition().x + player.size/2);
-            float fdy = (position.y + size/2) - (player.getPosition().y + player.size/2);
+        if (isFleeing && targetPlayer != null) {
+            float fdx = (position.x + size/2) - (targetPlayer.getPosition().x + targetPlayer.size/2);
+            float fdy = (position.y + size/2) - (targetPlayer.getPosition().y + targetPlayer.size/2);
             targetAngle = MathUtils.atan2(fdy, fdx) * MathUtils.radiansToDegrees;
         } else {
             targetAngle = MathUtils.atan2(dy, dx) * MathUtils.radiansToDegrees;
@@ -160,44 +170,22 @@ public class Enemy extends Entity {
             movingToEnd = !movingToEnd;
         }
 
-        Vector2 velocity = new Vector2(0, 0);
+        // Đặt vector vận tốc dựa trên góc quay thay vì tự cộng trực tiếp vào thuộc tính position
         if (isFleeing || Math.abs(angleDiff) < 20) {
             velocity.set(MathUtils.cosDeg(currentAngle) * speed, MathUtils.sinDeg(currentAngle) * speed);
+        } else {
+            velocity.set(0, 0);
         }
 
-        // Tăng thời gian chuyển động nếu có di chuyển
+        // Tăng thời gian hoạt ảnh nếu thực sự có vận tốc di chuyển
         if (velocity.len() > 0.1f) {
             stateTime += delta;
         }
-
-        float oldX = position.x;
-        position.x += velocity.x * delta;
-        Rectangle enemyRect = new Rectangle(position.x, position.y, size, size);
-        for (Rectangle wall : walls) {
-            if (enemyRect.overlaps(wall)) {
-                position.x = oldX;
-                break;
-            }
-        }
-
-        float oldY = position.y;
-        position.y += velocity.y * delta;
-        enemyRect.set(position.x, position.y, size, size);
-        for (Rectangle wall : walls) {
-            if (enemyRect.overlaps(wall)) {
-                position.y = oldY;
-                break;
-            }
-        }
     }
 
-    /**
-     * Thuật toán lấy frame dựa vào góc quay tương tự Player.
-     */
     private TextureRegion getCurrentFrame() {
         float a = ((currentAngle % 360) + 360) % 360;
 
-        // Nếu bị choáng (stun), hiển thị dạng đứng yên theo hướng hiện tại
         if (stunTimer > 0) {
             if      (a < 45 || a >= 315) return idleRight;
             else if (a < 135)            return idleUp;
@@ -205,43 +193,38 @@ public class Enemy extends Entity {
             else                         return idleDown;
         }
 
-        // Khi đang di chuyển tuần tra hoặc bỏ chạy
         if      (a < 45 || a >= 315) return walkRight.getKeyFrame(stateTime);
         else if (a < 135)            return walkUp.getKeyFrame(stateTime);
         else if (a < 225)            return walkLeft.getKeyFrame(stateTime);
         else                         return walkDown.getKeyFrame(stateTime);
     }
 
-    /**
-     * ĐỒNG BỘ ĐA HÌNH SONG HÀNH 2 THAM SỐ:
-     * Chuyển đổi từ hàm 'draw' cũ thành hàm 'render' chuẩn giao kèo lớp cha Entity.
-     * Nhận vào cả batch và shapeRenderer từ hệ thống quản lý truyền xuống.
-     */
     @Override
     public void render(SpriteBatch batch, ShapeRenderer shape) {
         TextureRegion currentFrame = getCurrentFrame();
         float drawX = position.x + (size / 2f) - (DRAW_W / 2f);
         float drawY = position.y;
 
-        // Tùy biến màu sắc Sprite dựa vào trạng thái hiệu ứng (Sử dụng tính năng setColor của SpriteBatch)
         if (stunTimer > 0) {
-            batch.setColor(Color.PURPLE); // Ám tím khi bị choáng
+            batch.setColor(Color.PURPLE);
         } else if (isFleeing) {
-            batch.setColor(Color.BLUE);   // Ám xanh khi hoảng sợ bỏ chạy
+            batch.setColor(Color.BLUE);
         } else {
-            batch.setColor(Color.WHITE);  // Trở lại bình thường
+            batch.setColor(Color.WHITE);
         }
 
         batch.draw(currentFrame, drawX, drawY, DRAW_W, DRAW_H);
-
-        // Trả lại màu mặc định cho Batch để không làm ảnh hưởng tới các Sprite vẽ phía sau
         batch.setColor(Color.WHITE);
     }
 
-    public boolean detects(Player player, Array<Rectangle> walls) {
-        if (stunTimer > 0) return false;
-        float pX = player.getPosition().x + player.size/2;
-        float pY = player.getPosition().y + player.size/2;
+    /**
+     * Hàm quét kiểm tra tầm nhìn phát hiện người chơi.
+     * Loại bỏ tham số Player cũ, sử dụng luôn biến targetPlayer đã lưu trong cấu trúc lớp.
+     */
+    public boolean detects(Array<Rectangle> walls) {
+        if (stunTimer > 0 || targetPlayer == null) return false;
+        float pX = targetPlayer.getPosition().x + targetPlayer.size/2;
+        float pY = targetPlayer.getPosition().y + targetPlayer.size/2;
         float eX = this.position.x + this.size/2;
         float eY = this.position.y + this.size/2;
         float dist = Vector2.dst(eX, eY, pX, pY);

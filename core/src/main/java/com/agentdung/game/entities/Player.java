@@ -6,9 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer; // Thêm import phục vụ đa hình
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 public class Player extends Entity {
     private float maxMana = 100f;
@@ -21,7 +19,7 @@ public class Player extends Entity {
     private TextureRegion idleDown, idleUp, idleRight, idleLeft;
     private float stateTime = 0;
 
-    // Kích thước vẽ lên màn hình (Đã xóa bỏ các biến static thừa không dùng)
+    // Kích thước vẽ lên màn hình
     private static final float DRAW_W = 32f;
     private static final float DRAW_H = 33f;
 
@@ -53,7 +51,7 @@ public class Player extends Entity {
 
         // ---- WALK ANIMATIONS ----
         float frameDuration = 0.1f;
-        int cols = 6; // Giữ lại biến cục bộ phục vụ vòng lặp tạo animation phía dưới
+        int cols = 6;
 
         walkDown  = new Animation<>(frameDuration, tmp[3]);
         walkRight = new Animation<>(frameDuration, tmp[4]);
@@ -73,11 +71,19 @@ public class Player extends Entity {
         walkLeft.setPlayMode(Animation.PlayMode.LOOP);
     }
 
+    /**
+     * HÀM UPDATE CHUẨN ĐA HÌNH OOP:
+     * Loại bỏ hoàn toàn tham số 'player' và 'walls' dư thừa.
+     * Chỉ xử lý việc tự hồi phục nội lực (mana) và đếm thời gian hoạt ảnh di chuyển.
+     */
     @Override
-    public void update(float delta, Player player, Array<Rectangle> walls) {
+    public void update(float delta) {
+        // Tự động hồi phục nội lực theo thời gian
         if (currentMana < maxMana) {
             currentMana = Math.min(maxMana, currentMana + regenRate * delta);
         }
+
+        // Cập nhật thời gian hoạt ảnh nếu nhân vật đang thực sự di chuyển
         if (velocity.len() > 0.1f) {
             stateTime += delta;
         }
@@ -85,6 +91,17 @@ public class Player extends Entity {
 
     public void setSpeed(float speed) {
         this.speed = speed;
+    }
+
+    /**
+     * Hàm hành vi: Cho phép InputHandler hoặc hệ thống điều khiển cập nhật vector vận tốc.
+     * Đảm bảo tính đóng gói bằng cách chuẩn hóa (normalize) vector để tránh lỗi đi chéo nhanh hơn đi thẳng.
+     */
+    public void setMovementDirection(float x, float y) {
+        this.velocity.set(x, y);
+        if (this.velocity.len() > 0.1f) {
+            this.velocity.nor();
+        }
     }
 
     /**
@@ -108,20 +125,12 @@ public class Player extends Entity {
         }
     }
 
-    /**
-     * ĐỒNG BỘ ĐA HÌNH SONG HÀNH 2 THAM SỐ:
-     * Nhận cả SpriteBatch và ShapeRenderer từ PlayScreen truyền vào.
-     * Vì nhân vật vẽ bằng ảnh (Sprite), chúng ta sẽ bỏ qua tham số 'shape'.
-     */
     @Override
     public void render(SpriteBatch batch, ShapeRenderer shape) {
         TextureRegion currentFrame = getCurrentFrame();
         float drawX = position.x + (size / 2f) - (DRAW_W / 2f);
         float drawY = position.y;
         batch.draw(currentFrame, drawX, drawY, DRAW_W, DRAW_H);
-
-        // Tham số 'shape' ở đây đóng vai trò giữ đúng giao kèo kiến trúc lớp cha Entity,
-        // giúp PlayScreen gọi hàm không bị báo lỗi lệch danh sách đối số nữa!
     }
 
     // ---- PUBLIC HELPERS ----
@@ -140,6 +149,8 @@ public class Player extends Entity {
     public void  setAngle(float angle) { this.angle = angle; }
 
     public void dispose() {
-        spriteSheet.dispose();
+        if (spriteSheet != null) {
+            spriteSheet.dispose();
+        }
     }
 }

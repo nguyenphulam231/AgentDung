@@ -119,10 +119,12 @@ public class PlayScreen extends ScreenAdapter {
 
         mapManager.loadLevel(currentWorld, level);
 
+        // 1. Khởi tạo đối tượng người chơi trước
         dung = new Player(mapManager.playerSpawn.x, mapManager.playerSpawn.y, this.game);
         dung.setSize(26);
 
-        entityManager.initEnemies(mapManager);
+        // 2. ĐÃ SỬA: Truyền thực thể 'dung' vào hệ thống quản lý quái để AI cấu trúc định vị được mục tiêu
+        entityManager.initEnemies(mapManager, dung);
         entityManager.clearAll();
 
         gameHUD.loadTextures();
@@ -147,32 +149,30 @@ public class PlayScreen extends ScreenAdapter {
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
 
-        // Xử lý hiệu ứng tàng hình trực tiếp cho Player
         if (invisibilityTimer > 0) {
             game.batch.setColor(1, 1, 1, 0.5f);
         } else {
             game.batch.setColor(1, 1, 1, 1f);
         }
 
-        // Đã sửa: Truyền đúng 2 tham số song hành cho hàm render của Player
+        // Vẽ Player
         dung.render(game.batch, game.shapeRenderer);
         game.batch.setColor(1, 1, 1, 1f); // Reset màu batch
 
-        // Đã sửa: Đồng bộ hóa cơ chế vẽ Enemy qua đa hình (Bỏ hàm e.draw cũ)
+        // Vẽ danh sách Enemy qua đa hình
         for (com.agentdung.game.entities.Enemy e : entityManager.enemies) {
             e.render(game.batch, game.shapeRenderer);
         }
 
-        // Render các Sprite của Map (Cây cối, chướng ngại vật...)
+        // Render các Sprite của Map
         mapManager.renderSprites(game.batch);
         if (mapManager.targetServer != null) {
             mapManager.targetServer.renderSprite(game.batch);
         }
 
-        // Đã sửa: Truyền đầy đủ 3 đối số theo cấu trúc mới của EntityManager (Xử lý dứt điểm lỗi dòng 95)
+        // Vẽ Sprite của đạn/bẫy sinh học
         entityManager.renderSprites(game.batch, game.shapeRenderer, skills);
 
-        // Vẽ thông báo tương tác với máy bán hàng (Prompt)
         if (activeVending != null && !isVendingOpen && !isInventoryOpen && !isPaused) {
             batchDrawPrompt();
         }
@@ -182,14 +182,13 @@ public class PlayScreen extends ScreenAdapter {
         game.shapeRenderer.setProjectionMatrix(camera.combined);
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        // Bản đồ vẽ các vùng va chạm hình học (nếu có)
         mapManager.renderShapes(game.shapeRenderer);
 
         if (mapManager.targetServer != null) {
             mapManager.targetServer.renderHpBar(game.shapeRenderer);
         }
 
-        // Đã sửa: Truyền đầy đủ cả shapeRenderer và batch theo hàm mới của EntityManager
+        // Vẽ các loại đạn khối hình học (Shape)
         entityManager.renderShapes(game.shapeRenderer, game.batch);
 
         game.shapeRenderer.end();
@@ -198,7 +197,6 @@ public class PlayScreen extends ScreenAdapter {
         lightRenderer.renderDarkness(game.batch, dung, camera, carrotTimer > 0);
 
         game.shapeRenderer.setProjectionMatrix(camera.combined);
-        // Luôn render tầm nhìn lính (để người chơi thấy vùng nguy hiểm dù đang tàng hình)
         lightRenderer.renderEnemyVision(game.shapeRenderer, entityManager, mapManager);
 
         // --- GIAI ĐOẠN 5: RENDER GIAO DIỆN (HUD & OVERLAY) ---
@@ -212,13 +210,11 @@ public class PlayScreen extends ScreenAdapter {
             game.batch.end();
         }
 
-        // Xử lý các UI Overlay
         if (isInventoryOpen)         inventoryOverlay.render(game.batch, game.shapeRenderer, hudMatrix);
         if (isVendingOpen)           vendingMachineOverlay.render(game.batch, game.shapeRenderer, hudMatrix);
         if (isCaptured)              capturedOverlay.render(game.shapeRenderer, hudMatrix);
         if (isPaused)                pauseOverlay.render(game.shapeRenderer, hudMatrix);
 
-        // Xử lý nút ESC thoát/tạm dừng game
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && !isCaptured) {
             if (isInventoryOpen) {
                 isInventoryOpen = false;
@@ -318,8 +314,14 @@ public class PlayScreen extends ScreenAdapter {
             dung.setSpeed(originalSpeed);
         }
 
-        dung.update(delta, dung, mapManager.wallRects);
+        // 3. ĐÃ SỬA: Cập nhật trạng thái nội bộ của nhân vật chuẩn hóa không tham số thừa
+        dung.update(delta);
+
+        // 4. ĐÃ SỬA: Gọi cơ chế điều khiển hướng đi của nhân vật từ phím bấm
         InputHandler.handleTankMovement(delta, dung, camera, mapManager);
+
+        // 5. ĐÃ SỬA: Ép EntityManager xử lý dịch chuyển tịnh tiến + quét va chạm tường tập trung cho Player
+        entityManager.moveEntityWithWallCollision(dung, delta, mapManager);
 
         Rectangle dungRect = new Rectangle(dung.getPosition().x, dung.getPosition().y, dung.getSize(), dung.getSize());
 
@@ -355,8 +357,9 @@ public class PlayScreen extends ScreenAdapter {
 
         InputHandler.handleSkillInput(dung, skills, entityManager, this.game);
 
-        // Cập nhật trạng thái lính luôn chạy, nhưng logic bắt giữ chỉ chạy khi KHÔNG tàng hình
         float deltaLogic = (clockTimer > 0) ? 0f : delta;
+
+        // Cập nhật quái vật & xử lý bắt giữ
         entityManager.update(deltaLogic, dung, mapManager, () -> {
             if (invisibilityTimer <= 0) {
                 if (!isCaptured) {

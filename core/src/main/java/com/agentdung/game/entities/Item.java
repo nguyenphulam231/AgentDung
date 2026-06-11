@@ -40,7 +40,7 @@ public class Item extends Entity {
     public Rectangle bounds;
 
     public Item(float x, float y, ItemType type) {
-        super(x, y, 0f, 16f); // Vật phẩm đứng im, kích thước 16x16
+        super(x, y, 0f, 16f); // Vật phẩm đứng im (speed = 0), kích thước 16x16
         this.type = type;
         this.bounds = new Rectangle(x, y, this.size, this.size);
     }
@@ -51,6 +51,12 @@ public class Item extends Entity {
         // Ví dụ: batch.draw(itemTexture, position.x, position.y, size, size);
     }
 
+    /**
+     * ĐÃ SỬA: Đồng bộ hóa cấu trúc Đa hình với lớp cha Entity.
+     * Vì vật phẩm đứng yên nên chúng ta giữ nguyên thân hàm trống.
+     */
     @Override
-    public void update(float delta, Player player, Array<Rectangle> walls) {}
+    public void update(float delta) {
+        // Vật phẩm không cần cập nhật logic di chuyển nội bộ theo từng frame
+    }
 }
